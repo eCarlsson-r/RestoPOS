@@ -1,76 +1,64 @@
+<script setup>
+const credentials = ref({ username: '', password: '' })
+const { login } = useAuth() // We'll define this helper
+
+definePageMeta({
+    layout: false
+})
+
+const handleLogin = async () => {
+    try {
+        const user = await login(credentials.value)
+        // Redirect based on job-type from your employee table
+        if (user.type === 'ADMIN') navigateTo('/admin/dashboard')
+        else if (user.type === 'KITCHEN') navigateTo('/pos/cashier')
+        else navigateTo('/pos/floor-map') // Waiters
+    } catch (e) {
+        alert(e.message || 'Invalid Credentials')
+    }
+}
+</script>
+
 <template>
-  <div>
-    <UPageHero
-      title="Nuxt Starter Template"
-      description="A production-ready starter template powered by Nuxt UI. Build beautiful, accessible, and performant applications in minutes, not hours."
-      :links="[{
-        label: 'Get started',
-        to: 'https://ui.nuxt.com/docs/getting-started/installation/nuxt',
-        target: '_blank',
-        trailingIcon: 'i-lucide-arrow-right',
-        size: 'xl'
-      }, {
-        label: 'Use this template',
-        to: 'https://github.com/nuxt-ui-templates/starter',
-        target: '_blank',
-        icon: 'i-simple-icons-github',
-        size: 'xl',
-        color: 'neutral',
-        variant: 'subtle'
-      }]"
-    />
+    <div class="min-h-screen flex items-center justify-center bg-linear-to-b from-orange-50 via-red-300 to-red-600 p-6">
+        <div class="w-full max-w-md space-y-8 bg-white p-10 rounded-[3rem] shadow-2xl">
+            <div class="text-center">
+                <h1 class="text-4xl font-black italic tracking-tighter uppercase">
+                    Republican
+                </h1>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                    Staff Access Only
+                </p>
+            </div>
 
-    <UPageSection
-      id="features"
-      title="Everything you need to build modern Nuxt apps"
-      description="Start with a solid foundation. This template includes all the essentials for building production-ready applications with Nuxt UI's powerful component system."
-      :features="[{
-        icon: 'i-lucide-rocket',
-        title: 'Production-ready from day one',
-        description: 'Pre-configured with TypeScript, ESLint, Tailwind CSS, and all the best practices. Focus on building features, not setting up tooling.'
-      }, {
-        icon: 'i-lucide-palette',
-        title: 'Beautiful by default',
-        description: 'Leveraging Nuxt UI\'s design system with automatic dark mode, consistent spacing, and polished components that look great out of the box.'
-      }, {
-        icon: 'i-lucide-zap',
-        title: 'Lightning fast',
-        description: 'Optimized for performance with SSR/SSG support, automatic code splitting, and edge-ready deployment. Your users will love the speed.'
-      }, {
-        icon: 'i-lucide-blocks',
-        title: '100+ components included',
-        description: 'Access Nuxt UI\'s comprehensive component library. From forms to navigation, everything is accessible, responsive, and customizable.'
-      }, {
-        icon: 'i-lucide-code-2',
-        title: 'Developer experience first',
-        description: 'Auto-imports, hot module replacement, and TypeScript support. Write less boilerplate and ship more features.'
-      }, {
-        icon: 'i-lucide-shield-check',
-        title: 'Built for scale',
-        description: 'Enterprise-ready architecture with proper error handling, SEO optimization, and security best practices built-in.'
-      }]"
-    />
-
-    <UPageSection>
-      <UPageCTA
-        title="Ready to build your next Nuxt app?"
-        description="Join thousands of developers building with Nuxt and Nuxt UI. Get this template and start shipping today."
-        variant="subtle"
-        :links="[{
-          label: 'Start building',
-          to: 'https://ui.nuxt.com/docs/getting-started/installation/nuxt',
-          target: '_blank',
-          trailingIcon: 'i-lucide-arrow-right',
-          color: 'neutral'
-        }, {
-          label: 'View on GitHub',
-          to: 'https://github.com/nuxt-ui-templates/starter',
-          target: '_blank',
-          icon: 'i-simple-icons-github',
-          color: 'neutral',
-          variant: 'outline'
-        }]"
-      />
-    </UPageSection>
-  </div>
+            <div class="space-y-4">
+                <input
+                    v-model="credentials.username"
+                    type="text"
+                    placeholder="Employee ID"
+                    class="input-login"
+                >
+                <input
+                    v-model="credentials.password"
+                    type="password"
+                    placeholder="PIN"
+                    class="input-login"
+                >
+                <button
+                    class="w-full bg-rose-600 text-white py-5 rounded-2xl font-black uppercase italic shadow-xl transition-transform active:scale-95"
+                    @click="handleLogin"
+                >
+                    Clock In
+                </button>
+            </div>
+        </div>
+    </div>
 </template>
+
+<style scoped>
+@reference "tailwindcss";
+
+.input-login {
+  @apply w-full p-4 bg-slate-100 border-none rounded-2xl font-black text-center focus:ring-2 ring-black transition-all;
+}
+</style>

@@ -1,0 +1,277 @@
+export interface Timestamps {
+    created_at?: string
+    updated_at?: string
+}
+
+export interface ApiResponse<T> {
+    data: T
+    error?: number
+}
+
+// --- Core Master Data ---
+
+export interface Branch extends Timestamps {
+    id: number
+    name: string
+    address: string
+    phone: string
+    floor_number: number
+    kitchen_no: number
+    bartender_no: number
+}
+
+export interface Category extends Timestamps {
+    id: number
+    name: string
+    kitchen_process: string
+    description: string
+}
+
+export interface Product extends Timestamps {
+    code: string
+    name: string
+    desc?: string
+    img_no: number
+    category_id: string
+    price: number
+    cost: number
+    discount: number
+    soldout: number
+    category?: Category
+}
+
+export interface Customer extends Timestamps {
+    id: number
+    name: string
+    gender: 'M' | 'F'
+    pob?: string
+    dob?: string
+    address?: string
+    mobile?: string
+    email?: string
+    discount: number
+    tax: number
+    img_no: number
+    account_id?: number
+}
+
+export interface Employee extends Timestamps {
+    id: number
+    name: string
+    branch_id: string
+    gender: 'M' | 'F'
+    status: string
+    job_type: string
+    join_date?: string
+    quit_date?: string
+    home_address?: string
+    phone?: string
+    mobile?: string
+    email?: string
+    img_no: number
+    account_id?: number
+    branch?: Branch
+    user?: User
+}
+
+export interface User extends Timestamps {
+    id: number
+    name: string
+    email: string
+    username: string
+    type: 'ADMIN' | 'WAITER' | 'CASHIER' | 'KITCHEN'
+    email_verified_at?: string
+    employee?: Employee
+}
+
+export interface Table extends Timestamps {
+    id: number
+    table_number: string
+    floor_number: string
+    branch_id: string
+    capacity: number
+    size: number
+    direction: 'H' | 'V'
+    status: 'available' | 'occupied' | 'reserved' | 'dirty'
+    position_x: number
+    position_y: number
+    shape: 'circle' | 'square'
+}
+
+// --- Transactional ---
+
+export interface Sale extends Timestamps {
+    id: number
+    branch_id: string
+    table_number: string
+    floor_number: number
+    employee_id: number
+    customer_id: number
+    date: string
+    time: string
+    discount: number
+    tax: number
+    status: string
+    employee?: User
+    customer?: Customer
+    records?: SaleRecord[]
+    invoice?: SaleInvoice
+}
+
+export interface SaleRecord extends Timestamps {
+    id: number
+    sale_id: number
+    item_type: string
+    item_code: string
+    item_price: number
+    discount_pcnt: number
+    discount_amnt: number
+    item_note?: string
+    item_status: string
+    order_employee?: string
+    order_date?: string
+    order_time?: string
+    deliver_employee?: string
+}
+
+export interface SaleInvoice extends Timestamps {
+    id: number
+    sale_id: number
+    pay_method: string
+    pay_bank?: string
+    pay_card?: string
+    pay_amount: number
+    pay_change: number
+    card_type?: string
+    voucher?: string
+    employee_id: number
+}
+
+// --- Operational Master Data ---
+
+export interface Ingredient extends Timestamps {
+    code: string
+    name: string
+    desc?: string
+    unit: string
+    img_no: number
+}
+
+export interface Recipe extends Timestamps {
+    id: number
+    product_id: string
+    ingredient_id: string
+    qty: number
+    purchase_price: number
+}
+
+export interface Supplier extends Timestamps {
+    id: number
+    name: string
+    branch_id: string
+    storage: string
+    contact_person?: string
+    npwp?: string
+    address?: string
+    phone?: string
+    mobile?: string
+    email?: string
+}
+
+export interface Stock extends Timestamps {
+    id: number
+    item_type: string
+    item_code: string
+    branch_id: string
+    storage: string
+    purchase_price: number
+    quantity: number
+}
+
+// --- Operational & Miscellaneous ---
+
+export interface Utility extends Timestamps {
+    id: number
+    name: string
+    desc?: string
+    unit: string
+    img_no: number
+}
+
+export interface Package extends Timestamps {
+    code: string
+    name: string
+    price: number
+    desc?: string
+    img_no: number
+}
+
+export interface PackageProduct extends Timestamps {
+    id: number
+    package_id: string
+    product_id: string
+    qty: number
+}
+
+export interface Prepare extends Timestamps {
+    code: string
+    name: string
+    cost: number
+    qty: number
+    unit: string
+}
+
+export interface PrepareLog extends Timestamps {
+    id: number
+    prepare_id: string
+    branch_id: string
+    storage: string
+    date: string
+    time: string
+}
+
+export interface PrepareRecipe extends Timestamps {
+    id: number
+    prepare_id: string
+    ingredient_id: string
+    qty: number
+    purchase_price: number
+}
+
+export interface KitchenRequest extends Timestamps {
+    id: number
+    date: string
+    time: string
+    from_branch_id: string
+    from_storage: string
+    to_branch_id: string
+    to_storage: string
+    respond_date?: string
+    respond_time?: string
+    status: string
+}
+
+export interface KitchenRequestItem extends Timestamps {
+    id: number
+    request_id: number
+    item_type: string
+    item_code: string
+    qty: number
+}
+
+export interface File extends Timestamps {
+    id: number
+    name: string
+    type: string
+    ext: string
+    size: number
+    upload_date: string
+}
+
+export interface NotificationSubscription extends Timestamps {
+    id: number
+    user_id: number
+    endpoint: string
+    public_key: string
+    auth_token: string
+}
