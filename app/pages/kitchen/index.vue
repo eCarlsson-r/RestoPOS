@@ -17,16 +17,16 @@ interface KitchenTicket {
 
 // Filter records by the station (e.g., KTCN)
 const station = ref('KTCN')
-const { data: activeTickets, refresh } = await useApi<KitchenTicket[]>(() => `/api/kitchen/tickets?station=${station.value}`)
+const { data: activeTickets } = await useApi<{ data: KitchenTicket[] }>(`/api/kitchen/tickets?station=${station.value}`)
 
 // Poll every 10 seconds for new orders
-if (import.meta.client) {
+/* if (import.meta.client) {
     setInterval(() => refresh(), 10000)
-}
+} */
 
 const markAsReady = async (recordId: number) => {
     await useApi(`/api/kitchen/complete/${recordId}`, { method: 'POST' })
-    refresh()
+    // refresh()
 }
 </script>
 
@@ -46,11 +46,6 @@ const markAsReady = async (recordId: number) => {
                 v-for="ticket in activeTickets"
                 :key="ticket.id"
                 class="w-80 shrink-0 bg-zinc-900 border-t-4 border-amber-500 rounded-b-2xl flex flex-col overflow-hidden"
-                :ui="{
-                    body: { padding: 'p-0' },
-                    background: 'bg-zinc-900',
-                    divide: 'divide-zinc-800'
-                }"
             >
                 <div class="p-4 border-b border-zinc-800 flex justify-between">
                     <span class="text-white font-black text-xl italic">
@@ -73,7 +68,7 @@ const markAsReady = async (recordId: number) => {
                             </span>
                             <UButton
                                 variant="subtle"
-                                color="emerald"
+                                color="success"
                                 icon="i-lucide-check"
                                 size="xs"
                                 square

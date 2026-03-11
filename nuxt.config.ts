@@ -1,6 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-    modules: ['@nuxt/eslint', '@nuxt/ui', '@pinia/nuxt'],
+    modules: [
+        '@nuxt/eslint',
+        '@nuxt/ui',
+        '@pinia/nuxt',
+        'nuxt-laravel-echo'
+    ],
 
     devtools: {
         enabled: true
@@ -10,7 +15,7 @@ export default defineNuxtConfig({
 
     runtimeConfig: {
         public: {
-            apiBase: ''
+            apiBase: 'http://restosystem-api.test/'
         }
     },
 
@@ -19,6 +24,20 @@ export default defineNuxtConfig({
     },
 
     compatibilityDate: '2025-01-15',
+
+    vite: {
+        optimizeDeps: {
+            include: ['nuxt-laravel-echo > pusher-js']
+        }
+    },
+
+    echo: {
+        key: 'REPLACE_ME', // Your Laravel Echo app key
+        authentication: {
+            mode: 'cookie',
+            baseUrl: 'http://restosystem-api.test/' // Your Laravel app URL
+        }
+    },
 
     eslint: {
         config: {

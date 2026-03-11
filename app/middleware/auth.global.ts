@@ -5,11 +5,15 @@ export default defineNuxtRouteMiddleware((to) => {
 
     if (!isAuthenticated) return navigateTo('/')
 
-    if (to.path.startsWith('/admin') && user.value?.role !== 'ADMIN') {
+    if (to.path.startsWith('/admin') && user.value?.type !== 'ADMIN') {
         return navigateTo('/pos/floor-map')
     }
 
-    if (to.path.startsWith('/pos/cashier') && user.value?.role !== 'CASHIER' && user.value?.role !== 'ADMIN') {
+    if (to.path.startsWith('/kitchen') && user.value?.type !== 'KITCHEN' && user.value?.type !== 'ADMIN') {
+        return navigateTo('/pos/floor-map')
+    }
+
+    if (to.path.startsWith('/pos/cashier') && user.value?.type !== 'CASHIER' && user.value?.type !== 'ADMIN') {
         return navigateTo('/pos/floor-map')
     }
 })

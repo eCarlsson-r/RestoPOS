@@ -10,10 +10,11 @@ const handleLogin = async () => {
     try {
         const user = await login(credentials.value)
         // Redirect based on job-type from your employee table
-        if (user.type === 'ADMIN') navigateTo('/admin/dashboard')
-        else if (user.type === 'KITCHEN') navigateTo('/pos/cashier')
-        else navigateTo('/pos/floor-map') // Waiters
+        if (user.type === 'ADMIN') await navigateTo('/admin/dashboard')
+        else if (user.type === 'KITCHEN') await navigateTo('/kitchen')
+        else await navigateTo('/pos/floor-map') // Waiters
     } catch (e) {
+        console.error(e) // Better debugging
         alert(e.message || 'Invalid Credentials')
     }
 }
@@ -35,30 +36,24 @@ const handleLogin = async () => {
                 <input
                     v-model="credentials.username"
                     type="text"
-                    placeholder="Employee ID"
-                    class="input-login"
+                    placeholder="Username"
+                    class="w-full p-4 bg-slate-100 border-none rounded-2xl font-black text-center focus:ring-2 ring-black transition-all"
                 >
                 <input
                     v-model="credentials.password"
                     type="password"
-                    placeholder="PIN"
-                    class="input-login"
+                    placeholder="Password"
+                    class="w-full p-4 bg-slate-100 border-none rounded-2xl font-black text-center focus:ring-2 ring-black transition-all"
                 >
-                <button
-                    class="w-full bg-rose-600 text-white py-5 rounded-2xl font-black uppercase italic shadow-xl transition-transform active:scale-95"
+                <UButton
+                    block
+                    size="xl"
+                    label="Clock In"
+                    color="primary"
+                    class="py-5 font-black uppercase italic text-sm shadow-xl shadow-primary/20"
                     @click="handleLogin"
-                >
-                    Clock In
-                </button>
+                />
             </div>
         </div>
     </div>
 </template>
-
-<style scoped>
-@reference "tailwindcss";
-
-.input-login {
-  @apply w-full p-4 bg-slate-100 border-none rounded-2xl font-black text-center focus:ring-2 ring-black transition-all;
-}
-</style>

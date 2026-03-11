@@ -1,61 +1,42 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-
-interface Category {
-    'category-code': string
-    'category-name': string
-}
-
-interface Product {
-    'product-code': string
-    'product-name': string
-    'product-price': number
-    'product-soldout': boolean
-    'category-code': string
-}
-
-interface TicketItem extends Product {
-    qty: number
-    note: string
-}
+import { watchDebounced } from '@vueuse/core'
+import type { Category, Product } from '~/types/master'
 
 const route = useRoute()
-const { data: categories } = await useApi<{ data: Category[] }>('/api/pos/categories')
-const activeCategory = ref('NS') // Default to Nasi
+const { data: categories } = await useApi<{ data: Category[] }>('/api/categories')
+const activeCategory = ref(1) // Default to Nasi
 const search = ref('')
-
 const products = ref<Product[]>([])
 
 const fetchProducts = async () => {
-    const { data } = await useApi<{ data: Product[] }>(`/api/pos/products?category=${activeCategory.value}&q=${search.value}`)
+    let productURL = `/api/products?category=${activeCategory.value}`
+    if (search.value) productURL += `&q=${search.value}`
+    const { data } = await useApi<{ data: Product[] }>(productURL)
     products.value = data || []
 }
 
 // Watch both category and search for changes
-watch([activeCategory, search], fetchProducts)
+watchDebounced(
+    [activeCategory, search],
+    fetchProducts,
+    { debounce: 300, maxWait: 1000 }
+)
 
 // Initial fetch
 await fetchProducts()
 
-// Local Ticket State
-const ticket = ref<TicketItem[]>([])
-
-const addToTicket = (product: Product) => {
-    const existing = ticket.value.find(item => item['product-code'] === product['product-code'])
-    if (existing) {
-        existing.qty++
-    } else {
-        ticket.value.push({
-            ...product,
-            qty: 1,
-            note: ''
-        })
-    }
-}
+// Accessing Auth/Session State
+const { user } = useAuth()
+const orderStore = useOrderStore()
+const salesId = ref<number | null>(null) // Store this if adding to existing table
 
 const submitOrder = async () => {
-    // Logic to POST to Laravel /api/sales
-    // This will create a 'sales' record and multiple 'sales-record' items
+    await orderStore.sendToKitchen(
+        salesId.value,
+        user?.value?.employee?.branch?.id || 1,
+        route.params.id
+    )
 }
 </script>
 
@@ -64,14 +45,14 @@ const submitOrder = async () => {
         <aside class="w-24 bg-white border-r flex flex-col items-center py-6 gap-4">
             <UButton
                 v-for="cat in categories"
-                :key="cat['category-code']"
-                :color="activeCategory === cat['category-code'] ? 'primary' : 'neutral'"
-                :variant="activeCategory === cat['category-code'] ? 'solid' : 'ghost'"
+                :key="cat.id"
+                :color="activeCategory === cat.id ? 'primary' : 'neutral'"
+                :variant="activeCategory === cat.id ? 'solid' : 'ghost'"
                 class="w-16 h-16 rounded-2xl flex flex-col items-center justify-center p-0"
-                @click="activeCategory = cat['category-code']"
+                @click="activeCategory = cat.id"
             >
                 <span class="text-[10px] font-black uppercase tracking-tighter">
-                    {{ cat['category-name'] }}
+                    {{ cat.name }}
                 </span>
             </UButton>
         </aside>
@@ -90,26 +71,49 @@ const submitOrder = async () => {
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <UCard
                     v-for="prod in products"
-                    :key="prod['product-code']"
+                    :key="prod.id"
                     :class="[
-                        'cursor-pointer hover:ring-2 hover:ring-primary transition-all rounded-3xl overflow-hidden',
-                        prod['product-soldout'] ? 'opacity-50 grayscale pointer-events-none' : ''
+                        'relative cursor-pointer hover:ring-2 hover:ring-primary transition-all rounded-3xl overflow-hidden',
+                        prod.soldout ? 'opacity-50 grayscale pointer-events-none' : ''
                     ]"
-                    :ui="{ body: 'p-4' }"
-                    @click="addToTicket(prod)"
+                    @click="orderStore.addToBasket(prod)"
                 >
-                    <div class="h-32 bg-neutral-50 rounded-2xl mb-3 flex items-center justify-center text-neutral-200">
+                    <div class="absolute top-3 right-3 flex gap-1">
+                        <span
+                            :class="prod.category?.kitchen_process === 'KTCN' ? 'bg-orange-500' : 'bg-blue-500'"
+                            class="text-[8px] font-black text-white px-2 py-0.5 rounded-full shadow-sm"
+                        >
+                            {{ prod.category?.kitchen_process === 'KTCN' ? 'Kitchen' : 'Bartender' }}
+                        </span>
+                    </div>
+
+                    <div class="h-28 bg-neutral-50 rounded-2xl mb-3 flex items-center justify-center">
+                        <img
+                            v-if="prod.image"
+                            :src="prod.image"
+                            class="h-full w-full object-cover rounded-2xl"
+                        >
                         <UIcon
-                            :name="prod['category-code'] === 'NS' ? 'i-lucide-bowl' : 'i-lucide-utensils'"
-                            class="w-10 h-10"
+                            v-else
+                            name="i-lucide-utensils"
+                            class="w-8 h-8 text-neutral-200"
                         />
                     </div>
-                    <h3 class="font-black uppercase italic text-sm leading-tight">
-                        {{ prod['product-name'] }}
+
+                    <h3 class="font-black uppercase italic text-xs leading-tight min-h-8">
+                        {{ prod.name }}
                     </h3>
-                    <p class="text-xs font-bold text-neutral-400 mt-1">
-                        Rp {{ (prod['product-price'] / 1000).toFixed(0) }}k
-                    </p>
+
+                    <div class="flex justify-between items-center mt-2">
+                        <p class="text-[10px] font-bold text-primary italic uppercase">
+                            Rp {{ (prod.price).toLocaleString('id-ID') }}
+                        </p>
+                        <UIcon
+                            v-if="!prod.soldout"
+                            name="i-lucide-plus-circle"
+                            class="w-4 h-4 text-neutral-300"
+                        />
+                    </div>
                 </UCard>
             </div>
         </main>
@@ -117,22 +121,22 @@ const submitOrder = async () => {
         <aside class="w-96 bg-white border-l flex flex-col">
             <div class="p-6 border-b">
                 <h2 class="text-xl font-black uppercase italic tracking-tighter">
-                    Table {{ route.params.tableId }}
+                    Table {{ route.params.id }}
                 </h2>
                 <p class="text-[10px] font-bold text-neutral-400 uppercase">
-                    Waitress: Demo Waitress
+                    Waitress: {{ user?.employee?.name }}
                 </p>
             </div>
 
             <div class="flex-1 overflow-y-auto p-6 space-y-4">
                 <div
-                    v-for="item in ticket"
-                    :key="item['product-code']"
+                    v-for="item in orderStore.basket"
+                    :key="item.id"
                     class="flex justify-between items-start group"
                 >
                     <div class="flex-1">
                         <h4 class="text-sm font-black uppercase italic">
-                            {{ item['product-name'] }}
+                            {{ item.name }}
                         </h4>
                         <UInput
                             v-model="item.note"
@@ -167,7 +171,7 @@ const submitOrder = async () => {
                 <div class="flex justify-between font-black uppercase italic">
                     <span>Subtotal</span>
                     <span>
-                        Rp {{ ticket.reduce((acc, i) => acc + (i['product-price'] * i.qty), 0).toLocaleString('id-ID')
+                        Rp {{ orderStore.basket.reduce((acc, i) => acc + (i.price * i.qty), 0).toLocaleString('id-ID')
                         }}
                     </span>
                 </div>

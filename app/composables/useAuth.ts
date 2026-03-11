@@ -1,12 +1,14 @@
 import type { User } from '~/types/master'
 
 export const useAuth = () => {
+    const config = useRuntimeConfig()
     const user = useState<User | null>('user', () => null)
     const token = useCookie('auth_token', { maxAge: 60 * 60 * 12 }) // 12-hour shift
     const branch = useCookie('active_branch') // Crucial for multi-outlet support
 
     const login = async (credentials: { username: string, password: string }) => {
-        const result = await $fetch<{ data: User[] }>('http://localhost:8000/api/login', {
+        const url = config.public.apiBase || 'http://localhost:8000/'
+        const result = await $fetch<{ data: User[] }>(url + 'api/login', {
             method: 'POST',
             body: credentials
         })
@@ -17,6 +19,9 @@ export const useAuth = () => {
         }
 
         const loggedInUser: User = data[0]
+
+        // Set token (placeholder for now as backend doesn't return one yet)
+        token.value = 'dummy-token'
 
         user.value = loggedInUser
         if (loggedInUser.employee?.branch_id) {
@@ -43,5 +48,12 @@ export const useAuth = () => {
         }
     }
 
-    return { user, login, logout, checkAuth, isAuthenticated: !!token.value }
+    // Automatically log out if user becomes null but we still have a token
+    watch(user, (newUser, oldUser) => {
+        if (!newUser && oldUser && token.value) {
+            logout()
+        }
+    })
+
+    return { user, branch, login, logout, checkAuth, isAuthenticated: !!token.value }
 }

@@ -28,16 +28,17 @@ export interface Category extends Timestamps {
 }
 
 export interface Product extends Timestamps {
-    code: string
+    id: number
     name: string
     desc?: string
     img_no: number
-    category_id: string
+    category_id: number
     price: number
     cost: number
     discount: number
     soldout: number
     category?: Category
+    image?: string
 }
 
 export interface Customer extends Timestamps {
