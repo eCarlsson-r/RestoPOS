@@ -55,6 +55,14 @@ const goToSplit = (salesId) => {
     navigateTo(`/pos/split/${salesId}`)
 }
 
+/* const printCaptainOrder = async (table) => {
+    try {
+        const response = await useApi(`/api/orders/${table.sales_id}`)
+    } catch (e) {
+        console.error('Failed to open table', e)
+    }
+} */
+
 definePageMeta({
     layout: 'default'
 })

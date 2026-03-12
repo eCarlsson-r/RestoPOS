@@ -1,4 +1,4 @@
-import type { Product } from '~/types/master'
+import type { Product, Sale, SaleRecord } from '~/types/master'
 
 interface BasketItem extends Product {
     qty: number
@@ -8,11 +8,39 @@ interface BasketItem extends Product {
 
 export const useOrderStore = defineStore('order', {
     state: () => ({
-        basket: [] as BasketItem[]
+        basket: [] as BasketItem[],
+        employee: ''
     }),
     actions: {
         addToBasket(product: Product) {
-            this.basket.push({ ...product, qty: 1, is_sent: false })
+            const existing = this.basket.find(i => i.id === product.id && !i.is_sent)
+            if (existing) {
+                existing.qty++
+            } else {
+                this.basket.push({ ...product, qty: 1, is_sent: false })
+            }
+        },
+        removeFromBasket(product: Product) {
+            const existing = this.basket.find(i => i.id === product.id && !i.is_sent)
+            if (existing) {
+                existing.qty--
+                if (existing.qty === 0) {
+                    this.basket = this.basket.filter(i => i.id !== product.id || i.is_sent)
+                }
+            }
+        },
+        clearBasket() {
+            this.basket = []
+        },
+        async loadBasket(salesId: number) {
+            const sale = await useApi<Sale>(`/api/sales/${salesId}`)
+            this.basket = (sale.records || []).map((record: SaleRecord & { product?: Product }) => ({
+                ...record.product!,
+                qty: 1,
+                note: record.item_note || '',
+                is_sent: true // Already sent to kitchen since it's loaded from DB
+            }))
+            if (sale.employee?.name) this.employee = sale.employee?.name
         },
         async sendToKitchen(salesId: number | null, branchId: number, tableId: string | string[] | undefined) {
             const unsentItems = this.basket.filter(i => !i.is_sent)

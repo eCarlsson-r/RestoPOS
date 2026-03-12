@@ -31,7 +31,7 @@ const markAsReady = async (recordId: number) => {
 </script>
 
 <template>
-    <div class="h-screen bg-zinc-950 p-6 flex flex-col">
+    <div class="h-screen p-6 flex flex-col">
         <header class="flex justify-between items-center mb-8">
             <h1 class="text-3xl font-black text-white uppercase italic tracking-tighter">
                 Station: {{ station }}
@@ -45,13 +45,13 @@ const markAsReady = async (recordId: number) => {
             <UCard
                 v-for="ticket in activeTickets"
                 :key="ticket.id"
-                class="w-80 shrink-0 bg-zinc-900 border-t-4 border-amber-500 rounded-b-2xl flex flex-col overflow-hidden"
+                class="w-80 shrink-0 border-t-4 border-rose-500 rounded-b-2xl flex flex-col overflow-hidden"
             >
                 <div class="p-4 border-b border-zinc-800 flex justify-between">
-                    <span class="text-white font-black text-xl italic">
+                    <span class="font-black text-xl italic">
                         TABLE {{ ticket.table_number }}
                     </span>
-                    <span class="text-amber-500 font-bold text-xs">
+                    <span class="text-rose-500 font-bold text-xs">
                         {{ ticket.time_elapsed }}m ago
                     </span>
                 </div>
@@ -63,7 +63,7 @@ const markAsReady = async (recordId: number) => {
                         class="flex flex-col"
                     >
                         <div class="flex justify-between items-start">
-                            <span class="text-zinc-100 font-bold uppercase text-sm">
+                            <span class="font-bold uppercase text-sm">
                                 {{ item.qty }}x {{ item.name }}
                             </span>
                             <UButton
@@ -77,7 +77,7 @@ const markAsReady = async (recordId: number) => {
                         </div>
                         <p
                             v-if="item.note"
-                            class="text-amber-200 text-[10px] font-black uppercase italic"
+                            class="text-[10px] font-black uppercase italic"
                         >
                             * {{ item.note }}
                         </p>

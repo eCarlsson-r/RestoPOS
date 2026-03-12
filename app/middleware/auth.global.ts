@@ -1,19 +1,15 @@
 export default defineNuxtRouteMiddleware((to) => {
     const { user, isAuthenticated } = useAuth()
-
-    if (to.path === '/') return
+    const userType = user.value?.type
+    const checkNotAdmin = to.path.startsWith('/admin') && userType !== 'ADMIN'
+    const checkNotKitchen = to.path.startsWith('/kitchen') && userType !== 'KITCHEN'
+    const checkNotCashier = to.path.startsWith('/pos/cashier') && userType !== 'CASHIER'
+    const checkWaiter = userType === 'WAITER'
 
     if (!isAuthenticated) return navigateTo('/')
 
-    if (to.path.startsWith('/admin') && user.value?.type !== 'ADMIN') {
-        return navigateTo('/pos/floor-map')
-    }
-
-    if (to.path.startsWith('/kitchen') && user.value?.type !== 'KITCHEN' && user.value?.type !== 'ADMIN') {
-        return navigateTo('/pos/floor-map')
-    }
-
-    if (to.path.startsWith('/pos/cashier') && user.value?.type !== 'CASHIER' && user.value?.type !== 'ADMIN') {
-        return navigateTo('/pos/floor-map')
+    if (checkNotAdmin || checkNotKitchen || checkNotCashier) {
+        if (checkWaiter) return navigateTo('/pos/floor-map')
+        else return navigateTo('/')
     }
 })

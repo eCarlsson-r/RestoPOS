@@ -1,33 +1,28 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useMaster } from '~/composables/useMaster'
-import type { Product } from '~/types/master'
+import type { Prepare } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Product>('products')
+const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Prepare>('prepare')
 
 onMounted(() => {
     fetchItems()
 })
 
-const columns: TableColumn<Product>[] = [
+const columns: TableColumn<Prepare>[] = [
     {
         accessorKey: 'id',
         header: 'ID'
     },
     {
         accessorKey: 'name',
-        header: 'Nama Produk',
+        header: 'Nama Bahan Jadi',
         meta: { class: { td: 'uppercase' } }
     },
     {
-        accessorKey: 'category_id',
-        header: 'Kategori'
-    },
-    {
-        accessorKey: 'price',
-        header: 'Harga Jual',
-        meta: { class: { td: 'text-right' } }
+        accessorKey: 'quantity',
+        header: 'Jumlah'
     },
     {
         accessorKey: 'cost',
@@ -46,7 +41,7 @@ function openNewForm() {
     isFormOpen.value = true
 }
 
-function editItem(item: Product) {
+function editItem(item: Prepare) {
     selectedItem.value = item
     isFormOpen.value = true
 }
@@ -64,11 +59,11 @@ const formatCurrency = (val: number) => {
     <UContainer class="py-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-black uppercase italic tracking-tighter">
-                Master Produk
+                Master Prepare
             </h1>
             <UButton
                 icon="i-lucide-plus"
-                label="Tambah Produk"
+                label="Tambah Prepare"
                 size="md"
                 @click="openNewForm"
             />
@@ -81,18 +76,12 @@ const formatCurrency = (val: number) => {
                     :rows="items"
                     :columns="columns"
                 >
-                    <template #category_id-cell="{ row }">
-                        <UBadge
-                            variant="subtle"
-                            color="neutral"
-                            size="sm"
-                        >
-                            {{ row.original.category_id }}
-                        </UBadge>
+                    <template #name-cell="{ row }">
+                        {{ row.original.name }}
                     </template>
 
-                    <template #price-cell="{ row }">
-                        {{ formatCurrency(row.original.price) }}
+                    <template #quantity-cell="{ row }">
+                        {{ row.original.quantity }}
                     </template>
 
                     <template #cost-cell="{ row }">
@@ -121,9 +110,9 @@ const formatCurrency = (val: number) => {
         >
             <template #content>
                 <UCard class="overflow-y-auto">
-                    <ProductForm
+                    <PrepareForm
                         type="product"
-                        :item="selectedItem"
+                        :item="selectedItem || {}"
                         @save="saveItem"
                         @close="isFormOpen = false"
                     />

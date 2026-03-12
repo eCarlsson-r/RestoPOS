@@ -16,6 +16,7 @@ export interface Branch extends Timestamps {
     address: string
     phone: string
     floor_number: number
+    table_number: number
     kitchen_no: number
     bartender_no: number
 }
@@ -30,7 +31,7 @@ export interface Category extends Timestamps {
 export interface Product extends Timestamps {
     id: number
     name: string
-    desc?: string
+    description?: string
     img_no: number
     category_id: number
     price: number
@@ -38,6 +39,7 @@ export interface Product extends Timestamps {
     discount: number
     soldout: number
     category?: Category
+    recipe: Recipe[]
     image?: string
 }
 
@@ -151,18 +153,19 @@ export interface SaleInvoice extends Timestamps {
 // --- Operational Master Data ---
 
 export interface Ingredient extends Timestamps {
-    code: string
+    id: number
     name: string
-    desc?: string
+    description?: string
     unit: string
-    img_no: number
+    min_stock: number
 }
 
 export interface Recipe extends Timestamps {
-    id: number
-    product_id: string
-    ingredient_id: string
+    id?: number
+    product_id?: number
+    ingredient_id: number
     qty: number
+    unit: string
     purchase_price: number
 }
 
@@ -194,32 +197,33 @@ export interface Stock extends Timestamps {
 export interface Utility extends Timestamps {
     id: number
     name: string
-    desc?: string
+    description?: string
     unit: string
     img_no: number
 }
 
 export interface Package extends Timestamps {
-    code: string
+    id: number
     name: string
     price: number
-    desc?: string
+    description?: string
     img_no: number
 }
 
 export interface PackageProduct extends Timestamps {
     id: number
-    package_id: string
-    product_id: string
+    package_id: number
+    product_id: number
     qty: number
 }
 
 export interface Prepare extends Timestamps {
-    code: string
+    id: number
     name: string
     cost: number
-    qty: number
+    quantity: number
     unit: string
+    recipe: PrepareRecipe[]
 }
 
 export interface PrepareLog extends Timestamps {
@@ -232,10 +236,11 @@ export interface PrepareLog extends Timestamps {
 }
 
 export interface PrepareRecipe extends Timestamps {
-    id: number
-    prepare_id: string
-    ingredient_id: string
+    id?: number
+    prepare_id?: number
+    ingredient_id: number
     qty: number
+    unit: string
     purchase_price: number
 }
 

@@ -32,7 +32,7 @@ export default defineNuxtConfig({
     },
 
     echo: {
-        key: 'REPLACE_ME', // Your Laravel Echo app key
+        key: 'h041wsoaf2e5u5irq4hd', // Your Laravel Echo app key
         authentication: {
             mode: 'cookie',
             baseUrl: 'http://restosystem-api.test/' // Your Laravel app URL

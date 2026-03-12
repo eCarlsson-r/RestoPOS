@@ -29,7 +29,11 @@ await fetchProducts()
 // Accessing Auth/Session State
 const { user } = useAuth()
 const orderStore = useOrderStore()
-const salesId = ref<number | null>(null) // Store this if adding to existing table
+const salesId = ref<number | null>(Number(route.query.salesId) || null) // Store this if adding to existing table
+
+if (salesId.value) {
+    orderStore.loadBasket(salesId.value)
+}
 
 const submitOrder = async () => {
     await orderStore.sendToKitchen(
@@ -124,7 +128,7 @@ const submitOrder = async () => {
                     Table {{ route.params.id }}
                 </h2>
                 <p class="text-[10px] font-bold text-neutral-400 uppercase">
-                    Waitress: {{ user?.employee?.name }}
+                    Waitress: {{ orderStore.employee || user?.employee?.name }}
                 </p>
             </div>
 
@@ -153,7 +157,7 @@ const submitOrder = async () => {
                             color="neutral"
                             icon="i-lucide-minus"
                             size="xs"
-                            @click="item.qty--"
+                            @click="orderStore.removeFromBasket(item)"
                         />
                         <span class="text-sm font-black">{{ item.qty }}</span>
                         <UButton
@@ -161,7 +165,7 @@ const submitOrder = async () => {
                             color="primary"
                             icon="i-lucide-plus"
                             size="xs"
-                            @click="item.qty++"
+                            @click="orderStore.addToBasket(item)"
                         />
                     </div>
                 </div>

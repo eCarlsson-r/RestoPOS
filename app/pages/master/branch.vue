@@ -1,38 +1,32 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useMaster } from '~/composables/useMaster'
-import type { Product } from '~/types/master'
+import type { Branch } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Product>('products')
+const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Branch>('branches')
 
 onMounted(() => {
     fetchItems()
 })
 
-const columns: TableColumn<Product>[] = [
+const columns: TableColumn<Branch>[] = [
     {
         accessorKey: 'id',
         header: 'ID'
     },
     {
         accessorKey: 'name',
-        header: 'Nama Produk',
+        header: 'Nama Cabang',
         meta: { class: { td: 'uppercase' } }
     },
     {
-        accessorKey: 'category_id',
-        header: 'Kategori'
+        accessorKey: 'address',
+        header: 'Alamat Cabang'
     },
     {
-        accessorKey: 'price',
-        header: 'Harga Jual',
-        meta: { class: { td: 'text-right' } }
-    },
-    {
-        accessorKey: 'cost',
-        header: 'Modal',
-        meta: { class: { td: 'text-right' } }
+        accessorKey: 'phone',
+        header: 'Nomor Telfon'
     },
     {
         accessorKey: 'actions',
@@ -46,17 +40,9 @@ function openNewForm() {
     isFormOpen.value = true
 }
 
-function editItem(item: Product) {
+function editItem(item: Branch) {
     selectedItem.value = item
     isFormOpen.value = true
-}
-
-const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0
-    }).format(val)
 }
 </script>
 
@@ -64,11 +50,11 @@ const formatCurrency = (val: number) => {
     <UContainer class="py-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-black uppercase italic tracking-tighter">
-                Master Produk
+                Master Cabang
             </h1>
             <UButton
                 icon="i-lucide-plus"
-                label="Tambah Produk"
+                label="Tambah Cabang"
                 size="md"
                 @click="openNewForm"
             />
@@ -81,24 +67,16 @@ const formatCurrency = (val: number) => {
                     :rows="items"
                     :columns="columns"
                 >
-                    <template #category_id-cell="{ row }">
-                        <UBadge
-                            variant="subtle"
-                            color="neutral"
-                            size="sm"
-                        >
-                            {{ row.original.category_id }}
-                        </UBadge>
+                    <template #name-cell="{ row }">
+                        {{ row.original.name }}
                     </template>
 
-                    <template #price-cell="{ row }">
-                        {{ formatCurrency(row.original.price) }}
+                    <template #address-cell="{ row }">
+                        {{ row.original.address }}
                     </template>
 
-                    <template #cost-cell="{ row }">
-                        <span class="text-neutral-400">
-                            {{ formatCurrency(row.original.cost) }}
-                        </span>
+                    <template #phone-cell="{ row }">
+                        {{ row.original.phone }}
                     </template>
 
                     <template #actions-cell="{ row }">
@@ -116,13 +94,11 @@ const formatCurrency = (val: number) => {
 
         <UModal
             v-model:open="isFormOpen"
-            title="Form Produk"
             class="w-[500px]"
         >
             <template #content>
-                <UCard class="overflow-y-auto">
-                    <ProductForm
-                        type="product"
+                <UCard>
+                    <BranchForm
                         :item="selectedItem"
                         @save="saveItem"
                         @close="isFormOpen = false"

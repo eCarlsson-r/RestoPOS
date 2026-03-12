@@ -7,7 +7,7 @@ export const useMaster = <T extends { id?: number }>(endpoint: string) => {
     const isFormOpen = ref(false)
 
     const fetchItems = async () => {
-        const data = await useApi<T[] | ApiResponse<T[]>>(`/api/admin/master/${endpoint}`)
+        const data = await useApi<T[] | ApiResponse<T[]>>(`/api/${endpoint}`)
         if (Array.isArray(data)) {
             items.value = data
         } else if (data && typeof data === 'object' && 'data' in data) {
@@ -19,7 +19,7 @@ export const useMaster = <T extends { id?: number }>(endpoint: string) => {
 
     const saveItem = async (formData: T) => {
         const method = formData.id ? 'PUT' : 'POST'
-        const url = formData.id ? `/api/admin/master/${endpoint}/${formData.id}` : `/api/admin/master/${endpoint}`
+        const url = formData.id ? `/api/${endpoint}/${formData.id}` : `/api/${endpoint}`
         await useApi(url, { method, body: formData })
         await fetchItems()
         isFormOpen.value = false
