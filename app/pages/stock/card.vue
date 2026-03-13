@@ -2,12 +2,17 @@
 const dateRange = ref({ start: new Date(), end: new Date() })
 const selectedIngredient = ref(null)
 const { data: ingredients } = await useApi('/api/ingredients')
+const selectedUtility = ref(null)
+const { data: utilities } = await useApi('/api/utilities')
+const selectedType = ref('ingredient')
 const logs = ref([])
 
 const fetchAudit = async () => {
     const { data } = await useApi('/api/reports/stock-card', {
         params: {
-            code: selectedIngredient.value,
+            type: selectedType.value,
+            ingredient_id: selectedIngredient.value,
+            utility_id: selectedUtility.value,
             start: dateRange.value.start,
             end: dateRange.value.end
         }
@@ -23,18 +28,37 @@ const fetchAudit = async () => {
                 Kartu Stok (Audit)
             </h1>
             <div class="flex gap-4">
-                <select
-                    v-model="selectedIngredient"
-                    class="input-master w-64"
+                <USelect
+                    v-model="selectedType"
+                    class="font-bold shadow-sm  w-64"
                 >
                     <option
-                        v-for="i in ingredients"
-                        :key="i.code"
-                        :value="i.code"
+                        value="ingredient"
                     >
-                        {{ i.name }}
+                        Bahan
                     </option>
-                </select>
+                    <option
+                        value="utility"
+                    >
+                        Alat
+                    </option>
+                </USelect>
+                <USelect
+                    v-if="selectedType === 'ingredient'"
+                    v-model="selectedIngredient"
+                    :options="ingredients"
+                    option-key="id"
+                    option-label="name"
+                    class="font-bold shadow-sm w-64"
+                />
+                <USelect
+                    v-if="selectedType === 'utility'"
+                    v-model="selectedUtility"
+                    :options="utilities"
+                    option-key="id"
+                    option-label="name"
+                    class="font-bold shadow-sm w-64"
+                />
                 <UButton
                     color="black"
                     class="px-8 font-black uppercase italic"

@@ -25,97 +25,110 @@ const form = ref({
             />
         </div>
 
-        <div class="space-y-4">
+        <UForm
+            :state="form"
+            class="space-y-4"
+            @submit="emit('save', form)"
+        >
             <div class="grid grid-cols-4 gap-2">
-                <div class="col-span-2">
-                    <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                        Nama Cabang
-                    </ULabel>
+                <UFormField
+                    class="col-span-2"
+                    label="Nama Cabang"
+                    name="name"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
                     <UInput
                         v-model="form.name"
-                        class="w-full font-bold"
+                        class="w-full font-bold shadow-sm"
                     />
-                </div>
+                </UFormField>
 
-                <div>
-                    <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                        Jumlah Lantai
-                    </ULabel>
+                <UFormField
+                    label="Jumlah Lantai"
+                    name="floor_number"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
                     <UInput
                         v-model="form.floor_number"
-                        class="w-full font-bold"
+                        class="w-full font-bold shadow-sm"
                     />
-                </div>
+                </UFormField>
 
-                <div>
-                    <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                        Jumlah Meja / Lt
-                    </ULabel>
+                <UFormField
+                    label="Jumlah Meja / Lt"
+                    name="table_number"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
                     <UInput
                         v-model="form.table_number"
-                        class="w-full font-bold"
+                        class="w-full font-bold shadow-sm"
                     />
-                </div>
+                </UFormField>
             </div>
 
-            <div>
-                <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                    Alamat Cabang
-                </ULabel>
+            <UFormField
+                label="Alamat Cabang"
+                name="address"
+                :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+            >
                 <UTextarea
                     v-model="form.address"
-                    class="w-full font-bold"
+                    class="w-full font-bold shadow-sm"
                 />
-            </div>
+            </UFormField>
 
             <div class="grid grid-cols-4 gap-2">
-                <div class="col-span-2">
-                    <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                        Nomor Telfon Cabang
-                    </ULabel>
+                <UFormField
+                    class="col-span-2"
+                    label="Nomor Telfon Cabang"
+                    name="phone"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
                     <UInput
                         v-model="form.phone"
-                        class="w-full font-bold"
+                        class="w-full font-bold shadow-sm"
                     />
-                </div>
+                </UFormField>
 
-                <div>
-                    <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                        Jumlah Dapur
-                    </ULabel>
+                <UFormField
+                    label="Jumlah Dapur"
+                    name="kitchen_no"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
                     <UInput
                         v-model="form.kitchen_no"
-                        class="w-full font-bold"
+                        class="w-full font-bold shadow-sm"
                     />
-                </div>
+                </UFormField>
 
-                <div>
-                    <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                        Jumlah Bartndr
-                    </ULabel>
+                <UFormField
+                    label="Jumlah Bartndr"
+                    name="bartender_no"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
                     <UInput
                         v-model="form.bartender_no"
-                        class="w-full font-bold"
+                        class="w-full font-bold shadow-sm"
                     />
-                </div>
+                </UFormField>
             </div>
-        </div>
 
-        <div class="flex gap-2 mt-8">
-            <UButton
-                variant="outline"
-                color="neutral"
-                class="flex-1 font-bold justify-center"
-                @click="emit('close')"
-            >
-                Batal
-            </UButton>
-            <UButton
-                class="flex-1 font-black uppercase italic justify-center py-4"
-                @click="emit('save', form)"
-            >
-                Simpan
-            </UButton>
-        </div>
+            <div class="flex gap-2 mt-8">
+                <UButton
+                    variant="outline"
+                    color="neutral"
+                    class="flex-1 font-bold justify-center"
+                    @click="emit('close')"
+                >
+                    Batal
+                </UButton>
+                <UButton
+                    type="submit"
+                    class="flex-1 font-black uppercase italic justify-center py-4"
+                >
+                    Simpan
+                </UButton>
+            </div>
+        </UForm>
     </div>
 </template>

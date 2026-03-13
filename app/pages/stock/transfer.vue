@@ -1,84 +1,83 @@
-<script setup>
-const form = ref({
-    branch_code: 'DMBRC',
-    note: '',
-    items: []
-})
-
-const submitTransfer = async () => {
-    await useApi('/api/admin/stock/transfer', {
-        method: 'POST',
-        body: form.value
-    })
-    alert('Stock Transferred successfully!')
-    navigateTo('/admin/stock/list')
-}
-</script>
-
 <template>
-    <div class="p-8 max-w-5xl">
-        <div class="mb-8 flex justify-between items-end">
-            <div>
-                <h1 class="text-3xl font-black uppercase italic tracking-tighter">
-                    Pindah Stok
-                </h1>
-                <p class="text-slate-400 font-bold text-xs uppercase">
-                    Warehouse (MAIN) → Kitchen (KTCN)
-                </p>
-            </div>
-            <button
-                class="bg-black text-white px-8 py-4 rounded-2xl font-black uppercase italic"
-                @click="submitTransfer"
+    <UContainer class="p-6">
+        <div class="flex justify-between items-center">
+            <h3 class="text-xl font-black uppercase text-slate-400">
+                Recent Movements
+            </h3>
+            <UButton
+                @click="openTransferStock()"
             >
-                Konfirmasi Pemindahan
-            </button>
+                New Transfer
+            </UButton>
         </div>
 
-        <div class="bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm">
-            <div class="space-y-4">
-                <div
-                    v-for="(item, idx) in form.items"
-                    :key="idx"
-                    class="grid grid-cols-12 gap-4 items-center border-b pb-4"
+        <UTable
+            :rows="items"
+            :columns="moveColumns"
+        >
+            <template #status-data="{ row }">
+                <UBadge
+                    :color="row.original.status === 'COMPLETED' ? 'success' : 'warning'"
+                    variant="subtle"
                 >
-                    <div class="col-span-6">
-                        <label class="text-[10px] font-black text-slate-400 uppercase">Item Bahan</label>
-                        <select
-                            v-model="item.code"
-                            class="w-full bg-slate-50 border-none rounded-xl p-3 font-bold"
-                        >
-                            <option
-                                v-for="b in bahan"
-                                :key="b.code"
-                                :value="b.code"
-                            >
-                                {{ b.name }}
-                            </option>
-                        </select>
-                    </div>
-                    <div class="col-span-3">
-                        <label class="text-[10px] font-black text-slate-400 uppercase">Jumlah</label>
-                        <input
-                            v-model="item.qty"
-                            type="number"
-                            class="w-full bg-slate-50 border-none rounded-xl p-3 font-bold"
-                        >
-                    </div>
-                    <div class="col-span-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase">Satuan</label>
-                        <div class="p-3 font-bold text-slate-400">
-                            {{ getUnit(item.code) }}
-                        </div>
-                    </div>
-                </div>
+                    {{ row.original.status }}
+                </UBadge>
+            </template>
 
-                <button
-                    class="mt-4 text-indigo-600 font-black uppercase text-[10px] tracking-widest"
-                    @click="form.items.push({ code: '', qty: 0 })"
-                >
-                    + Tambah Baris
-                </button>
-            </div>
-        </div>
-    </div>
+            <template #actions-data="{ row }">
+                <UButton
+                    v-if="row.original.status === 'PENDING'"
+                    size="xs"
+                    label="Receive"
+                    @click="receiveStock(row.original.id)"
+                />
+            </template>
+        </UTable>
+
+        <UModal v-model="isFormOpen">
+            <template #content>
+                <UCard>
+                    <StockTransferForm
+                        :item="selectedItem"
+                        @save="saveItem"
+                        @receive="receiveStock"
+                        @close="isFormOpen = false"
+                    />
+                </UCard>
+            </template>
+        </UModal>
+    </UContainer>
 </template>
+
+<script setup lang="ts">
+import type { TableColumn } from '@nuxt/ui'
+import type { StockMove } from '~/types/master'
+
+const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<StockMove>('stock/transfers')
+
+const moveColumns: TableColumn<StockMove>[] = [
+    { accessorKey: 'move_date', header: 'Date' },
+    { accessorKey: 'from_branch_id', header: 'From Branch' },
+    { accessorKey: 'from_storage', header: 'From Storage' },
+    { accessorKey: 'to_branch_id', header: 'To Branch' },
+    { accessorKey: 'to_storage', header: 'To Storage' },
+    { accessorKey: 'status', header: 'Status' },
+    { accessorKey: 'actions', header: 'Actions' }
+]
+
+const openTransferStock = (item = null) => {
+    selectedItem.value = item
+    isFormOpen.value = true
+}
+
+const receiveStock = async (id: number) => {
+    await useApi(`/api/stock/receive/${id}`, {
+        method: 'POST'
+    })
+    fetchItems()
+}
+
+onMounted(() => {
+    fetchItems()
+})
+</script>

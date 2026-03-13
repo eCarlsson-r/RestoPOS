@@ -1,33 +1,35 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useMaster } from '~/composables/useMaster'
-import type { Prepare } from '~/types/master'
+import type { Supplier } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Prepare>('prepare')
+const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Supplier>('suppliers')
 
 onMounted(() => {
     fetchItems()
 })
 
-const columns: TableColumn<Prepare>[] = [
-    {
-        accessorKey: 'id',
-        header: 'ID'
-    },
+const columns: TableColumn<Supplier>[] = [
     {
         accessorKey: 'name',
-        header: 'Nama Bahan Jadi',
-        meta: { class: { td: 'uppercase' } }
+        header: 'Nama Pemasok'
     },
     {
-        accessorKey: 'quantity',
-        header: 'Jumlah'
+        accessorKey: 'address',
+        header: 'Alamat'
     },
     {
-        accessorKey: 'cost',
-        header: 'Modal',
-        meta: { class: { td: 'text-right' } }
+        accessorKey: 'phone',
+        header: 'Nomor Telfon'
+    },
+    {
+        accessorKey: 'mobile',
+        header: 'Nomor Ponsel'
+    },
+    {
+        accessorKey: 'email',
+        header: 'Alamat eMail'
     },
     {
         accessorKey: 'actions',
@@ -41,17 +43,9 @@ function openNewForm() {
     isFormOpen.value = true
 }
 
-function editItem(item: Prepare) {
+function editItem(item: Supplier) {
     selectedItem.value = item
     isFormOpen.value = true
-}
-
-const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0
-    }).format(val)
 }
 </script>
 
@@ -59,11 +53,11 @@ const formatCurrency = (val: number) => {
     <UContainer class="py-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-black uppercase italic tracking-tighter">
-                Master Prepare
+                Master Pemasok
             </h1>
             <UButton
                 icon="i-lucide-plus"
-                label="Tambah Prepare"
+                label="Tambah Pemasok"
                 size="md"
                 @click="openNewForm"
             />
@@ -80,14 +74,20 @@ const formatCurrency = (val: number) => {
                         {{ row.original.name }}
                     </template>
 
-                    <template #quantity-cell="{ row }">
-                        {{ row.original.quantity }}
+                    <template #address-cell="{ row }">
+                        {{ row.original.address }}
                     </template>
 
-                    <template #cost-cell="{ row }">
-                        <span class="text-neutral-400">
-                            {{ formatCurrency(row.original.cost) }}
-                        </span>
+                    <template #phone-cell="{ row }">
+                        {{ row.original.phone }}
+                    </template>
+
+                    <template #mobile-cell="{ row }">
+                        {{ row.original.mobile }}
+                    </template>
+
+                    <template #email-cell="{ row }">
+                        {{ row.original.email }}
                     </template>
 
                     <template #actions-cell="{ row }">
@@ -105,13 +105,11 @@ const formatCurrency = (val: number) => {
 
         <UModal
             v-model:open="isFormOpen"
-            title="Form Produk"
-            class="w-6xl"
+            class="w-[500px]"
         >
             <template #content>
                 <UCard class="overflow-y-auto">
-                    <ProductForm
-                        type="prepare"
+                    <SupplierForm
                         :item="selectedItem"
                         @save="saveItem"
                         @close="isFormOpen = false"

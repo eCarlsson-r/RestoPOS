@@ -30,12 +30,12 @@ const submitPurchase = async () => {
         body: form.value
     })
     alert('Purchase recorded. Stock updated in MAIN storage.')
-    navigateTo('/admin/inventory/stock')
+    navigateTo('/admin/stock/list')
 }
 </script>
 
 <template>
-    <div class="p-10 max-w-(--ui-container) mx-auto bg-white rounded-[3rem] shadow-sm border border-slate-100 mt-10">
+    <UContainer class="p-6">
         <div class="flex justify-between items-end mb-10">
             <div>
                 <h1 class="text-4xl font-black uppercase italic tracking-tighter">
@@ -142,5 +142,5 @@ const submitPurchase = async () => {
                 Simpan Pembelian
             </UButton>
         </div>
-    </div>
+    </UContainer>
 </template>

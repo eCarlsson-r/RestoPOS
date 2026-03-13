@@ -164,7 +164,7 @@ export interface Recipe extends Timestamps {
     id?: number
     product_id?: number
     ingredient_id: number
-    qty: number
+    quantity: number
     unit: string
     purchase_price: number
 }
@@ -190,6 +190,27 @@ export interface Stock extends Timestamps {
     storage: string
     purchase_price: number
     quantity: number
+    min_stock: number
+}
+
+export interface StockMove extends Timestamps {
+    id: number
+    move_date: string
+    from_branch_id: number
+    from_storage: string
+    to_branch_id: number
+    to_storage: string
+    status: string
+    items?: StockMoveItem[]
+}
+
+export interface StockMoveItem {
+    id?: number
+    movement_id?: number
+    item_type: string
+    item_code: string
+    qty: number
+    purchase_price?: number
 }
 
 // --- Operational & Miscellaneous ---
@@ -199,7 +220,6 @@ export interface Utility extends Timestamps {
     name: string
     description?: string
     unit: string
-    img_no: number
 }
 
 export interface Package extends Timestamps {
@@ -207,14 +227,15 @@ export interface Package extends Timestamps {
     name: string
     price: number
     description?: string
-    img_no: number
+    products: PackageProduct[]
 }
 
 export interface PackageProduct extends Timestamps {
-    id: number
-    package_id: number
+    id?: number
+    package_id?: number
     product_id: number
-    qty: number
+    quantity: number
+    price: number
 }
 
 export interface Prepare extends Timestamps {
@@ -239,7 +260,7 @@ export interface PrepareRecipe extends Timestamps {
     id?: number
     prepare_id?: number
     ingredient_id: number
-    qty: number
+    quantity: number
     unit: string
     purchase_price: number
 }
@@ -262,7 +283,16 @@ export interface KitchenRequestItem extends Timestamps {
     request_id: number
     item_type: string
     item_code: string
-    qty: number
+    quantity: number
+}
+
+export interface StockCardLog {
+    date: string
+    reference: string
+    description: string
+    in: number
+    out: number
+    balance: number
 }
 
 export interface File extends Timestamps {

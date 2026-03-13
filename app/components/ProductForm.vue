@@ -1,27 +1,34 @@
 <script setup lang="ts">
 import type { SelectItem } from '@nuxt/ui'
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
+import { useApi } from '~/composables/useApi'
 import type { Product, Category, ApiResponse, Ingredient, Prepare } from '~/types/master'
 
 const props = defineProps<{
     type: 'product' | 'prepare'
-    item: Product | Prepare
+    item: Product | Prepare | null
 }>()
 
 const emit = defineEmits(['save', 'close'])
 
-const form = ref<Partial<Product & Prepare>>(props.item as Partial<Product & Prepare>)
+const form = ref<Partial<Product & Prepare>>((props.item || {}) as Partial<Product & Prepare>)
 const categories = ref<Category[]>([])
 const categorySelects = ref<SelectItem[]>([])
 const allIngredients = ref<Ingredient[]>([])
 const ingredientSelects = ref<SelectItem[]>([])
+const unitList = ref<SelectItem[]>([
+    { label: 'Gram (gr)', value: 'GR' },
+    { label: 'Kilogram (kg)', value: 'KG' },
+    { label: 'Liter (ltr)', value: 'LTR' },
+    { label: 'Pieces (pcs)', value: 'PCS' }
+])
 
 watch(() => props.item, (newVal) => {
     // Avoid resetting the form if the parent component re-renders and passes a new empty object
-    if (form.value && form.value.id === newVal?.id && !newVal?.id && Object.keys(newVal).length === 0) {
+    if (form.value && form.value.id === newVal?.id && !newVal?.id && newVal && Object.keys(newVal).length === 0) {
         return
     }
-    const baseItem = { ...newVal }
+    const baseItem = newVal ? { ...newVal } : {} as Partial<Product & Prepare>
     if (!baseItem.recipe) baseItem.recipe = []
     form.value = baseItem
 }, { deep: true, immediate: true })
@@ -29,17 +36,27 @@ watch(() => props.item, (newVal) => {
 const addIngrRow = () => {
     if (form.value.recipe) form.value.recipe?.push({
         ingredient_id: 0,
-        qty: 0,
+        quantity: 0,
         unit: 'Pcs',
         purchase_price: 0
     })
     else form.value.recipe = [{
         ingredient_id: 0,
-        qty: 0,
+        quantity: 0,
         unit: 'Pcs',
         purchase_price: 0
     }]
 }
+
+// 2. Computed total for each row
+const totals = computed(() => {
+    return form.value.recipe?.map(field => field.quantity * field.purchase_price)
+})
+
+// 3. Computed grand total
+const grandTotal = computed(() => {
+    return totals.value ? totals.value.reduce((sum, total) => sum + total, 0) : form.value.cost
+})
 
 watch(() => form.value.recipe, (newIngrs) => {
     if (newIngrs) newIngrs.forEach((ingr) => {
@@ -103,32 +120,11 @@ const submit = async () => {
             />
         </div>
 
-        <form
+        <UForm
+            :state="form"
             class="space-y-6 flex-1 overflow-y-auto pr-2"
-            @submit.prevent="submit"
+            @submit="submit"
         >
-            <div>
-                <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                    Nama {{ props.type }}
-                </ULabel>
-                <UInput
-                    v-model="form.name"
-                    class="w-full font-bold"
-                    required
-                />
-            </div>
-
-            <div v-if="props.type === 'product'">
-                <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                    Kategori
-                </ULabel>
-                <USelect
-                    v-model="form.category_id"
-                    :items="categorySelects"
-                    class="w-full font-bold"
-                />
-            </div>
-
             <div
                 v-if="props.type === 'prepare'"
             >
@@ -148,6 +144,129 @@ const submit = async () => {
                 </div>
             </div>
 
+            <UFormField
+                :label="`Nama ${props.type}`"
+                name="name"
+                :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+            >
+                <UInput
+                    v-model="form.name"
+                    class="w-full font-bold shadow-sm"
+                    required
+                />
+            </UFormField>
+
+            <UFormField
+                v-if="props.type === 'product'"
+                label="Kategori"
+                name="category_id"
+                :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+            >
+                <USelect
+                    v-model="form.category_id"
+                    :items="categorySelects"
+                    class="w-full font-bold shadow-sm"
+                />
+            </UFormField>
+
+            <div
+                v-if="props.type === 'product'"
+                class="grid grid-cols-5 gap-3"
+            >
+                <UFormField
+                    label="Diskon (%)"
+                    name="discount"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
+                    <UInput
+                        v-model="form.discount"
+                        class="w-full font-bold shadow-sm"
+                        required
+                    />
+                </UFormField>
+
+                <UFormField
+                    class="col-span-2"
+                    label="Modal"
+                    name="cost"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
+                    <UInput
+                        v-model="form.cost"
+                        class="w-full font-bold shadow-sm"
+                        required
+                    />
+                </UFormField>
+
+                <UFormField
+                    class="col-span-2"
+                    label="Harga Jual"
+                    name="price"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
+                    <UInput
+                        v-model="form.price"
+                        class="w-full font-bold shadow-sm"
+                        required
+                    />
+                </UFormField>
+            </div>
+
+            <UFormField
+                v-if="props.type === 'product'"
+                label="Keterangan"
+                name="description"
+                :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+            >
+                <UTextarea
+                    v-model="form.description"
+                    class="w-full font-bold shadow-sm"
+                    required
+                />
+            </UFormField>
+
+            <div
+                v-if="props.type === 'prepare'"
+                class="grid grid-cols-4 gap-3"
+            >
+                <UFormField
+                    label="Jumlah / Resep"
+                    name="quantity"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
+                    <UInput
+                        v-model="form.quantity"
+                        class="w-full font-bold shadow-sm"
+                        required
+                    />
+                </UFormField>
+
+                <UFormField
+                    label="Satuan / Resep"
+                    name="unit"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
+                    <USelect
+                        v-model="form.unit"
+                        :items="unitList"
+                        class="w-full font-bold shadow-sm"
+                    />
+                </UFormField>
+
+                <UFormField
+                    class="col-span-2"
+                    label="Jumlah Modal"
+                    name="grandTotal"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
+                    <UInput
+                        v-model="grandTotal"
+                        class="w-full font-bold shadow-sm"
+                        required
+                    />
+                </UFormField>
+            </div>
+
             <div class="mt-4 p-4 bg-slate-50 rounded-xl">
                 <h4 class="text-xs font-black uppercase mb-3">
                     Komposisi Bahan
@@ -155,34 +274,50 @@ const submit = async () => {
                 <div
                     v-for="(ingr, idx) in form.recipe"
                     :key="idx"
-                    class="flex gap-2 mb-2 items-center"
+                    class="grid grid-cols-4 gap-2 mb-2 items-center"
                 >
                     <USelect
                         v-model="ingr.ingredient_id"
                         :items="ingredientSelects"
-                        class="w-full font-bold text-sm shadow-sm"
+                        class="font-bold text-sm shadow-sm"
                     />
+
+                    <div class="flex gap-2 items-center">
+                        <UInput
+                            v-model="ingr.quantity"
+                            class="font-bold text-center shadow-sm"
+                            placeholder="0"
+                        />
+
+                        <span class="text-[10px] font-black uppercase text-slate-400">{{ ingr.unit }}</span>
+                    </div>
 
                     <UInput
-                        v-model="ingr.qty"
-                        type="number"
-                        step="0.01"
-                        class="w-36 font-bold text-center shadow-sm"
+                        v-model="ingr.purchase_price"
+                        class="font-bold text-center shadow-sm"
                         placeholder="0"
+                        disabled
                     />
 
-                    <span class="w-12 text-[10px] font-black uppercase text-slate-400">{{ ingr.unit }}</span>
-
-                    <button
-                        type="button"
-                        class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg"
-                        @click="form.recipe?.splice(idx, 1)"
-                    >
-                        <UIcon
-                            name="i-lucide-trash-2"
-                            class="w-4 h-4"
+                    <div class="flex gap-2 items-center">
+                        <UInput
+                            v-model="totals![idx]"
+                            class="font-bold text-center shadow-sm"
+                            placeholder="0"
+                            disabled
                         />
-                    </button>
+
+                        <button
+                            type="button"
+                            class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg"
+                            @click="form.recipe?.splice(idx, 1)"
+                        >
+                            <UIcon
+                                name="i-lucide-trash-2"
+                                class="w-4 h-4"
+                            />
+                        </button>
+                    </div>
                 </div>
 
                 <UButton
@@ -201,6 +336,6 @@ const submit = async () => {
                 label="Simpan Data"
                 class="font-black uppercase italic"
             />
-        </form>
+        </UForm>
     </div>
 </template>

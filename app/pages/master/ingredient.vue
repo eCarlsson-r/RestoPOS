@@ -45,11 +45,11 @@ function editItem(item: Ingredient) {
     <UContainer class="py-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-black uppercase italic tracking-tighter">
-                Master Bahan
+                Master Bahan Baku
             </h1>
             <UButton
                 icon="i-lucide-plus"
-                label="Tambah Bahan"
+                label="Tambah Bahan Baku"
                 size="md"
                 @click="openNewForm"
             />
@@ -94,7 +94,8 @@ function editItem(item: Ingredient) {
             <template #content>
                 <UCard class="overflow-y-auto">
                     <IngredientForm
-                        :item="selectedItem || {}"
+                        type="ingredient"
+                        :item="selectedItem"
                         @save="saveItem"
                         @close="isFormOpen = false"
                     />

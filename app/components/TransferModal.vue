@@ -8,7 +8,7 @@ const destinationTable = ref(null)
 const confirmMove = async () => {
     if (!destinationTable.value) return
 
-    await useApi('/api/pos/move-table', {
+    await useApi('/api/tables/move', {
         method: 'POST',
         body: {
             old_table: props.sourceTable,

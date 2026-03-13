@@ -1,15 +1,23 @@
 export default defineNuxtRouteMiddleware((to) => {
     const { user, isAuthenticated } = useAuth()
-    const userType = user.value?.type
-    const checkNotAdmin = to.path.startsWith('/admin') && userType !== 'ADMIN'
-    const checkNotKitchen = to.path.startsWith('/kitchen') && userType !== 'KITCHEN'
-    const checkNotCashier = to.path.startsWith('/pos/cashier') && userType !== 'CASHIER'
-    const checkWaiter = userType === 'WAITER'
 
+    if (to.path === '/') return
     if (!isAuthenticated) return navigateTo('/')
 
-    if (checkNotAdmin || checkNotKitchen || checkNotCashier) {
-        if (checkWaiter) return navigateTo('/pos/floor-map')
-        else return navigateTo('/')
+    const userType = user.value?.type
+
+    // 1. Admin Guard: Only ADMIN can enter /admin
+    if (to.path.startsWith('/admin') && userType !== 'ADMIN') {
+        return navigateTo('/pos/floor-map')
+    }
+
+    // 2. Kitchen Guard: Only KITCHEN (and maybe Admin) can enter /kitchen
+    if (to.path.startsWith('/kitchen') && userType !== 'KITCHEN' && userType !== 'ADMIN') {
+        return navigateTo('/pos/floor-map')
+    }
+
+    // 3. Cashier Guard: Only CASHIER (and maybe Admin) can enter /pos/cashier
+    if (to.path.startsWith('/pos/cashier') && userType !== 'CASHIER' && userType !== 'ADMIN') {
+        return navigateTo('/pos/floor-map')
     }
 })

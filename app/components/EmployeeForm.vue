@@ -4,12 +4,12 @@ import { ref, onMounted } from 'vue'
 import type { Employee, Branch, ApiResponse } from '~/types/master'
 
 const props = defineProps<{
-    item: Employee | Partial<Employee>
+    item: Employee | Partial<Employee> | null
 }>()
 
 const emit = defineEmits(['save', 'close'])
 
-const form = ref<Employee>({ ...props.item } as Employee)
+const form = ref<Partial<Employee>>((props.item || {}) as Partial<Employee>)
 const branches = ref<Branch[]>([])
 const branchSelects = ref<SelectItem[]>([])
 
@@ -107,136 +107,153 @@ const submit = async () => {
             />
         </div>
 
-        <div>
-            <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                Nama Lengkap
-            </ULabel>
-            <UInput
-                v-model="form.name"
-                class="w-full font-bold"
-            />
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                    Role / Jabatan
-                </ULabel>
-                <USelect
-                    v-model="form.job_type"
-                    :items="jobTypes"
-                    class="w-full font-bold"
-                />
-            </div>
-            <div>
-                <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                    Penugasan Cabang
-                </ULabel>
-                <USelect
-                    v-model="form.branch_id"
-                    :items="branchSelects"
-                    class="w-full font-bold"
-                />
-            </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                    Gender
-                </ULabel>
-                <USelect
-                    v-model="form.gender"
-                    :items="genders"
-                    class="w-full font-bold"
-                />
-            </div>
-            <div>
-                <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                    Status
-                </ULabel>
-                <USelect
-                    v-model="form.status"
-                    :items="employeeStatus"
-                    class="w-full font-bold"
-                />
-            </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                    Join Date
-                </ULabel>
-                <UInput
-                    v-model="form.join_date"
-                    type="date"
-                    class="w-full font-bold"
-                />
-            </div>
-            <div>
-                <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                    Quit Date
-                </ULabel>
-                <UInput
-                    v-model="form.quit_date"
-                    type="date"
-                    class="w-full font-bold"
-                />
-            </div>
-        </div>
-
-        <div>
-            <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                Alamat Rumah
-            </ULabel>
-            <UTextarea
-                v-model="form.home_address"
-                class="w-full font-bold"
-                placeholder="Alamat tempat tinggal karyawan saat ini"
-            />
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                    Telepon
-                </ULabel>
-                <UInput
-                    v-model="form.phone"
-                    type="text"
-                    class="w-full font-bold"
-                />
-            </div>
-            <div>
-                <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                    No. HP
-                </ULabel>
-                <UInput
-                    v-model="form.mobile"
-                    type="text"
-                    class="w-full font-bold"
-                />
-            </div>
-        </div>
-
-        <div>
-            <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                Email
-            </ULabel>
-            <UInput
-                v-model="form.email"
-                type="text"
-                class="w-full font-bold"
-            />
-        </div>
-
-        <UButton
-            block
-            class="py-4"
-            @click="submit"
+        <UForm
+            :state="form"
+            class="space-y-4 overflow-y-auto pr-2"
+            @submit="submit"
         >
-            Simpan Karyawan
-        </UButton>
+            <UFormField
+                label="Nama Lengkap"
+                name="name"
+                :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+            >
+                <UInput
+                    v-model="form.name"
+                    class="w-full font-bold shadow-sm"
+                />
+            </UFormField>
+
+            <div class="grid grid-cols-2 gap-4">
+                <UFormField
+                    label="Role / Jabatan"
+                    name="job_type"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
+                    <USelect
+                        v-model="form.job_type"
+                        :items="jobTypes"
+                        class="w-full font-bold shadow-sm"
+                    />
+                </UFormField>
+                <UFormField
+                    label="Penugasan Cabang"
+                    name="branch_id"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
+                    <USelect
+                        v-model="form.branch_id"
+                        :items="branchSelects"
+                        class="w-full font-bold shadow-sm"
+                    />
+                </UFormField>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <UFormField
+                    label="Gender"
+                    name="gender"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
+                    <USelect
+                        v-model="form.gender"
+                        :items="genders"
+                        class="w-full font-bold shadow-sm"
+                    />
+                </UFormField>
+                <UFormField
+                    label="Status"
+                    name="status"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
+                    <USelect
+                        v-model="form.status"
+                        :items="employeeStatus"
+                        class="w-full font-bold shadow-sm"
+                    />
+                </UFormField>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <UFormField
+                    label="Join Date"
+                    name="join_date"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
+                    <UInput
+                        v-model="form.join_date"
+                        type="date"
+                        class="w-full font-bold shadow-sm"
+                    />
+                </UFormField>
+                <UFormField
+                    label="Quit Date"
+                    name="quit_date"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
+                    <UInput
+                        v-model="form.quit_date"
+                        type="date"
+                        class="w-full font-bold shadow-sm"
+                    />
+                </UFormField>
+            </div>
+
+            <UFormField
+                label="Alamat Rumah"
+                name="home_address"
+                :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+            >
+                <UTextarea
+                    v-model="form.home_address"
+                    class="w-full font-bold shadow-sm"
+                    placeholder="Alamat tempat tinggal karyawan saat ini"
+                />
+            </UFormField>
+
+            <div class="grid grid-cols-2 gap-4">
+                <UFormField
+                    label="Telepon"
+                    name="phone"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
+                    <UInput
+                        v-model="form.phone"
+                        type="text"
+                        class="w-full font-bold shadow-sm"
+                    />
+                </UFormField>
+                <UFormField
+                    label="No. HP"
+                    name="mobile"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
+                    <UInput
+                        v-model="form.mobile"
+                        type="text"
+                        class="w-full font-bold shadow-sm"
+                    />
+                </UFormField>
+            </div>
+
+            <UFormField
+                label="Email"
+                name="email"
+                :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+            >
+                <UInput
+                    v-model="form.email"
+                    type="text"
+                    class="w-full font-bold shadow-sm"
+                />
+            </UFormField>
+
+            <UButton
+                type="submit"
+                block
+                class="py-4 mt-8"
+            >
+                Simpan Karyawan
+            </UButton>
+        </UForm>
     </div>
 </template>

@@ -102,7 +102,7 @@ function editItem(item: Employee) {
             <template #content>
                 <UCard class="overflow-y-auto">
                     <EmployeeForm
-                        :item="selectedItem || {}"
+                        :item="selectedItem"
                         @save="saveItem"
                         @close="isFormOpen = false"
                     />

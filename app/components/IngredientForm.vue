@@ -1,17 +1,37 @@
 <script setup lang="ts">
 import type { SelectItem } from '@nuxt/ui'
-import type { Ingredient } from '~/types/master'
+import { ref, watch } from 'vue'
+import type { Ingredient, Utility } from '~/types/master'
 
-const props = defineProps<{ item: Partial<Ingredient> }>()
+const props = withDefaults(defineProps<{
+    type?: 'ingredient' | 'utility'
+    item?: Partial<Ingredient | Utility> | null
+}>(), {
+    type: 'ingredient',
+    item: () => ({})
+})
+
 const emit = defineEmits(['save', 'close'])
 
-const form = ref<Ingredient>({
-    id: 0,
-    name: '',
-    unit: 'GR', // Default to grams for precision
-    min_stock: 0,
-    ...props.item
-})
+type FormData = Partial<Ingredient & Utility> & { code?: string }
+
+const form = ref<FormData>(props.item ? ({ ...props.item } as FormData) : {})
+
+watch(() => props.item, (newVal) => {
+    if (form.value && form.value.id === newVal?.id && !newVal?.id && newVal && Object.keys(newVal).length === 0) {
+        return
+    }
+    const baseItem = newVal ? { ...newVal } : {} as FormData
+
+    if (props.type === 'ingredient') {
+        if (!baseItem.unit) baseItem.unit = 'GR'
+        if (baseItem.min_stock === undefined) baseItem.min_stock = 0
+    } else {
+        if (!baseItem.unit) baseItem.unit = 'g'
+    }
+
+    form.value = baseItem
+}, { deep: true, immediate: true })
 
 const unitList = ref<SelectItem[]>([
     { label: 'Gram (gr)', value: 'GR' },
@@ -19,6 +39,7 @@ const unitList = ref<SelectItem[]>([
     { label: 'Liter (ltr)', value: 'LTR' },
     { label: 'Pieces (pcs)', value: 'PCS' }
 ])
+
 const submit = () => emit('save', form.value)
 </script>
 
@@ -26,7 +47,7 @@ const submit = () => emit('save', form.value)
     <div class="space-y-6">
         <header class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-black uppercase italic tracking-tighter">
-                Master Bahan Baku
+                {{ form.id ? 'Edit' : 'Tambah' }} {{ props.type === 'utility' ? 'Utility' : 'Bahan Baku' }}
             </h2>
             <UButton
                 variant="ghost"
@@ -36,64 +57,68 @@ const submit = () => emit('save', form.value)
             />
         </header>
 
-        <div class="space-y-4">
-            <div>
-                <ULabel class="label-master">
-                    Nama Bahan
-                </ULabel>
+        <UForm
+            :state="form"
+            class="space-y-4"
+            @submit="submit"
+        >
+            <UFormField
+                :label="'Nama ' + (props.type === 'utility' ? 'Alat' : 'Bahan')"
+                name="name"
+                :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+            >
                 <UInput
                     v-model="form.name"
-                    class="input-master"
-                    placeholder="Nama bahan baku..."
+                    class="w-full font-bold shadow-sm"
                 />
-            </div>
+            </UFormField>
 
             <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <ULabel class="label-master">
-                        Satuan Stok
-                    </ULabel>
+                <UFormField
+                    label="Satuan Stok"
+                    name="unit"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
                     <USelect
                         v-model="form.unit"
                         :items="unitList"
-                        class="input-master"
+                        class="w-full font-bold shadow-sm"
                     />
-                </div>
-                <div>
-                    <ULabel class="label-master">
-                        Min. Stok
-                    </ULabel>
+                </UFormField>
+                <UFormField
+                    label="Min. Stok"
+                    name="min_stock"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
                     <UInput
                         v-model="form.min_stock"
                         type="number"
-                        class="input-master text-center"
+                        class="w-full font-bold text-center shadow-sm"
                     />
-                </div>
+                </UFormField>
             </div>
 
-            <div>
-                <ULabel
-                    class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest"
-                    for="description"
-                >
-                    Keterangan
-                </ULabel>
+            <UFormField
+                label="Keterangan"
+                name="description"
+                :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+            >
                 <UTextarea
                     id="description"
                     v-model="form.description"
-                    class="input-master h-24 pt-4"
+                    class="w-full font-bold shadow-sm"
                 />
-            </div>
-        </div>
+            </UFormField>
 
-        <UButton
-            block
-            size="xl"
-            color="primary"
-            class="font-black uppercase italic py-4 shadow-lg shadow-primary/20"
-            @click="submit"
-        >
-            Simpan Bahan
-        </UButton>
+            <UButton
+                type="submit"
+                block
+                size="xl"
+                color="primary"
+                class="font-black uppercase italic py-4 shadow-lg shadow-primary/20 mt-4"
+            >
+                Simpan {{ props.type === 'utility' ? 'Alat' : 'Bahan' }}
+            </UButton>
+        </UForm>
     </div>
 </template>

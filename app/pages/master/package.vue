@@ -1,33 +1,29 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useMaster } from '~/composables/useMaster'
-import type { Prepare } from '~/types/master'
+import type { Package } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Prepare>('prepare')
+const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Package>('packages')
 
 onMounted(() => {
     fetchItems()
 })
 
-const columns: TableColumn<Prepare>[] = [
-    {
-        accessorKey: 'id',
-        header: 'ID'
-    },
+const columns: TableColumn<Package>[] = [
     {
         accessorKey: 'name',
-        header: 'Nama Bahan Jadi',
+        header: 'Nama Paket',
         meta: { class: { td: 'uppercase' } }
     },
     {
-        accessorKey: 'quantity',
-        header: 'Jumlah'
+        accessorKey: 'price',
+        header: 'Harga Jual',
+        meta: { class: { td: 'text-right' } }
     },
     {
-        accessorKey: 'cost',
-        header: 'Modal',
-        meta: { class: { td: 'text-right' } }
+        accessorKey: 'description',
+        header: 'Keterangan'
     },
     {
         accessorKey: 'actions',
@@ -41,7 +37,7 @@ function openNewForm() {
     isFormOpen.value = true
 }
 
-function editItem(item: Prepare) {
+function editItem(item: Package) {
     selectedItem.value = item
     isFormOpen.value = true
 }
@@ -59,11 +55,11 @@ const formatCurrency = (val: number) => {
     <UContainer class="py-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-black uppercase italic tracking-tighter">
-                Master Prepare
+                Master Paket
             </h1>
             <UButton
                 icon="i-lucide-plus"
-                label="Tambah Prepare"
+                label="Tambah Paket"
                 size="md"
                 @click="openNewForm"
             />
@@ -80,14 +76,12 @@ const formatCurrency = (val: number) => {
                         {{ row.original.name }}
                     </template>
 
-                    <template #quantity-cell="{ row }">
-                        {{ row.original.quantity }}
+                    <template #price-cell="{ row }">
+                        {{ formatCurrency(row.original.price) }}
                     </template>
 
-                    <template #cost-cell="{ row }">
-                        <span class="text-neutral-400">
-                            {{ formatCurrency(row.original.cost) }}
-                        </span>
+                    <template #description-cell="{ row }">
+                        {{ row.original.description }}
                     </template>
 
                     <template #actions-cell="{ row }">
@@ -105,13 +99,11 @@ const formatCurrency = (val: number) => {
 
         <UModal
             v-model:open="isFormOpen"
-            title="Form Produk"
-            class="w-6xl"
+            title="Form Paket"
         >
             <template #content>
                 <UCard class="overflow-y-auto">
-                    <ProductForm
-                        type="prepare"
+                    <PackageForm
                         :item="selectedItem"
                         @save="saveItem"
                         @close="isFormOpen = false"

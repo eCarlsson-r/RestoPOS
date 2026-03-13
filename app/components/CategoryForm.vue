@@ -46,66 +46,61 @@ watch(() => props.item, (newItem) => {
             />
         </div>
 
-        <div class="space-y-4">
-            <div>
-                <ULabel
-                    class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest"
-                    for="name"
-                >
-                    Nama Kategori
-                </ULabel>
+        <UForm
+            :state="form"
+            class="space-y-4"
+            @submit="emit('save', form)"
+        >
+            <UFormField
+                label="Nama Kategori"
+                name="name"
+                :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+            >
                 <UInput
-                    id="name"
                     v-model="form.name"
-                    class="w-full font-bold"
+                    class="w-full font-bold shadow-sm"
                 />
-            </div>
+            </UFormField>
 
-            <div>
-                <ULabel
-                    class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest"
-                    for="kitchen_process"
-                >
-                    Proses Dapur
-                </ULabel>
+            <UFormField
+                label="Proses Dapur"
+                name="kitchen_process"
+                :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+            >
                 <USelect
-                    id="kitchen_process"
                     v-model="form.kitchen_process"
                     :items="kitchenProcessList"
-                    class="w-full font-bold"
+                    class="w-full font-bold shadow-sm"
                 />
-            </div>
+            </UFormField>
 
-            <div>
-                <ULabel
-                    class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest"
-                    for="description"
-                >
-                    Keterangan
-                </ULabel>
+            <UFormField
+                label="Keterangan"
+                name="description"
+                :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+            >
                 <UTextarea
-                    id="description"
                     v-model="form.description"
-                    class="w-full font-bold"
+                    class="w-full font-bold shadow-sm"
                 />
-            </div>
-        </div>
+            </UFormField>
 
-        <div class="flex gap-2 mt-8">
-            <UButton
-                variant="outline"
-                color="neutral"
-                class="flex-1 font-bold justify-center"
-                @click="emit('close')"
-            >
-                Batal
-            </UButton>
-            <UButton
-                class="flex-1 font-black uppercase italic justify-center py-4"
-                @click="emit('save', form)"
-            >
-                Simpan
-            </UButton>
-        </div>
+            <div class="flex gap-2 mt-8">
+                <UButton
+                    variant="outline"
+                    color="neutral"
+                    class="flex-1 font-bold justify-center"
+                    @click="emit('close')"
+                >
+                    Batal
+                </UButton>
+                <UButton
+                    type="submit"
+                    class="flex-1 font-black uppercase italic justify-center py-4"
+                >
+                    Simpan
+                </UButton>
+            </div>
+        </UForm>
     </div>
 </template>

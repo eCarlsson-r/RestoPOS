@@ -117,7 +117,6 @@ const formatCurrency = (val: number) => {
         <UModal
             v-model:open="isFormOpen"
             title="Form Produk"
-            class="w-[500px]"
         >
             <template #content>
                 <UCard class="overflow-y-auto">
