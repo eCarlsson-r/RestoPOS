@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { SelectItem } from '@nuxt/ui'
 import { ref, onMounted } from 'vue'
 import { useApi } from '~/composables/useApi'
 import type { Branch, Ingredient, Utility, ApiResponse, Stock } from '~/types/master'
@@ -15,7 +16,11 @@ const branches = ref<Branch[]>([])
 const ingredients = ref<Ingredient[]>([])
 const utilities = ref<Utility[]>([])
 
-const storages = [{ label: 'Store/Main', value: 'MAIN' }, { label: 'Kitchen', value: 'KTCN' }, { label: 'Bar', value: 'BART' }]
+const storageList = ref<SelectItem[]>([
+    { label: 'Main Storage', value: 'MAIN' },
+    { label: 'Kitchen', value: 'KTCN' },
+    { label: 'Bartender', value: 'BART' }
+])
 
 onMounted(async () => {
     const data = await useApi<Branch[] | ApiResponse<Branch[]>>('/api/branches')
@@ -63,6 +68,7 @@ onMounted(async () => {
 
         <UForm
             :state="form"
+            :submit="emit('save', form)"
             class="space-y-4 p-4"
         >
             <div class="grid grid-cols-2 gap-4">
@@ -75,7 +81,7 @@ onMounted(async () => {
                 <UFormGroup label="Storage">
                     <USelect
                         v-model="form.storage"
-                        :options="storages"
+                        :options="storageList"
                     />
                 </UFormGroup>
             </div>

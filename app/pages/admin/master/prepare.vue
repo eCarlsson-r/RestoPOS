@@ -1,27 +1,33 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useMaster } from '~/composables/useMaster'
-import type { Ingredient } from '~/types/master'
+import type { Prepare } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Ingredient>('employees')
+const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Prepare>('prepare')
 
 onMounted(() => {
     fetchItems()
 })
 
-const columns: TableColumn<Ingredient>[] = [
+const columns: TableColumn<Prepare>[] = [
+    {
+        accessorKey: 'id',
+        header: 'ID'
+    },
     {
         accessorKey: 'name',
-        header: 'Nama Alat'
+        header: 'Nama Bahan Jadi',
+        meta: { class: { td: 'uppercase' } }
     },
     {
-        accessorKey: 'unit',
-        header: 'Satuan'
+        accessorKey: 'quantity',
+        header: 'Jumlah'
     },
     {
-        accessorKey: 'description',
-        header: 'Keterangan'
+        accessorKey: 'cost',
+        header: 'Modal',
+        meta: { class: { td: 'text-right' } }
     },
     {
         accessorKey: 'actions',
@@ -35,9 +41,17 @@ function openNewForm() {
     isFormOpen.value = true
 }
 
-function editItem(item: Ingredient) {
+function editItem(item: Prepare) {
     selectedItem.value = item
     isFormOpen.value = true
+}
+
+const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0
+    }).format(val)
 }
 </script>
 
@@ -45,11 +59,11 @@ function editItem(item: Ingredient) {
     <UContainer class="py-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-black uppercase italic tracking-tighter">
-                Master Bahan Baku
+                Master Prepare
             </h1>
             <UButton
                 icon="i-lucide-plus"
-                label="Tambah Bahan Baku"
+                label="Tambah Prepare"
                 size="md"
                 @click="openNewForm"
             />
@@ -59,19 +73,21 @@ function editItem(item: Ingredient) {
             <ClientOnly>
                 <UTable
                     :key="items.length"
-                    :rows="items"
+                    :data="items"
                     :columns="columns"
                 >
                     <template #name-cell="{ row }">
                         {{ row.original.name }}
                     </template>
 
-                    <template #unit-cell="{ row }">
-                        {{ row.original.unit }}
+                    <template #quantity-cell="{ row }">
+                        {{ row.original.quantity }}
                     </template>
 
-                    <template #description-cell="{ row }">
-                        {{ row.original.description }}
+                    <template #cost-cell="{ row }">
+                        <span class="text-neutral-400">
+                            {{ formatCurrency(row.original.cost) }}
+                        </span>
                     </template>
 
                     <template #actions-cell="{ row }">
@@ -89,12 +105,13 @@ function editItem(item: Ingredient) {
 
         <UModal
             v-model:open="isFormOpen"
-            class="w-[500px]"
+            title="Form Produk"
+            class="w-6xl"
         >
             <template #content>
                 <UCard class="overflow-y-auto">
-                    <IngredientForm
-                        type="utility"
+                    <ProductForm
+                        type="prepare"
                         :item="selectedItem"
                         @save="saveItem"
                         @close="isFormOpen = false"

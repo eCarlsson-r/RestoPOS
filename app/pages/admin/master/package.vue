@@ -1,31 +1,29 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useMaster } from '~/composables/useMaster'
-import type { Customer } from '~/types/master'
+import type { Package } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Customer>('customers')
+const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Package>('packages')
 
 onMounted(() => {
     fetchItems()
 })
 
-const columns: TableColumn<Customer>[] = [
+const columns: TableColumn<Package>[] = [
     {
         accessorKey: 'name',
-        header: 'Nama Pelanggan'
+        header: 'Nama Paket',
+        meta: { class: { td: 'uppercase' } }
     },
     {
-        accessorKey: 'address',
-        header: 'Alamat'
+        accessorKey: 'price',
+        header: 'Harga Jual',
+        meta: { class: { td: 'text-right' } }
     },
     {
-        accessorKey: 'dob',
-        header: 'Tanggal Lahir'
-    },
-    {
-        accessorKey: 'mobile',
-        header: 'Nomor Ponsel'
+        accessorKey: 'description',
+        header: 'Keterangan'
     },
     {
         accessorKey: 'actions',
@@ -39,9 +37,17 @@ function openNewForm() {
     isFormOpen.value = true
 }
 
-function editItem(item: Customer) {
+function editItem(item: Package) {
     selectedItem.value = item
     isFormOpen.value = true
+}
+
+const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0
+    }).format(val)
 }
 </script>
 
@@ -49,11 +55,11 @@ function editItem(item: Customer) {
     <UContainer class="py-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-black uppercase italic tracking-tighter">
-                Master Pelanggan
+                Master Paket
             </h1>
             <UButton
                 icon="i-lucide-plus"
-                label="Tambah Pelanggan"
+                label="Tambah Paket"
                 size="md"
                 @click="openNewForm"
             />
@@ -63,23 +69,19 @@ function editItem(item: Customer) {
             <ClientOnly>
                 <UTable
                     :key="items.length"
-                    :rows="items"
+                    :data="items"
                     :columns="columns"
                 >
                     <template #name-cell="{ row }">
                         {{ row.original.name }}
                     </template>
 
-                    <template #dob-cell="{ row }">
-                        {{ row.original.dob }}
+                    <template #price-cell="{ row }">
+                        {{ formatCurrency(row.original.price) }}
                     </template>
 
-                    <template #mobile-cell="{ row }">
-                        {{ row.original.mobile }}
-                    </template>
-
-                    <template #address-cell="{ row }">
-                        {{ row.original.address }}
+                    <template #description-cell="{ row }">
+                        {{ row.original.description }}
                     </template>
 
                     <template #actions-cell="{ row }">
@@ -97,11 +99,11 @@ function editItem(item: Customer) {
 
         <UModal
             v-model:open="isFormOpen"
-            class="w-[500px]"
+            title="Form Paket"
         >
             <template #content>
                 <UCard class="overflow-y-auto">
-                    <CustomerForm
+                    <PackageForm
                         :item="selectedItem"
                         @save="saveItem"
                         @close="isFormOpen = false"

@@ -31,7 +31,7 @@ const markAsReady = async (recordId: number) => {
 </script>
 
 <template>
-    <div class="h-screen p-6 flex flex-col">
+    <UContainer class="h-screen p-6 flex flex-col">
         <header class="flex justify-between items-center mb-8">
             <h1 class="text-3xl font-black text-white uppercase italic tracking-tighter">
                 Station: {{ station }}
@@ -85,5 +85,5 @@ const markAsReady = async (recordId: number) => {
                 </div>
             </UCard>
         </div>
-    </div>
+    </UContainer>
 </template>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { SelectItem } from '@nuxt/ui'
 import type { ApiResponse, Branch, Ingredient, StockMove, Utility } from '~/types/master'
 
 const props = defineProps<{
@@ -13,7 +14,11 @@ const branches = ref<Branch[]>([])
 const ingredients = ref<Ingredient[]>([])
 const utilities = ref<Utility[]>([])
 
-const storages = [{ label: 'Store/Main', value: 'MAIN' }, { label: 'Kitchen', value: 'KTCN' }, { label: 'Bar', value: 'BART' }]
+const storageList = ref<SelectItem[]>([
+    { label: 'Main Storage', value: 'MAIN' },
+    { label: 'Kitchen', value: 'KTCN' },
+    { label: 'Bartender', value: 'BART' }
+])
 
 const addRecordRow = () => {
     if (form.value.items) form.value.items?.push({
@@ -72,7 +77,7 @@ onMounted(async () => {
                 />
                 <USelect
                     v-model="form.from_storage"
-                    :options="storages"
+                    :items="storageList"
                 />
             </div>
             <div class="space-y-2">
@@ -86,7 +91,7 @@ onMounted(async () => {
                 />
                 <USelect
                     v-model="form.to_storage"
-                    :options="storages"
+                    :items="storageList"
                 />
             </div>
         </div>

@@ -12,15 +12,16 @@ watch(() => voucherForm.value.amount, (val) => {
 </script>
 
 <template>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div class="space-y-4">
-            <UFormGroup label="Nominal Voucher">
-                <USelect
-                    v-model="voucherForm.amount"
-                    :options="[{ label: 'Rp 20.000', value: 20000 }, { label: 'Rp 50.000', value: 50000 }]"
-                />
-            </UFormGroup>
-            <div class="grid grid-cols-2 gap-4">
+    <UContainer class="p-6">
+        <UForm class="space-y-4">
+            <div class="grid grid-cols-3 gap-4">
+                <UFormGroup label="Nominal Voucher">
+                    <USelect
+                        v-model="voucherForm.amount"
+                        :items="[{ label: 'Rp 20.000', value: 20000 }, { label: 'Rp 50.000', value: 50000 }]"
+                    />
+                </UFormGroup>
+
                 <UFormGroup label="Prefix">
                     <UInput
                         v-model="voucherForm.prefix"
@@ -47,9 +48,9 @@ watch(() => voucherForm.value.amount, (val) => {
             >
                 Register & Generate PDF
             </UButton>
-        </div>
+        </UForm>
         <div class="border-2 border-dashed border-slate-200 rounded-3xl flex items-center justify-center text-slate-400 italic text-sm">
             PDF Preview (voucher_output)
         </div>
-    </div>
+    </UContainer>
 </template>

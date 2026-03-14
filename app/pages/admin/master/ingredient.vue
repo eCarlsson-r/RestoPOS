@@ -1,32 +1,27 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useMaster } from '~/composables/useMaster'
-import type { Branch } from '~/types/master'
+import type { Ingredient } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Branch>('branches')
+const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Ingredient>('ingredients')
 
 onMounted(() => {
     fetchItems()
 })
 
-const columns: TableColumn<Branch>[] = [
-    {
-        accessorKey: 'id',
-        header: 'ID'
-    },
+const columns: TableColumn<Ingredient>[] = [
     {
         accessorKey: 'name',
-        header: 'Nama Cabang',
-        meta: { class: { td: 'uppercase' } }
+        header: 'Nama Bahan'
     },
     {
-        accessorKey: 'address',
-        header: 'Alamat Cabang'
+        accessorKey: 'unit',
+        header: 'Satuan'
     },
     {
-        accessorKey: 'phone',
-        header: 'Nomor Telfon'
+        accessorKey: 'description',
+        header: 'Keterangan'
     },
     {
         accessorKey: 'actions',
@@ -40,7 +35,7 @@ function openNewForm() {
     isFormOpen.value = true
 }
 
-function editItem(item: Branch) {
+function editItem(item: Ingredient) {
     selectedItem.value = item
     isFormOpen.value = true
 }
@@ -50,11 +45,11 @@ function editItem(item: Branch) {
     <UContainer class="py-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-black uppercase italic tracking-tighter">
-                Master Cabang
+                Master Bahan Baku
             </h1>
             <UButton
                 icon="i-lucide-plus"
-                label="Tambah Cabang"
+                label="Tambah Bahan Baku"
                 size="md"
                 @click="openNewForm"
             />
@@ -64,19 +59,19 @@ function editItem(item: Branch) {
             <ClientOnly>
                 <UTable
                     :key="items.length"
-                    :rows="items"
+                    :data="items"
                     :columns="columns"
                 >
                     <template #name-cell="{ row }">
                         {{ row.original.name }}
                     </template>
 
-                    <template #address-cell="{ row }">
-                        {{ row.original.address }}
+                    <template #unit-cell="{ row }">
+                        {{ row.original.unit }}
                     </template>
 
-                    <template #phone-cell="{ row }">
-                        {{ row.original.phone }}
+                    <template #description-cell="{ row }">
+                        {{ row.original.description }}
                     </template>
 
                     <template #actions-cell="{ row }">
@@ -97,8 +92,9 @@ function editItem(item: Branch) {
             class="w-[500px]"
         >
             <template #content>
-                <UCard>
-                    <BranchForm
+                <UCard class="overflow-y-auto">
+                    <IngredientForm
+                        type="ingredient"
                         :item="selectedItem"
                         @save="saveItem"
                         @close="isFormOpen = false"

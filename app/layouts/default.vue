@@ -38,12 +38,11 @@
 
             <template #right>
                 <UButton
-                    to="https://github.com/nuxt-ui-templates/starter"
-                    target="_blank"
-                    icon="i-simple-icons-github"
-                    aria-label="GitHub"
-                    color="neutral"
+                    icon="i-lucide-log-out"
+                    aria-label="Logout"
+                    color="primary"
                     variant="ghost"
+                    @click="useAuth().logout()"
                 />
             </template>
         </UFooter>

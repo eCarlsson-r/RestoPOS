@@ -269,13 +269,16 @@ export interface KitchenRequest extends Timestamps {
     id: number
     date: string
     time: string
-    from_branch_id: string
+    from_branch_id: number
+    from_branch: Branch
     from_storage: string
-    to_branch_id: string
+    to_branch_id: number
+    to_branch: Branch
     to_storage: string
     respond_date?: string
     respond_time?: string
     status: string
+    items?: KitchenRequestItem[]
 }
 
 export interface KitchenRequestItem extends Timestamps {
@@ -293,6 +296,51 @@ export interface StockCardLog {
     in: number
     out: number
     balance: number
+}
+
+export interface PurchaseOrder extends Timestamps {
+    id: number
+    supplier_id: number
+    supplier?: Supplier
+    date: string
+    delivery_date: string
+    status: string
+    description: string
+    items?: PurchaseOrderItem[]
+}
+
+export interface PurchaseOrderItem extends Timestamps {
+    id?: number
+    purchase_order_id?: number
+    item_type: string
+    item_code: number
+    ingredient?: Ingredient
+    utility?: Utility
+    quantity: number
+    price: number
+    discount?: number
+}
+
+export interface PurchaseReturn extends Timestamps {
+    id: number
+    supplier_id: number
+    supplier?: Supplier
+    date: string
+    delivery_date: string
+    description: string
+    items?: PurchaseReturnItem[]
+}
+
+export interface PurchaseReturnItem extends Timestamps {
+    id?: number
+    purchase_return_id?: number
+    item_type: string
+    item_code: number
+    ingredient?: Ingredient
+    utility?: Utility
+    quantity: number
+    price: number
+    discount?: number
 }
 
 export interface File extends Timestamps {

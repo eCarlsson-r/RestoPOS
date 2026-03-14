@@ -67,7 +67,7 @@ function editItem(item: Supplier) {
             <ClientOnly>
                 <UTable
                     :key="items.length"
-                    :rows="items"
+                    :data="items"
                     :columns="columns"
                 >
                     <template #name-cell="{ row }">

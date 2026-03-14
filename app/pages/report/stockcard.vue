@@ -4,11 +4,19 @@ const selectedIngredient = ref(null)
 const { data: ingredients } = await useApi('/api/ingredients')
 const selectedUtility = ref(null)
 const { data: utilities } = await useApi('/api/utilities')
+const selectedBranch = ref(null)
+const { data: branchList } = await useApi('/api/branches')
+const selectedStorage = ref(null)
+const storageList = ref([
+    { label: 'Main Storage', value: 'MAIN' },
+    { label: 'Kitchen', value: 'KTCN' },
+    { label: 'Bartender', value: 'BART' }
+])
 const selectedType = ref('ingredient')
 const logs = ref([])
 
 const fetchAudit = async () => {
-    const { data } = await useApi('/api/reports/stock-card', {
+    const { data } = await useApi('/api/stock/card', {
         params: {
             type: selectedType.value,
             ingredient_id: selectedIngredient.value,
@@ -22,7 +30,7 @@ const fetchAudit = async () => {
 </script>
 
 <template>
-    <div class="p-8">
+    <UContainer class="p-6">
         <div class="flex justify-between items-end mb-8">
             <h1 class="text-3xl font-black uppercase italic tracking-tighter">
                 Kartu Stok (Audit)
@@ -30,19 +38,14 @@ const fetchAudit = async () => {
             <div class="flex gap-4">
                 <USelect
                     v-model="selectedType"
-                    class="font-bold shadow-sm  w-64"
-                >
-                    <option
-                        value="ingredient"
-                    >
-                        Bahan
-                    </option>
-                    <option
-                        value="utility"
-                    >
-                        Alat
-                    </option>
-                </USelect>
+                    class="font-bold shadow-sm w-64"
+                    :items="[
+                        { value: 'ingredient', label: 'Bahan' },
+                        { value: 'utility', label: 'Alat' }
+                    ]"
+                    option-key="value"
+                    option-label="label"
+                />
                 <USelect
                     v-if="selectedType === 'ingredient'"
                     v-model="selectedIngredient"
@@ -59,8 +62,17 @@ const fetchAudit = async () => {
                     option-label="name"
                     class="font-bold shadow-sm w-64"
                 />
+                <USelect
+                    v-model="selectedBranch"
+                    :items="branchList"
+                    class="font-bold shadow-sm w-64"
+                />
+                <USelect
+                    v-model="selectedStorage"
+                    :items="storageList"
+                    class="font-bold shadow-sm w-64"
+                />
                 <UButton
-                    color="black"
                     class="px-8 font-black uppercase italic"
                     @click="fetchAudit"
                 >
@@ -115,5 +127,5 @@ const fetchAudit = async () => {
                 </tbody>
             </table>
         </div>
-    </div>
+    </UContainer>
 </template>

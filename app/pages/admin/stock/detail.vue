@@ -20,6 +20,7 @@ const columns: TableColumn<Stock>[] = [
 const openAddStock = (item = null) => {
     selectedItem.value = item
     isFormOpen.value = true
+    console.info('open add stock')
 }
 </script>
 
@@ -41,7 +42,7 @@ const openAddStock = (item = null) => {
             <ClientOnly>
                 <UTable
                     :key="items.length"
-                    :rows="items"
+                    :data="items"
                     :columns="columns"
                 >
                     <template #quantity-data="{ row }">

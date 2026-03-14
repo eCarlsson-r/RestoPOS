@@ -1,9 +1,9 @@
 <template>
     <UContainer class="p-6">
         <div class="flex justify-between items-center">
-            <h3 class="text-xl font-black uppercase text-slate-400">
+            <h1 class="text-3xl font-black uppercase italic tracking-tighter">
                 Recent Movements
-            </h3>
+            </h1>
             <UButton
                 @click="openTransferStock()"
             >
@@ -12,7 +12,7 @@
         </div>
 
         <UTable
-            :rows="items"
+            :data="items"
             :columns="moveColumns"
         >
             <template #status-data="{ row }">

@@ -1,125 +1,163 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
 
-const adminItems = ref<NavigationMenuItem[]>([
-    {
-        label: 'Guide',
-        icon: 'i-lucide-book-open',
-        to: '/docs/getting-started',
-        children: [
+const { user } = useAuth()
+
+const navigation = ref<NavigationMenuItem[]>([])
+
+switch (user.value?.type) {
+    case 'ADMIN':
+        navigation.value = [
             {
-                label: 'Introduction',
-                description: 'Fully styled and customizable components for Nuxt.',
-                icon: 'i-lucide-house'
+                label: 'Purchasing',
+                icon: 'i-lucide-shopping-cart',
+                children: [
+                    {
+                        label: 'Purchase Order',
+                        icon: 'i-lucide-file-text',
+                        to: '/admin/purchase/order'
+                    }
+                ]
             },
             {
-                label: 'Installation',
-                description: 'Learn how to install and configure Nuxt UI in your application.',
-                icon: 'i-lucide-cloud-download'
+                label: 'Master',
+                icon: 'i-lucide-database',
+                children: [
+                    {
+                        label: 'Cabang',
+                        icon: 'i-lucide-store',
+                        to: '/admin/master/branch'
+                    },
+                    {
+                        label: 'Kategori',
+                        icon: 'i-lucide-folder',
+                        to: '/admin/master/category'
+                    },
+                    {
+                        label: 'Pegawai',
+                        icon: 'i-lucide-user',
+                        to: '/admin/master/employee'
+                    },
+                    {
+                        label: 'Pelanggan',
+                        icon: 'i-lucide-users',
+                        to: '/admin/master/customer'
+                    },
+                    {
+                        label: 'Pemasok',
+                        icon: 'i-lucide-truck',
+                        to: '/admin/master/supplier'
+                    },
+                    {
+                        label: 'Peralatan',
+                        icon: 'i-lucide-utensils',
+                        to: '/admin/master/utility'
+                    },
+                    {
+                        label: 'Produk',
+                        icon: 'i-lucide-salad',
+                        to: '/admin/master/product'
+                    },
+                    {
+                        label: 'Paket',
+                        icon: 'i-lucide-package',
+                        to: '/admin/master/package'
+                    },
+                    {
+                        label: 'Bahan Mentah',
+                        icon: 'i-lucide-beef',
+                        to: '/admin/master/ingredient'
+                    },
+                    {
+                        label: 'Bahan Jadi',
+                        icon: 'i-lucide-soup',
+                        to: '/admin/master/prepare'
+                    }
+                ]
             },
             {
-                label: 'Icons',
-                icon: 'i-lucide-smile',
-                description: 'You have nothing to do, @nuxt/icon will handle it automatically.'
-            },
-            {
-                label: 'Colors',
-                icon: 'i-lucide-swatch-book',
-                description: 'Choose a primary and a neutral color from your Tailwind CSS theme.'
-            },
-            {
-                label: 'Theme',
-                icon: 'i-lucide-cog',
-                description: 'You can customize components by using the `class` / `ui` props or in your app.config.ts.'
-            }
-        ]
-    },
-    {
-        label: 'Purchasing',
-        icon: 'i-lucide-shopping-cart',
-        children: [
-            {
-                label: 'Purchase Order',
-                icon: 'i-lucide-file-text',
-                to: '/purchase/order'
-            }
-        ]
-    },
-    {
-        label: 'Master',
-        icon: 'i-lucide-database',
-        children: [
-            {
-                label: 'Cabang',
-                icon: 'i-lucide-store',
-                to: '/master/branch'
-            },
-            {
-                label: 'Kategori',
-                icon: 'i-lucide-folder',
-                to: '/master/category'
-            },
-            {
-                label: 'Pegawai',
-                icon: 'i-lucide-user',
-                to: '/master/employee'
-            },
-            {
-                label: 'Pelanggan',
-                icon: 'i-lucide-users',
-                to: '/master/customer'
-            },
-            {
-                label: 'Pemasok',
-                icon: 'i-lucide-truck',
-                to: '/master/supplier'
-            },
-            {
-                label: 'Peralatan',
-                icon: 'i-lucide-utensils',
-                to: '/master/utility'
-            },
-            {
-                label: 'Produk',
-                icon: 'i-lucide-salad',
-                to: '/master/product'
-            },
-            {
-                label: 'Paket',
+                label: 'Stock',
                 icon: 'i-lucide-package',
-                to: '/master/package'
+                children: [
+                    {
+                        label: 'Rincian Stok',
+                        icon: 'i-lucide-list',
+                        to: '/admin/stock/detail'
+                    },
+                    {
+                        label: 'Pindah Stok',
+                        icon: 'i-lucide-truck',
+                        to: '/admin/stock/transfer'
+                    },
+                    {
+                        label: 'Cek Voucher',
+                        icon: 'i-lucide-ticket',
+                        to: '/admin/stock/voucher'
+                    },
+                    {
+                        label: 'Buat Voucher',
+                        icon: 'i-lucide-tickets',
+                        to: '/admin/stock/register-voucher'
+                    },
+                    {
+                        label: 'Request Dapur',
+                        icon: 'i-lucide-chef-hat',
+                        to: '/admin/stock/request'
+                    }
+                ]
             },
             {
-                label: 'Bahan Mentah',
-                icon: 'i-lucide-beef',
-                to: '/master/ingredient'
-            },
-            {
-                label: 'Bahan Jadi',
-                icon: 'i-lucide-soup',
-                to: '/master/prepare'
+                label: 'Laporan',
+                icon: 'i-lucide-file-text',
+                children: [
+                    {
+                        label: 'Penjualan',
+                        icon: 'i-lucide-chart-bar-stacked',
+                        to: '/report/sales'
+                    },
+                    {
+                        label: 'Kartu Stok',
+                        icon: 'i-lucide-wallet-cards',
+                        to: '/report/stockcard'
+                    },
+                    {
+                        label: 'Mutasi Stok',
+                        icon: 'i-lucide-logs',
+                        to: '/report/mutation'
+                    }
+                ]
             }
         ]
-    },
-    {
-        label: 'Stock',
-        icon: 'i-lucide-package',
-        children: [
+        break
+    case 'KITCHEN':
+        navigation.value = [
             {
-                label: 'Rincian Stok',
-                icon: 'i-lucide-list',
-                to: '/stock/detail'
+                label: 'Prepare',
+                icon: 'i-lucide-utensils',
+                to: '/kitchen/prepare'
             },
             {
-                label: 'Pindah Stok',
-                icon: 'i-lucide-truck',
-                to: '/stock/transfer'
+                label: 'Kitchen',
+                icon: 'i-lucide-utensils',
+                to: '/kitchen/kitchen'
             }
         ]
-    }
-])
+        break
+    case 'CASHIER':
+        navigation.value = [
+            {
+                label: 'Cashier',
+                icon: 'i-lucide-dollar-sign',
+                to: '/pos/cashier'
+            }
+        ]
+        break
+    default:
+        navigation.value = []
+        break
+}
 </script>
 
 <template>
-    <UNavigationMenu :items="adminItems" />
+    <UNavigationMenu :items="navigation" />
 </template>

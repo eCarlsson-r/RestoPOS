@@ -1,31 +1,41 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useMaster } from '~/composables/useMaster'
-import type { Employee } from '~/types/master'
+import type { PurchaseReturn } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Employee>('employees')
+const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<PurchaseReturn>('purchasing/returns')
 
 onMounted(() => {
     fetchItems()
 })
 
-const columns: TableColumn<Employee>[] = [
+function openNewForm() {
+    selectedItem.value = null
+    isFormOpen.value = true
+}
+
+function editItem(item: PurchaseReturn) {
+    selectedItem.value = item
+    isFormOpen.value = true
+}
+
+const columns: TableColumn<PurchaseReturn>[] = [
     {
-        accessorKey: 'name',
-        header: 'Nama Pegawai'
+        accessorKey: 'supplier.name',
+        header: 'Supplier'
     },
     {
-        accessorKey: 'home_address',
-        header: 'Alamat Rumah'
+        accessorKey: 'date',
+        header: 'Tanggal'
     },
     {
-        accessorKey: 'mobile',
-        header: 'Nomor Ponsel'
+        accessorKey: 'delivery_date',
+        header: 'Tanggal Kirim'
     },
     {
-        accessorKey: 'phone',
-        header: 'Nomor Telfon'
+        accessorKey: 'description',
+        header: 'Keterangan'
     },
     {
         accessorKey: 'actions',
@@ -33,27 +43,17 @@ const columns: TableColumn<Employee>[] = [
         meta: { class: { td: 'text-center text-right' } }
     }
 ]
-
-function openNewForm() {
-    selectedItem.value = null
-    isFormOpen.value = true
-}
-
-function editItem(item: Employee) {
-    selectedItem.value = item
-    isFormOpen.value = true
-}
 </script>
 
 <template>
     <UContainer class="py-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-black uppercase italic tracking-tighter">
-                Master Pegawai
+                Retur Pembelian
             </h1>
             <UButton
                 icon="i-lucide-plus"
-                label="Tambah Pegawai"
+                label="Retur Barang"
                 size="md"
                 @click="openNewForm"
             />
@@ -63,23 +63,23 @@ function editItem(item: Employee) {
             <ClientOnly>
                 <UTable
                     :key="items.length"
-                    :rows="items"
+                    :data="items"
                     :columns="columns"
                 >
                     <template #name-cell="{ row }">
-                        {{ row.original.name }}
+                        {{ row.original.supplier?.name }}
                     </template>
 
-                    <template #home_address-cell="{ row }">
-                        {{ row.original.home_address }}
+                    <template #date-cell="{ row }">
+                        {{ row.original.date }}
                     </template>
 
-                    <template #mobile-cell="{ row }">
-                        {{ row.original.mobile }}
+                    <template #delivery-date-cell="{ row }">
+                        {{ row.original.delivery_date }}
                     </template>
 
-                    <template #phone-cell="{ row }">
-                        {{ row.original.phone }}
+                    <template #description-cell="{ row }">
+                        {{ row.original.description }}
                     </template>
 
                     <template #actions-cell="{ row }">
@@ -97,11 +97,11 @@ function editItem(item: Employee) {
 
         <UModal
             v-model:open="isFormOpen"
-            class="w-[500px]"
         >
             <template #content>
-                <UCard class="overflow-y-auto">
-                    <EmployeeForm
+                <UCard>
+                    <PurchaseForm
+                        type="return"
                         :item="selectedItem"
                         @save="saveItem"
                         @close="isFormOpen = false"

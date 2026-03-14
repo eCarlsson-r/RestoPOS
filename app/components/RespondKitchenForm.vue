@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import type { Branch, KitchenRequestItem } from '~/types/master'
+
 const props = defineProps({
     requestNo: {
-        type: String,
+        type: Number,
         required: true
     },
     requestFrom: {
@@ -9,9 +11,15 @@ const props = defineProps({
         required: true
     },
     requestItems: {
-        type: Array,
-        required: true
+        type: Array<KitchenRequestItem>
     }
+})
+
+const branches = ref<Branch[]>([])
+const { items } = useMaster<Branch>('branches')
+
+onMounted(() => {
+    branches.value = items.value
 })
 </script>
 
@@ -20,7 +28,7 @@ const props = defineProps({
         <template #header>
             <div class="flex justify-between items-center">
                 <h3 class="font-black italic uppercase">
-                    Request #{{ requestNo }}
+                    Request #{{ props.requestNo }}
                 </h3>
                 <UBadge
                     color="warning"
@@ -33,11 +41,11 @@ const props = defineProps({
 
         <div class="space-y-4">
             <div class="grid grid-cols-2 gap-4 text-xs">
-                <div><span class="text-gray-400">From:</span> {{ requestFrom }}</div>
+                <div><span class="text-gray-400">From:</span> {{ props.requestFrom }}</div>
                 <div><span class="text-gray-400">To:</span> <USelect :options="branches" /></div>
             </div>
 
-            <UTable :rows="requestItems" />
+            <UTable :data="props.requestItems" />
 
             <div class="flex gap-2">
                 <UButton

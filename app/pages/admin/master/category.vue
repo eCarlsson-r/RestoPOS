@@ -1,33 +1,33 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useMaster } from '~/composables/useMaster'
-import type { Prepare } from '~/types/master'
+import type { Category } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Prepare>('prepare')
+const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Category>('categories')
 
 onMounted(() => {
     fetchItems()
 })
 
-const columns: TableColumn<Prepare>[] = [
+const columns: TableColumn<Category>[] = [
     {
         accessorKey: 'id',
         header: 'ID'
     },
     {
         accessorKey: 'name',
-        header: 'Nama Bahan Jadi',
+        header: 'Nama Kategori',
         meta: { class: { td: 'uppercase' } }
     },
     {
-        accessorKey: 'quantity',
-        header: 'Jumlah'
+        accessorKey: 'kitchen_process',
+        header: 'Dapur Proses',
+        meta: { class: { td: 'text-center' } }
     },
     {
-        accessorKey: 'cost',
-        header: 'Modal',
-        meta: { class: { td: 'text-right' } }
+        accessorKey: 'description',
+        header: 'Keterangan'
     },
     {
         accessorKey: 'actions',
@@ -41,17 +41,9 @@ function openNewForm() {
     isFormOpen.value = true
 }
 
-function editItem(item: Prepare) {
+function editItem(item: Category) {
     selectedItem.value = item
     isFormOpen.value = true
-}
-
-const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0
-    }).format(val)
 }
 </script>
 
@@ -59,11 +51,11 @@ const formatCurrency = (val: number) => {
     <UContainer class="py-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-black uppercase italic tracking-tighter">
-                Master Prepare
+                Master Kategori
             </h1>
             <UButton
                 icon="i-lucide-plus"
-                label="Tambah Prepare"
+                label="Tambah Kategori"
                 size="md"
                 @click="openNewForm"
             />
@@ -73,21 +65,19 @@ const formatCurrency = (val: number) => {
             <ClientOnly>
                 <UTable
                     :key="items.length"
-                    :rows="items"
+                    :data="items"
                     :columns="columns"
                 >
                     <template #name-cell="{ row }">
                         {{ row.original.name }}
                     </template>
 
-                    <template #quantity-cell="{ row }">
-                        {{ row.original.quantity }}
+                    <template #kitchen_process-cell="{ row }">
+                        {{ row.original.kitchen_process }}
                     </template>
 
-                    <template #cost-cell="{ row }">
-                        <span class="text-neutral-400">
-                            {{ formatCurrency(row.original.cost) }}
-                        </span>
+                    <template #description-cell="{ row }">
+                        {{ row.original.description }}
                     </template>
 
                     <template #actions-cell="{ row }">
@@ -105,13 +95,11 @@ const formatCurrency = (val: number) => {
 
         <UModal
             v-model:open="isFormOpen"
-            title="Form Produk"
-            class="w-6xl"
+            class="w-[500px]"
         >
             <template #content>
-                <UCard class="overflow-y-auto">
-                    <ProductForm
-                        type="prepare"
+                <UCard>
+                    <CategoryForm
                         :item="selectedItem"
                         @save="saveItem"
                         @close="isFormOpen = false"

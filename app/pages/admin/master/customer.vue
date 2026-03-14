@@ -1,29 +1,31 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useMaster } from '~/composables/useMaster'
-import type { Package } from '~/types/master'
+import type { Customer } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Package>('packages')
+const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Customer>('customers')
 
 onMounted(() => {
     fetchItems()
 })
 
-const columns: TableColumn<Package>[] = [
+const columns: TableColumn<Customer>[] = [
     {
         accessorKey: 'name',
-        header: 'Nama Paket',
-        meta: { class: { td: 'uppercase' } }
+        header: 'Nama Pelanggan'
     },
     {
-        accessorKey: 'price',
-        header: 'Harga Jual',
-        meta: { class: { td: 'text-right' } }
+        accessorKey: 'address',
+        header: 'Alamat'
     },
     {
-        accessorKey: 'description',
-        header: 'Keterangan'
+        accessorKey: 'dob',
+        header: 'Tanggal Lahir'
+    },
+    {
+        accessorKey: 'mobile',
+        header: 'Nomor Ponsel'
     },
     {
         accessorKey: 'actions',
@@ -37,17 +39,9 @@ function openNewForm() {
     isFormOpen.value = true
 }
 
-function editItem(item: Package) {
+function editItem(item: Customer) {
     selectedItem.value = item
     isFormOpen.value = true
-}
-
-const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0
-    }).format(val)
 }
 </script>
 
@@ -55,11 +49,11 @@ const formatCurrency = (val: number) => {
     <UContainer class="py-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-black uppercase italic tracking-tighter">
-                Master Paket
+                Master Pelanggan
             </h1>
             <UButton
                 icon="i-lucide-plus"
-                label="Tambah Paket"
+                label="Tambah Pelanggan"
                 size="md"
                 @click="openNewForm"
             />
@@ -69,19 +63,23 @@ const formatCurrency = (val: number) => {
             <ClientOnly>
                 <UTable
                     :key="items.length"
-                    :rows="items"
+                    :data="items"
                     :columns="columns"
                 >
                     <template #name-cell="{ row }">
                         {{ row.original.name }}
                     </template>
 
-                    <template #price-cell="{ row }">
-                        {{ formatCurrency(row.original.price) }}
+                    <template #dob-cell="{ row }">
+                        {{ row.original.dob }}
                     </template>
 
-                    <template #description-cell="{ row }">
-                        {{ row.original.description }}
+                    <template #mobile-cell="{ row }">
+                        {{ row.original.mobile }}
+                    </template>
+
+                    <template #address-cell="{ row }">
+                        {{ row.original.address }}
                     </template>
 
                     <template #actions-cell="{ row }">
@@ -99,11 +97,11 @@ const formatCurrency = (val: number) => {
 
         <UModal
             v-model:open="isFormOpen"
-            title="Form Paket"
+            class="w-[500px]"
         >
             <template #content>
                 <UCard class="overflow-y-auto">
-                    <PackageForm
+                    <CustomerForm
                         :item="selectedItem"
                         @save="saveItem"
                         @close="isFormOpen = false"

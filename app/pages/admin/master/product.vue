@@ -1,38 +1,40 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useMaster } from '~/composables/useMaster'
-import type { Category } from '~/types/master'
+import type { Product } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Category>('product')
+const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Product>('products')
 
 onMounted(() => {
     fetchItems()
 })
 
-const columns: TableColumn<Category>[] = [
+const columns: TableColumn<Product>[] = [
     {
         accessorKey: 'id',
         header: 'ID'
     },
     {
         accessorKey: 'name',
-        header: 'Nama Kategori',
+        header: 'Nama Produk',
         meta: { class: { td: 'uppercase' } }
     },
     {
-        accessorKey: 'kitchen_process',
-        header: 'Dapur Proses',
-        meta: { class: { td: 'text-center' } }
+        accessorKey: 'category_id',
+        header: 'Kategori'
     },
     {
-        accessorKey: 'description',
-        header: 'Keterangan'
+        accessorKey: 'price',
+        header: 'Harga Jual'
+    },
+    {
+        accessorKey: 'cost',
+        header: 'Modal'
     },
     {
         accessorKey: 'actions',
-        header: 'Aksi',
-        meta: { class: { td: 'text-center text-right' } }
+        header: 'Aksi'
     }
 ]
 
@@ -41,9 +43,17 @@ function openNewForm() {
     isFormOpen.value = true
 }
 
-function editItem(item: Category) {
+function editItem(item: Product) {
     selectedItem.value = item
     isFormOpen.value = true
+}
+
+const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0
+    }).format(val)
 }
 </script>
 
@@ -51,11 +61,11 @@ function editItem(item: Category) {
     <UContainer class="py-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-black uppercase italic tracking-tighter">
-                Master Kategori
+                Master Produk
             </h1>
             <UButton
                 icon="i-lucide-plus"
-                label="Tambah Kategori"
+                label="Tambah Produk"
                 size="md"
                 @click="openNewForm"
             />
@@ -65,19 +75,27 @@ function editItem(item: Category) {
             <ClientOnly>
                 <UTable
                     :key="items.length"
-                    :rows="items"
+                    :data="items"
                     :columns="columns"
                 >
-                    <template #name-cell="{ row }">
-                        {{ row.original.name }}
+                    <template #category_id-cell="{ row }">
+                        <UBadge
+                            variant="subtle"
+                            color="neutral"
+                            size="sm"
+                        >
+                            {{ row.original.category_id }}
+                        </UBadge>
                     </template>
 
-                    <template #kitchen_process-cell="{ row }">
-                        {{ row.original.kitchen_process }}
+                    <template #price-cell="{ row }">
+                        {{ formatCurrency(row.original.price) }}
                     </template>
 
-                    <template #description-cell="{ row }">
-                        {{ row.original.description }}
+                    <template #cost-cell="{ row }">
+                        <span class="text-neutral-400">
+                            {{ formatCurrency(row.original.cost) }}
+                        </span>
                     </template>
 
                     <template #actions-cell="{ row }">
@@ -95,11 +113,12 @@ function editItem(item: Category) {
 
         <UModal
             v-model:open="isFormOpen"
-            class="w-[500px]"
+            title="Form Produk"
         >
             <template #content>
-                <UCard>
-                    <CategoryForm
+                <UCard class="overflow-y-auto">
+                    <ProductForm
+                        type="product"
                         :item="selectedItem"
                         @save="saveItem"
                         @close="isFormOpen = false"
