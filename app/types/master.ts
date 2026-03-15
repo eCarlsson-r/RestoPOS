@@ -99,6 +99,7 @@ export interface Table extends Timestamps {
     position_x: number
     position_y: number
     shape: 'circle' | 'square'
+    active_sales_id?: number
 }
 
 // --- Transactional ---
@@ -106,16 +107,16 @@ export interface Table extends Timestamps {
 export interface Sale extends Timestamps {
     id: number
     branch_id: string
-    table_number: string
-    floor_number: number
+    table_id: number
     employee_id: number
     customer_id: number
     date: string
     time: string
     discount: number
     tax: number
-    status: string
+    status: 'O' | 'P' | 'C' | 'D' | 'X'
     employee?: User
+    table?: Table
     customer?: Customer
     records?: SaleRecord[]
     invoice?: SaleInvoice
@@ -126,15 +127,17 @@ export interface SaleRecord extends Timestamps {
     sale_id: number
     item_type: string
     item_code: string
+    quantity: number
     item_price: number
     discount_pcnt: number
     discount_amnt: number
     item_note?: string
-    item_status: string
+    item_status: 'O' | 'P' | 'C' | 'D' | 'X'
     order_employee?: string
     order_date?: string
     order_time?: string
     deliver_employee?: string
+    item?: Product | Package
 }
 
 export interface SaleInvoice extends Timestamps {
@@ -282,8 +285,8 @@ export interface KitchenRequest extends Timestamps {
 }
 
 export interface KitchenRequestItem extends Timestamps {
-    id: number
-    request_id: number
+    id?: number
+    request_id?: number
     item_type: string
     item_code: string
     quantity: number
@@ -341,6 +344,26 @@ export interface PurchaseReturnItem extends Timestamps {
     quantity: number
     price: number
     discount?: number
+}
+
+export interface KitchenTicketItem {
+    id: number
+    name: string
+    quantity: number
+    item_status: 'O' | 'P' | 'C' | 'D' | 'X'
+    note: string
+}
+
+export interface KitchenTicket {
+    id: number
+    floor_number: number
+    table_number: number
+    status: 'O' | 'P' | 'C' | 'D' | 'X'
+    items: KitchenTicketItem[]
+    sales_id: number
+    customer_name: string
+    created_at: Date
+    time_elapsed: number
 }
 
 export interface File extends Timestamps {

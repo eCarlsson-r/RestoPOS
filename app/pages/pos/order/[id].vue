@@ -6,6 +6,7 @@ import type { Category, Product } from '~/types/master'
 const route = useRoute()
 const { data: categories } = await useApi<{ data: Category[] }>('/api/categories')
 const activeCategory = ref(1) // Default to Nasi
+const isPaymentModalOpen = ref(false)
 const search = ref('')
 const products = ref<Product[]>([])
 
@@ -179,6 +180,27 @@ const submitOrder = async () => {
                         }}
                     </span>
                 </div>
+
+                <div
+                    v-if="route.query.mode === 'checkout'"
+                    class="space-y-2"
+                >
+                    <UButton
+                        block
+                        size="xl"
+                        label="Proses Pembayaran"
+                        color="success"
+                        class="py-5 font-black uppercase italic shadow-xl"
+                        @click="isPaymentModalOpen = true"
+                    />
+                    <UButton
+                        block
+                        variant="ghost"
+                        label="Kembali ke Order"
+                        @click="navigateTo({ query: { salesId: route.query.salesId } })"
+                    />
+                </div>
+
                 <UButton
                     block
                     size="xl"
@@ -189,5 +211,19 @@ const submitOrder = async () => {
                 />
             </div>
         </aside>
+
+        <UModal
+            v-model:open="isPaymentModalOpen"
+            class="w-full"
+        >
+            <template #content>
+                <PaymentForm
+                    :total-amount="orderStore.basket.reduce((acc, i) => acc + (i.price * i.qty), 0)"
+                    :sales-id="route.query.salesId"
+                    @success="isPaymentModalOpen = false; navigateTo('/pos/floor-map')"
+                    @close="isPaymentModalOpen = false"
+                />
+            </template>
+        </UModal>
     </div>
 </template>

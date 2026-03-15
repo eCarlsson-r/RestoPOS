@@ -3,7 +3,7 @@ import TransferModal from '~/components/TransferModal.vue'
 
 const floors = [1, 2, 3] // Pull from branch-code floor-number logic
 const currentFloor = 1
-const { branch } = useAuth()
+const { user, branch } = useAuth()
 const floorStore = useFloorMapStore()
 const isCalling = ref(false)
 const isMoveModalOpen = ref(false)
@@ -26,7 +26,7 @@ const openTable = async (table) => {
             body: {
                 table_number: table.table_number,
                 floor_number: table.floor_number,
-                sales_branch: user.value.branch_code,
+                sales_branch: user.value.branch_id,
                 guest_count: guestCount.value, // Added to track covers
                 sales_employee: user.value.id
             }
@@ -46,6 +46,15 @@ const goToOrder = (salesId, tableNumber) => {
     navigateTo({
         path: `/pos/order/${tableNumber || selectedTable.value.id}`,
         query: { salesId: salesId || selectedTable.value.sales[0].id }
+    })
+}
+
+const goToPayment = (salesId) => {
+    if (!salesId) return alert('No active order')
+    // Navigate to the payment screen (which we will build or integrate into Order)
+    navigateTo({
+        path: `/pos/order/${selectedTable.value.table_number}`,
+        query: { salesId: salesId, mode: 'checkout' } // We pass a 'mode'
     })
 }
 
@@ -115,7 +124,7 @@ const getStatusColor = (status) => {
                 </button>
                 <div class="h-8 w-px bg-slate-200 mx-2" />
                 <div class="flex items-center px-4 text-[10px] font-black uppercase text-indigo-600 italic">
-                    Branch: {{ branch.name }}
+                    Branch: {{ user?.employee?.branch?.name }}
                 </div>
             </div>
             <div class="flex gap-3">
@@ -124,11 +133,6 @@ const getStatusColor = (status) => {
                     variant="soft"
                     icon="i-lucide-refresh-cw"
                     @click="floorStore.fetchTables(currentFloor)"
-                />
-                <UButton
-                    color="rose"
-                    label="Pending Captain Order"
-                    icon="i-lucide-printer"
                 />
             </div>
         </header>
@@ -194,9 +198,17 @@ const getStatusColor = (status) => {
                     >
                         <button
                             class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-rose-500"
-                            @click="goToOrder(selectedTable.sales_id, selectedTable.number)"
+                            @click="goToOrder(selectedTable.sales[0].id, selectedTable.number)"
                         >
                             Pesan Menu
+                        </button>
+
+                        <button
+                            v-if="user?.type === 'CASHIER'"
+                            class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-emerald-600"
+                            @click="goToPayment(selectedTable.sales[0].id)"
+                        >
+                            Bayar / Checkout
                         </button>
 
                         <button
@@ -208,14 +220,14 @@ const getStatusColor = (status) => {
 
                         <button
                             class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-slate-500"
-                            @click="goToSplit(selectedTable.sales_id)"
+                            @click="goToSplit(selectedTable.sales[0].id)"
                         >
                             Pisah Meja / Kwitansi
                         </button>
 
                         <button
-                            class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-cyan-400 mt-6"
-                            @click="printCaptainOrder(selectedTable.sales_id)"
+                            class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-cyan-400"
+                            @click="printCaptainOrder(selectedTable.sales[0].id)"
                         >
                             Cetak Captain Order Pending
                         </button>
@@ -224,7 +236,12 @@ const getStatusColor = (status) => {
             </aside>
         </main>
 
-        <TransferModal v-if="isMoveModalOpen" />
+        <TransferModal
+            v-if="isMoveModalOpen"
+            :sales-id="selectedTable.sales[0].id"
+            :source-table="selectedTable.id"
+            @close="isMoveModalOpen = false"
+        />
     </div>
 </template>
 

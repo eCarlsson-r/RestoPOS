@@ -59,7 +59,7 @@ const generateReport = async (reportType) => {
                 </div>
             </div>
 
-            <div class="grid grid-cols-4 gap-4">
+            <UForm class="grid grid-cols-4 gap-4">
                 <UFormGroup label="Branch">
                     <USelect
                         v-model="filters.branch"
@@ -84,7 +84,7 @@ const generateReport = async (reportType) => {
                         type="date"
                     />
                 </UFormGroup>
-            </div>
+            </UForm>
         </header>
 
         <div class="grid grid-cols-1 gap-8">
@@ -134,6 +134,11 @@ const generateReport = async (reportType) => {
                         Generate Void Report
                     </UButton>
                 </div>
+
+                <CancellationReport
+                    v-if="reportData"
+                    :void-data="reportData.items"
+                />
             </UCard>
         </div>
     </UContainer>

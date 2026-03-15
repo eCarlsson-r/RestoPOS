@@ -2,6 +2,8 @@
 const { data: prepareList } = await useApi('/api/prepare') // Items like 'Nasi', 'Sambal', 'Ayam Marinated'
 const activeBranch = useCookie('active_branch')
 
+const emit = defineEmits(['success'])
+
 const form = ref({
     prepare_code: '',
     qty: 1,
@@ -34,14 +36,22 @@ const submitPrepare = async () => {
 </script>
 
 <template>
-    <div class="p-10 max-w-4xl mx-auto">
-        <div class="mb-10">
-            <h1 class="text-4xl font-black uppercase italic tracking-tighter">
-                Produksi Dapur
-            </h1>
-            <p class="text-slate-400 font-bold text-xs uppercase italic tracking-widest">
-                Konversi Bahan Baku menjadi Bahan Jadi
-            </p>
+    <div class="p-8">
+        <div class="flex justify-between items-center mb-8">
+            <div class="mb-10">
+                <h1 class="text-4xl font-black uppercase italic tracking-tighter">
+                    Produksi Dapur
+                </h1>
+                <p class="text-slate-400 font-bold text-xs uppercase italic tracking-widest">
+                    Konversi Bahan Baku menjadi Bahan Jadi
+                </p>
+            </div>
+            <UButton
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-x"
+                @click="emit('success')"
+            />
         </div>
 
         <div class="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">

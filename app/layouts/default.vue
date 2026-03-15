@@ -3,9 +3,11 @@
         <UHeader>
             <template #left>
                 <NuxtLink to="/">
-                    <AppLogo class="w-auto h-6 shrink-0" />
+                    <AppLogo class="w-auto h-12 shrink-0" />
                 </NuxtLink>
+            </template>
 
+            <template #default>
                 <TemplateMenu />
             </template>
 
@@ -13,12 +15,10 @@
                 <UColorModeButton />
 
                 <UButton
-                    to="https://github.com/nuxt-ui-templates/starter"
-                    target="_blank"
-                    icon="i-simple-icons-github"
-                    aria-label="GitHub"
+                    icon="i-lucide-log-out"
                     color="neutral"
                     variant="ghost"
+                    @click="useAuth().logout()"
                 />
             </template>
         </UHeader>

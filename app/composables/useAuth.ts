@@ -4,11 +4,11 @@ export const useAuth = () => {
     const config = useRuntimeConfig()
     const user = useState<User | null>('user', () => null)
     const token = useCookie('auth_token', { maxAge: 60 * 60 * 12 }) // 12-hour shift
-    const branch = useCookie('active_branch') // Crucial for multi-outlet support
+    const branch = ref(user.value?.employee?.branch_id)
 
     const login = async (credentials: { username: string, password: string }) => {
         const url = config.public.apiBase || 'http://localhost:8000/'
-        const result = await $fetch<{ data: User[] }>(url + 'api/login', {
+        const result = await $fetch<{ data: User[], token: string }>(url + 'api/login', {
             method: 'POST',
             body: credentials
         })
@@ -20,8 +20,8 @@ export const useAuth = () => {
 
         const loggedInUser: User = data[0]
 
-        // Set token (placeholder for now as backend doesn't return one yet)
-        token.value = 'dummy-token'
+        // Set token from the backend response
+        token.value = result.token
 
         user.value = loggedInUser
         if (loggedInUser.employee?.branch_id) {

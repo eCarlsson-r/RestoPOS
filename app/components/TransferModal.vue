@@ -1,5 +1,14 @@
 <script setup>
-const props = defineProps(['sourceTable'])
+const props = defineProps({
+    salesId: {
+        type: [String, Number],
+        required: true
+    },
+    sourceTable: {
+        type: [String, Number],
+        required: true
+    }
+})
 const emit = defineEmits(['close', 'moved'])
 const { tables } = useTables() // List of all tables
 
