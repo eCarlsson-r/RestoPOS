@@ -8,9 +8,7 @@ const { data: activeOrders } = await useApi<{ data: KitchenTicket[] }>(
 )
 
 // Sold out state
-const { data: allProducts } = await useApi<{ data: Product[] }>(
-    '/api/products?all=1'
-)
+const { data: allProducts } = await useApi<{ data: Product[] }>('/api/products')
 
 const products = computed(() => allProducts || [])
 const soldOutProducts = ref<Product[]>([])
@@ -42,10 +40,6 @@ watch(soldOutProducts, async (newVal, oldVal) => {
         })
     }
 }, { deep: true })
-
-// Modals
-const isRequestOpen = ref(false)
-const isPrepareOpen = ref(false)
 </script>
 
 <template>
@@ -62,24 +56,6 @@ const isPrepareOpen = ref(false)
                 >
                     Live
                 </UBadge>
-            </div>
-            <div class="flex gap-2">
-                <UButton
-                    color="warning"
-                    class="shadow-sm"
-                    icon="i-lucide-package-plus"
-                    @click="isRequestOpen = true"
-                >
-                    Stock Request
-                </UButton>
-                <UButton
-                    color="secondary"
-                    class="shadow-sm"
-                    icon="i-lucide-utensils"
-                    @click="isPrepareOpen = true"
-                >
-                    Prepare Recipe
-                </UButton>
             </div>
         </header>
 
@@ -134,29 +110,12 @@ const isPrepareOpen = ref(false)
                     </p>
                     <UButton
                         block
-                        @click="isPrepareOpen = true"
+                        @click="navigateTo('/kitchen/prepare')"
                     >
                         Open Prepare Tool
                     </UButton>
                 </section>
             </div>
         </div>
-
-        <UModal
-            v-model:open="isRequestOpen"
-            fullscreen
-        >
-            <template #content>
-                <StockRequestForm @success="isRequestOpen = false" />
-            </template>
-        </UModal>
-        <UModal
-            v-model:open="isPrepareOpen"
-            fullscreen
-        >
-            <template #content>
-                <PrepareIngredientForm @success="isPrepareOpen = false" />
-            </template>
-        </UModal>
     </UContainer>
 </template>

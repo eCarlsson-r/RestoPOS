@@ -129,7 +129,7 @@ const submit = async () => {
                     name="job_type"
                     :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
                 >
-                    <USelect
+                    <USelectMenu
                         v-model="form.job_type"
                         :items="jobTypes"
                         class="w-full font-bold shadow-sm"
@@ -140,7 +140,7 @@ const submit = async () => {
                     name="branch_id"
                     :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
                 >
-                    <USelect
+                    <USelectMenu
                         v-model="form.branch_id"
                         :items="branchSelects"
                         class="w-full font-bold shadow-sm"
@@ -154,7 +154,7 @@ const submit = async () => {
                     name="gender"
                     :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
                 >
-                    <USelect
+                    <USelectMenu
                         v-model="form.gender"
                         :items="genders"
                         class="w-full font-bold shadow-sm"
@@ -165,7 +165,7 @@ const submit = async () => {
                     name="status"
                     :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
                 >
-                    <USelect
+                    <USelectMenu
                         v-model="form.status"
                         :items="employeeStatus"
                         class="w-full font-bold shadow-sm"

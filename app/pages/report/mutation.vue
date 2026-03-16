@@ -83,12 +83,12 @@ fetchMutation()
                 </p>
             </div>
             <div class="flex gap-2">
-                <USelect
+                <USelectMenu
                     v-model="mutationFilter.branch"
                     :items="branchList"
                     class="font-bold shadow-sm w-64"
                 />
-                <USelect
+                <USelectMenu
                     v-model="mutationFilter.storage"
                     :items="storageList"
                     class="font-bold shadow-sm w-64"

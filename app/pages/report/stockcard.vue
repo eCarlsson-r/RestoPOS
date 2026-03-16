@@ -36,7 +36,7 @@ const fetchAudit = async () => {
                 Kartu Stok (Audit)
             </h1>
             <div class="flex gap-4">
-                <USelect
+                <USelectMenu
                     v-model="selectedType"
                     class="font-bold shadow-sm w-64"
                     :items="[
@@ -46,7 +46,7 @@ const fetchAudit = async () => {
                     option-key="value"
                     option-label="label"
                 />
-                <USelect
+                <USelectMenu
                     v-if="selectedType === 'ingredient'"
                     v-model="selectedIngredient"
                     :options="ingredients"
@@ -54,7 +54,7 @@ const fetchAudit = async () => {
                     option-label="name"
                     class="font-bold shadow-sm w-64"
                 />
-                <USelect
+                <USelectMenu
                     v-if="selectedType === 'utility'"
                     v-model="selectedUtility"
                     :options="utilities"
@@ -62,12 +62,12 @@ const fetchAudit = async () => {
                     option-label="name"
                     class="font-bold shadow-sm w-64"
                 />
-                <USelect
+                <USelectMenu
                     v-model="selectedBranch"
                     :items="branchList"
                     class="font-bold shadow-sm w-64"
                 />
-                <USelect
+                <USelectMenu
                     v-model="selectedStorage"
                     :items="storageList"
                     class="font-bold shadow-sm w-64"

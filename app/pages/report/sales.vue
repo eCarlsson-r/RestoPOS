@@ -60,30 +60,30 @@ const generateReport = async (reportType) => {
             </div>
 
             <UForm class="grid grid-cols-4 gap-4">
-                <UFormGroup label="Branch">
-                    <USelect
+                <UFormField label="Branch">
+                    <USelectMenu
                         v-model="filters.branch"
                         :options="branches"
                     />
-                </UFormGroup>
-                <UFormGroup label="Salesman">
-                    <USelect
+                </UFormField>
+                <UFormField label="Salesman">
+                    <USelectMenu
                         v-model="filters.employee_id"
                         :options="employees"
                     />
-                </UFormGroup>
-                <UFormGroup label="Start Date">
+                </UFormField>
+                <UFormField label="Start Date">
                     <UInput
                         v-model="filters.start"
                         type="date"
                     />
-                </UFormGroup>
-                <UFormGroup label="End Date">
+                </UFormField>
+                <UFormField label="End Date">
                     <UInput
                         v-model="filters.end"
                         type="date"
                     />
-                </UFormGroup>
+                </UFormField>
             </UForm>
         </header>
 

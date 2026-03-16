@@ -10,10 +10,19 @@ const isMoveModalOpen = ref(false)
 const callingTable = ref(null)
 const selectedTable = ref(null)
 const isDrawerOpen = ref(false)
+const isShiftingMode = ref(false)
+const isMergingMode = ref(false)
+const mergeSelection = ref([])
+const printStore = usePrintStore()
 
 const openActionDrawer = (table) => {
-    selectedTable.value = table
-    isDrawerOpen.value = true
+    if (isMergingMode.value && mergeSelection.value.length > 0) {
+        mergeSelection.value.push(table.id)
+        confirmMerge()
+    } else {
+        selectedTable.value = table
+        isDrawerOpen.value = true
+    }
 }
 
 // Inside the Action Drawer or a Modal
@@ -24,11 +33,8 @@ const openTable = async (table) => {
         const response = await useApi('/api/tables/use', {
             method: 'POST',
             body: {
-                table_number: table.table_number,
-                floor_number: table.floor_number,
-                sales_branch: user.value.branch_id,
-                guest_count: guestCount.value, // Added to track covers
-                sales_employee: user.value.id
+                table_id: table.id,
+                guest_count: guestCount.value // Added to track covers
             }
         })
 
@@ -41,20 +47,11 @@ const openTable = async (table) => {
     }
 }
 
-const goToOrder = (salesId, tableNumber) => {
+const goToOrder = (salesId, tableId) => {
     // We use route params for the table and a query for the session ID
     navigateTo({
-        path: `/pos/order/${tableNumber || selectedTable.value.id}`,
+        path: `/pos/order/${tableId || selectedTable.value.id}`,
         query: { salesId: salesId || selectedTable.value.sales[0].id }
-    })
-}
-
-const goToPayment = (salesId) => {
-    if (!salesId) return alert('No active order')
-    // Navigate to the payment screen (which we will build or integrate into Order)
-    navigateTo({
-        path: `/pos/order/${selectedTable.value.table_number}`,
-        query: { salesId: salesId, mode: 'checkout' } // We pass a 'mode'
     })
 }
 
@@ -62,6 +59,66 @@ const goToSplit = (salesId) => {
     if (!salesId) return alert('Meja ini belum memiliki pesanan.')
 
     navigateTo(`/pos/split/${salesId}`)
+}
+
+const toggleMergeMode = (table) => {
+    isMergingMode.value = !isMergingMode.value
+    mergeSelection.value = [table.id]
+}
+
+// 1. SHIFT TABLE LOGIC
+const updateTablePosition = async (table, newX, newY) => {
+    try {
+        await useApi('/api/tables/shift', {
+            method: 'POST',
+            body: {
+                branch_id: user.value.employee.branch_id,
+                floor_number: currentFloor,
+                table_id: table.id,
+                position_x: newX,
+                position_y: newY
+            }
+        })
+        // Refresh the local store to show new positions
+        await floorStore.fetchTables(currentFloor)
+        isShiftingMode.value = false
+    } catch (e) {
+        console.error('Failed to shift table', e)
+    }
+}
+
+// 2. MERGE TABLE LOGIC
+const confirmMerge = async () => {
+    if (mergeSelection.value.length !== 2) return
+
+    await useApi('/api/tables/merge', {
+        method: 'POST',
+        body: {
+            table1: mergeSelection.value[0],
+            table2: mergeSelection.value[1],
+            branch: user.value.branch_id
+        }
+    })
+    isMergingMode.value = false
+    mergeSelection.value = []
+    floorStore.fetchTables(currentFloor)
+}
+
+// 3. PRE-PAYMENT LOGIC (Waitress Bill)
+const printPrePayment = async (table) => {
+    // Original Carlsson logic: Get items but don't finalize
+    const response = await useApi(`/api/sales/${table.sales[0].id}`)
+    if (response) printStore.triggerPrint(response, true)
+}
+
+const splitTable = async (table) => {
+    await useApi('/api/tables/split', {
+        method: 'POST',
+        body: {
+            table_id: table.id
+        }
+    })
+    floorStore.fetchTables(currentFloor)
 }
 
 /* const printCaptainOrder = async (table) => {
@@ -92,16 +149,6 @@ onMounted(() => {
             })
     }
 })
-
-const getStatusColor = (status) => {
-    const colors = {
-        available: 'bg-emerald-500 border-emerald-600',
-        occupied: 'bg-rose-500 border-rose-600',
-        reserved: 'bg-amber-500 border-amber-600',
-        dirty: 'bg-slate-400 border-slate-500'
-    }
-    return colors[status] || 'bg-gray-200'
-}
 </script>
 
 <template>
@@ -112,24 +159,24 @@ const getStatusColor = (status) => {
                     Waiter Console
                 </h1>
             </div>
-            <div class="flex gap-2 p-4 bg-white/50 backdrop-blur-md rounded-4xl border border-white shadow-sm">
-                <button
+            <div class="flex gap-2 p-4 backdrop-blur-md rounded-4xl border border-white shadow-sm">
+                <UButton
                     v-for="f in floors"
                     :key="f"
-                    :class="currentFloor === f ? 'bg-primary text-white' : 'bg-white text-slate-400'"
+                    :variant="currentFloor === f ? 'solid': 'soft'"
                     class="px-6 py-2 rounded-xl font-black uppercase italic text-xs transition-all shadow-sm"
                     @click="currentFloor = f;floorStore.fetchTables(f)"
                 >
                     Lantai {{ f }}
-                </button>
+                </UButton>
                 <div class="h-8 w-px bg-slate-200 mx-2" />
-                <div class="flex items-center px-4 text-[10px] font-black uppercase text-indigo-600 italic">
+                <div class="flex items-center px-4 text-[10px] font-black uppercase italic">
                     Branch: {{ user?.employee?.branch?.name }}
                 </div>
             </div>
             <div class="flex gap-3">
                 <UButton
-                    color="black"
+                    color="neutral"
                     variant="soft"
                     icon="i-lucide-refresh-cw"
                     @click="floorStore.fetchTables(currentFloor)"
@@ -139,99 +186,93 @@ const getStatusColor = (status) => {
 
         <main class="flex-1 flex overflow-hidden">
             <div class="flex-1 p-6 overflow-y-auto">
-                <div class="grid grid-cols-4 lg:grid-cols-6 gap-4">
-                    <div
-                        v-for="table in floorStore.tables"
-                        :key="table.id"
-                        :class="[
-                            'h-32 rounded-3xl flex flex-col items-center justify-center cursor-pointer transition-all shadow-sm border-2',
-                            getStatusColor(table.status)
-                        ]"
-                        @click="openActionDrawer(table)"
-                    >
-                        <span class="text-3xl font-black italic">{{ table.table_number }}</span>
-                        <span class="text-[8px] font-black uppercase tracking-widest opacity-60">
-                            {{ table.status }}
-                        </span>
-                    </div>
-                </div>
+                <TableCanvas
+                    :tables="floorStore.tables"
+                    :is-shifting-mode="isShiftingMode"
+                    :is-merging-mode="isMergingMode"
+                    :selected-id="selectedTable?.id"
+                    :divisor="8"
+                    @select="openActionDrawer"
+                    @position-change="updateTablePosition"
+                />
             </div>
 
             <aside
                 v-if="selectedTable"
-                class="w-80 bg-white border-l p-6 shadow-2xl"
+                class="w-80 border-l p-6 shadow-2xl"
             >
                 <h2 class="text-xl font-black uppercase italic mb-6">
                     Meja {{ selectedTable.table_number }}
                 </h2>
 
-                <div class="space-y-4 p-6">
-                    <div
-                        v-if="selectedTable.status === 'available'"
-                        class="space-y-4"
+                <div
+                    v-if="selectedTable.status === 'available'"
+                    class="space-y-3"
+                >
+                    <button
+                        class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-pink-500"
+                        @click="openTable(selectedTable)"
                     >
-                        <div class="bg-slate-50 p-4 rounded-2xl">
-                            <label class="text-[10px] font-black uppercase text-slate-400">Jumlah Tamu</label>
-                            <div class="flex items-center gap-4 mt-2">
-                                <UButton
-                                    icon="i-lucide-minus"
-                                    @click="guestCount--"
-                                />
-                                <span class="text-xl font-black">{{ guestCount }}</span>
-                                <UButton
-                                    icon="i-lucide-plus"
-                                    @click="guestCount++"
-                                />
-                            </div>
-                        </div>
-                        <button
-                            class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-emerald-500"
-                            @click="openTable(selectedTable)"
-                        >
-                            Pakai Meja
-                        </button>
-                    </div>
-
-                    <div
-                        v-else
-                        class="space-y-3"
+                        Pakai Meja
+                    </button>
+                    <button
+                        class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-sky-500"
+                        @click="isShiftingMode = true"
                     >
-                        <button
-                            class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-rose-500"
-                            @click="goToOrder(selectedTable.sales[0].id, selectedTable.number)"
-                        >
-                            Pesan Menu
-                        </button>
+                        Geser Meja
+                    </button>
+                    <button
+                        class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-indigo-500"
+                        @click="toggleMergeMode(selectedTable)"
+                    >
+                        Gabung Meja
+                    </button>
+                    <button
+                        class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-zinc-500"
+                        @click="splitTable(selectedTable)"
+                    >
+                        Pisah Meja
+                    </button>
+                </div>
 
-                        <button
-                            v-if="user?.type === 'CASHIER'"
-                            class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-emerald-600"
-                            @click="goToPayment(selectedTable.sales[0].id)"
-                        >
-                            Bayar / Checkout
-                        </button>
+                <div
+                    v-else
+                    class="space-y-3"
+                >
+                    <button
+                        class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-rose-500"
+                        @click="goToOrder(selectedTable.sales[0].id, selectedTable.id)"
+                    >
+                        Pesan Menu
+                    </button>
 
-                        <button
-                            class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-teal-500"
-                            @click="isMoveModalOpen = true"
-                        >
-                            Pindah Meja
-                        </button>
+                    <button
+                        class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-teal-500"
+                        @click="isMoveModalOpen = true"
+                    >
+                        Pindah Meja
+                    </button>
 
-                        <button
-                            class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-slate-500"
-                            @click="goToSplit(selectedTable.sales[0].id)"
-                        >
-                            Pisah Meja / Kwitansi
-                        </button>
+                    <button
+                        class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-slate-500"
+                        @click="goToSplit(selectedTable.sales[0].id)"
+                    >
+                        Pisah Meja / Kwitansi
+                    </button>
 
-                        <button
-                            class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-cyan-400"
-                            @click="printCaptainOrder(selectedTable.sales[0].id)"
-                        >
-                            Cetak Captain Order Pending
-                        </button>
-                    </div>
+                    <button
+                        class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-cyan-400"
+                        @click="printCaptainOrder(selectedTable.sales[0].id)"
+                    >
+                        Cetak Captain Order Pending
+                    </button>
+
+                    <button
+                        class="w-full py-5 rounded-2xl text-white font-black uppercase italic text-sm shadow-lg transition-transform active:scale-95 bg-amber-400"
+                        @click="printPrePayment(selectedTable)"
+                    >
+                        Cetak Kwitansi
+                    </button>
                 </div>
             </aside>
         </main>

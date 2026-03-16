@@ -27,23 +27,11 @@
             <slot />
         </UMain>
 
-        <USeparator icon="i-simple-icons-nuxtdotjs" />
-
         <UFooter>
-            <template #left>
+            <template #default>
                 <p class="text-sm text-muted">
                     Built with Nuxt UI • © {{ new Date().getFullYear() }}
                 </p>
-            </template>
-
-            <template #right>
-                <UButton
-                    icon="i-lucide-log-out"
-                    aria-label="Logout"
-                    color="primary"
-                    variant="ghost"
-                    @click="useAuth().logout()"
-                />
             </template>
         </UFooter>
     </div>

@@ -46,8 +46,8 @@ const submitOrder = async () => {
 </script>
 
 <template>
-    <div class="flex h-screen bg-neutral-100 overflow-hidden">
-        <aside class="w-24 bg-white border-r flex flex-col items-center py-6 gap-4">
+    <div class="flex h-dvh bg-neutral-100 overflow-hidden">
+        <aside class="w-24 bg-default border-r flex flex-col items-center py-6 gap-4">
             <UButton
                 v-for="cat in categories"
                 :key="cat.id"
@@ -69,7 +69,7 @@ const submitOrder = async () => {
                     icon="i-lucide-search"
                     placeholder="Search menu..."
                     size="xl"
-                    :ui="{ base: 'rounded-2xl bg-white border-none shadow-sm font-bold uppercase italic tracking-tighter' }"
+                    :ui="{ base: 'rounded-2xl bg-default border-none shadow-sm font-bold uppercase italic tracking-tighter' }"
                 />
             </div>
 
@@ -81,7 +81,7 @@ const submitOrder = async () => {
                         'relative cursor-pointer hover:ring-2 hover:ring-primary transition-all rounded-3xl overflow-hidden',
                         prod.soldout ? 'opacity-50 grayscale pointer-events-none' : ''
                     ]"
-                    @click="orderStore.addToBasket(prod)"
+                    @click="orderStore.addProductToBasket(prod)"
                 >
                     <div class="absolute top-3 right-3 flex gap-1">
                         <span
@@ -123,14 +123,28 @@ const submitOrder = async () => {
             </div>
         </main>
 
-        <aside class="w-96 bg-white border-l flex flex-col">
+        <aside class="w-96 bg-default border-l flex flex-col">
             <div class="p-6 border-b">
-                <h2 class="text-xl font-black uppercase italic tracking-tighter">
-                    Table {{ route.params.id }}
-                </h2>
-                <p class="text-[10px] font-bold text-neutral-400 uppercase">
-                    Waitress: {{ orderStore.employee || user?.employee?.name }}
-                </p>
+                <div class="grid grid-cols-2 justify-between">
+                    <div>
+                        <h2 class="text-xl font-black uppercase italic tracking-tighter">
+                            Table {{ route.params.id }}
+                        </h2>
+                        <p class="text-[10px] font-bold text-neutral-400 uppercase">
+                            Waitress: {{ orderStore.employee || user?.employee?.name }}
+                        </p>
+                    </div>
+
+                    <UButton
+                        v-if="user?.type === 'CASHIER'"
+                        block
+                        size="xl"
+                        label="Bayar"
+                        color="success"
+                        class="py-2 font-black uppercase italic"
+                        @click="isPaymentModalOpen = true"
+                    />
+                </div>
             </div>
 
             <div class="flex-1 overflow-y-auto p-6 space-y-4">
@@ -141,10 +155,10 @@ const submitOrder = async () => {
                 >
                     <div class="flex-1">
                         <h4 class="text-sm font-black uppercase italic">
-                            {{ item.name }}
+                            {{ item.item?.name }}
                         </h4>
                         <UInput
-                            v-model="item.note"
+                            v-model="item.item_note"
                             placeholder="Add note..."
                             variant="none"
                             size="xs"
@@ -160,45 +174,34 @@ const submitOrder = async () => {
                             size="xs"
                             @click="orderStore.removeFromBasket(item)"
                         />
-                        <span class="text-sm font-black">{{ item.qty }}</span>
+                        <span class="text-sm font-black">{{ item.quantity }}</span>
                         <UButton
+                            v-if="item.item && item.item_type === 'product'"
                             variant="ghost"
                             color="primary"
                             icon="i-lucide-plus"
                             size="xs"
-                            @click="orderStore.addToBasket(item)"
+                            @click="orderStore.addProductToBasket(item.item)"
+                        />
+                        <UButton
+                            v-if="item.item && item.item_type === 'package'"
+                            variant="ghost"
+                            color="primary"
+                            icon="i-lucide-plus"
+                            size="xs"
+                            @click="orderStore.addPackageToBasket(item.item)"
                         />
                     </div>
                 </div>
             </div>
 
-            <div class="p-6 bg-neutral-50 border-t space-y-4">
+            <div class="p-6 bg-default-50 border-t space-y-4">
                 <div class="flex justify-between font-black uppercase italic">
                     <span>Subtotal</span>
                     <span>
-                        Rp {{ orderStore.basket.reduce((acc, i) => acc + (i.price * i.qty), 0).toLocaleString('id-ID')
+                        Rp {{ orderStore.basket.reduce((acc, i) => acc + (i.item_price * i.quantity), 0).toLocaleString('id-ID')
                         }}
                     </span>
-                </div>
-
-                <div
-                    v-if="route.query.mode === 'checkout'"
-                    class="space-y-2"
-                >
-                    <UButton
-                        block
-                        size="xl"
-                        label="Proses Pembayaran"
-                        color="success"
-                        class="py-5 font-black uppercase italic shadow-xl"
-                        @click="isPaymentModalOpen = true"
-                    />
-                    <UButton
-                        block
-                        variant="ghost"
-                        label="Kembali ke Order"
-                        @click="navigateTo({ query: { salesId: route.query.salesId } })"
-                    />
                 </div>
 
                 <UButton
@@ -218,8 +221,9 @@ const submitOrder = async () => {
         >
             <template #content>
                 <PaymentForm
-                    :total-amount="orderStore.basket.reduce((acc, i) => acc + (i.price * i.qty), 0)"
-                    :sales-id="route.query.salesId"
+                    :total-amount="orderStore.basket.reduce((acc, i) => acc + (i.item_price * i.quantity), 0)"
+                    :sales-id="salesId!"
+                    :order-data="{ branch: user?.employee?.branch, items: orderStore.basket }"
                     @success="isPaymentModalOpen = false; navigateTo('/pos/floor-map')"
                     @close="isPaymentModalOpen = false"
                 />

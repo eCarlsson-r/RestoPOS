@@ -22,7 +22,7 @@ const handleLogin = async () => {
 
 <template>
     <div class="min-h-screen flex items-center justify-center bg-linear-to-b from-orange-50 via-red-300 to-red-600 p-6">
-        <div class="w-full max-w-md space-y-8 bg-white p-10 rounded-[3rem] shadow-2xl">
+        <div class="w-full max-w-md space-y-8 bg-default p-10 rounded-[3rem] shadow-2xl">
             <div class="text-center">
                 <AppLogo class="w-full shrink-0" />
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">

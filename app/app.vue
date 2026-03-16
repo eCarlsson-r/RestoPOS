@@ -1,4 +1,6 @@
 <script setup>
+import PrintProvider from './components/PrintProvider.vue'
+
 useHead({
     meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1' }
@@ -31,4 +33,6 @@ useSeoMeta({
             <NuxtPage />
         </NuxtLayout>
     </UApp>
+
+    <PrintProvider />
 </template>

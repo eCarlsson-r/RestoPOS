@@ -72,44 +72,44 @@ onMounted(async () => {
             class="space-y-4 p-4"
         >
             <div class="grid grid-cols-2 gap-4">
-                <UFormGroup label="Branch">
-                    <USelect
+                <UFormField label="Branch">
+                    <USelectMenu
                         v-model="form.branch_id"
                         :options="branches"
                     />
-                </UFormGroup>
-                <UFormGroup label="Storage">
-                    <USelect
+                </UFormField>
+                <UFormField label="Storage">
+                    <USelectMenu
                         v-model="form.storage"
                         :options="storageList"
                     />
-                </UFormGroup>
+                </UFormField>
             </div>
 
-            <UFormGroup label="Item Type">
+            <UFormField label="Item Type">
                 <URadioGroup
                     v-model="form.item_type"
                     :options="[{ label: 'Ingredient', value: 'INGR' }, { label: 'Utility', value: 'UTLT' }]"
                 />
-            </UFormGroup>
+            </UFormField>
 
-            <UFormGroup label="Item">
+            <UFormField label="Item">
                 <USelectMenu
                     v-model="form.item_code"
                     :options="form.item_type === 'INGR' ? ingredients : utilities"
                     searchable
                 />
-            </UFormGroup>
+            </UFormField>
 
             <div class="grid grid-cols-2 gap-4">
-                <UFormGroup label="Purchase Price">
+                <UFormField label="Purchase Price">
                     <UInput
                         v-model="form.purchase_price"
                         type="number"
                         icon="i-lucide-banknote"
                     />
-                </UFormGroup>
-                <UFormGroup label="Quantity">
+                </UFormField>
+                <UFormField label="Quantity">
                     <UInput
                         v-model="form.quantity"
                         type="number"
@@ -118,7 +118,7 @@ onMounted(async () => {
                             <span class="text-xs text-gray-400">grams</span>
                         </template>
                     </UInput>
-                </UFormGroup>
+                </UFormField>
             </div>
 
             <UButton

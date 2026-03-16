@@ -7,8 +7,8 @@ const props = defineProps<{
 
 const statusColors = {
     O: 'bg-slate-200',
-    P: 'bg-sky-200',
-    C: 'bg-orange-200',
+    P: 'bg-orange-200',
+    C: 'bg-sky-200',
     D: 'bg-emerald-200',
     X: 'bg-rose-200'
 }
@@ -39,7 +39,10 @@ const updateStatus = async (status: string) => {
                 :key="item.id"
                 class="flex justify-between border-b border-white/10 pb-2"
             >
-                <span class="font-bold"><span class="text-yellow-300">x{{ item.quantity }}</span> {{ item.name }}</span>
+                <span class="font-bold">
+                    <span class="text-yellow-600">x{{ item.quantity }}</span> {{ item.name }}
+                </span>
+                {{ item.note }}
                 <UIcon
                     v-if="item.item_status === 'D'"
                     name="i-lucide-check-circle"

@@ -130,6 +130,16 @@ const navigation = computed<NavigationMenuItem[]>(() => {
         case 'KITCHEN':
             return [
                 {
+                    label: 'Produksi Bahan',
+                    icon: 'i-lucide-cooking-pot',
+                    to: '/kitchen/prepare'
+                },
+                {
+                    label: 'Request Stok',
+                    icon: 'i-lucide-receipt-text',
+                    to: '/kitchen/request'
+                },
+                {
                     label: 'Laporan',
                     icon: 'i-lucide-file-text',
                     children: [

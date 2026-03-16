@@ -79,7 +79,7 @@ const submit = () => emit('save', form.value)
                     name="unit"
                     :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
                 >
-                    <USelect
+                    <USelectMenu
                         v-model="form.unit"
                         :items="unitList"
                         class="w-full font-bold shadow-sm"

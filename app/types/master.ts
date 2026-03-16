@@ -32,14 +32,14 @@ export interface Product extends Timestamps {
     id: number
     name: string
     description?: string
-    img_no: number
-    category_id: number
+    img_no?: number
+    category_id?: number
     price: number
-    cost: number
-    discount: number
-    soldout: number
+    cost?: number
+    discount?: number
+    soldout?: number
     category?: Category
-    recipe: Recipe[]
+    recipe?: Recipe[]
     image?: string
 }
 
@@ -123,10 +123,10 @@ export interface Sale extends Timestamps {
 }
 
 export interface SaleRecord extends Timestamps {
-    id: number
-    sale_id: number
+    id?: number
+    sale_id?: number
     item_type: string
-    item_code: string
+    item_code: number
     quantity: number
     item_price: number
     discount_pcnt: number
@@ -230,7 +230,7 @@ export interface Package extends Timestamps {
     name: string
     price: number
     description?: string
-    products: PackageProduct[]
+    products?: PackageProduct[]
 }
 
 export interface PackageProduct extends Timestamps {
@@ -288,7 +288,7 @@ export interface KitchenRequestItem extends Timestamps {
     id?: number
     request_id?: number
     item_type: string
-    item_code: string
+    item_code: number
     quantity: number
 }
 

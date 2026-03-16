@@ -70,12 +70,12 @@ onMounted(async () => {
                 <p class="text-[10px] font-black uppercase text-slate-400">
                     Source (From)
                 </p>
-                <USelect
+                <USelectMenu
                     v-model="form.from_branch_id"
                     :options="branches"
                     placeholder="Branch"
                 />
-                <USelect
+                <USelectMenu
                     v-model="form.from_storage"
                     :items="storageList"
                 />
@@ -84,12 +84,12 @@ onMounted(async () => {
                 <p class="text-[10px] font-black uppercase text-slate-400">
                     Destination (To)
                 </p>
-                <USelect
+                <USelectMenu
                     v-model="form.to_branch_id"
                     :options="branches"
                     placeholder="Branch"
                 />
-                <USelect
+                <USelectMenu
                     v-model="form.to_storage"
                     :items="storageList"
                 />
@@ -105,23 +105,23 @@ onMounted(async () => {
                 :key="idx"
                 class="grid grid-cols-3 gap-2 mb-2 items-center"
             >
-                <UFormGroup label="Item Type">
+                <UFormField label="Item Type">
                     <URadioGroup
                         v-model="record.item_type"
                         :options="[{ label: 'Ingredient', value: 'INGR' }, { label: 'Utility', value: 'UTLT' }]"
                     />
-                </UFormGroup>
+                </UFormField>
 
-                <UFormGroup label="Item">
+                <UFormField label="Item">
                     <USelectMenu
                         v-model="record.item_code"
                         :options="record.item_type === 'INGR' ? ingredients : utilities"
                         searchable
                     />
-                </UFormGroup>
+                </UFormField>
 
                 <div class="flex gap-2 items-center">
-                    <UFormGroup label="Quantity">
+                    <UFormField label="Quantity">
                         <UInput
                             v-model="record.qty"
                             type="number"
@@ -130,7 +130,7 @@ onMounted(async () => {
                                 <span class="text-xs text-gray-400">grams</span>
                             </template>
                         </UInput>
-                    </UFormGroup>
+                    </UFormField>
 
                     <button
                         type="button"

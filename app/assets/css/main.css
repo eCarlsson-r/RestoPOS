@@ -4,3 +4,47 @@
 @theme {
   --font-sans: 'Public Sans', sans-serif;
 }
+/* assets/css/main.css */
+
+@media print {
+  /* 1. Hide the entire Nuxt application root */
+  header, main, footer {
+    display: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* 2. Force the Body and HTML to be visible and white */
+  html, body {
+    visibility: visible !important;
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+  }
+
+  /* 3. The Print Portal must be forced into view */
+  .global-print-portal {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 80mm !important;
+    z-index: 9999999 !important;
+  }
+
+  /* 4. Ensure the Receipt component itself has black text */
+  .print-area {
+    display: block !important;
+    visibility: visible !important;
+    color: black !important;
+    width: 80mm !important;
+  }
+}
+/* Hide the portal during normal screen viewing */
+@media screen {
+  .global-print-portal {
+    display: none;
+  }
+}

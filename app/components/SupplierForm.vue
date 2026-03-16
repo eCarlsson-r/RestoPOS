@@ -65,7 +65,7 @@ const submit = () => emit('save', form.value)
                     name="branch_id"
                     :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
                 >
-                    <USelect
+                    <USelectMenu
                         v-model="form.branch_id"
                         :items="branchSelects"
                         class="w-full font-bold shadow-sm"
@@ -77,7 +77,7 @@ const submit = () => emit('save', form.value)
                     name="storage"
                     :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
                 >
-                    <USelect
+                    <USelectMenu
                         v-model="form.storage"
                         :items="storageList"
                         class="w-full font-bold shadow-sm"

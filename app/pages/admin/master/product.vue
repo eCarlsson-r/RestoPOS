@@ -94,7 +94,7 @@ const formatCurrency = (val: number) => {
 
                     <template #cost-cell="{ row }">
                         <span class="text-neutral-400">
-                            {{ formatCurrency(row.original.cost) }}
+                            {{ formatCurrency(row.original.cost || 0) }}
                         </span>
                     </template>
 

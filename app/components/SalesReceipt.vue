@@ -1,37 +1,77 @@
 <template>
-    <div class="print-only w-[80mm] p-4 text-[12px] font-mono bg-white text-black">
-        <div class="text-center mb-4">
-            <h1 class="text-lg font-bold">
-                REPUBLICAN
-            </h1>
-            <p>{{ branch.name }}</p>
-            <p>{{ branch.address }}</p>
+    <div class="print-area">
+        <div class="receipt-header">
+            <AppLogo />
+            <p>{{ orderData.branch?.name }}</p>
+            <p class="text-[10px]">
+                {{ orderData.branch?.address }}
+            </p>
         </div>
-        <div class="border-t border-dashed my-2" />
-        <div
-            v-for="item in items"
-            :key="item.id"
-            class="flex justify-between"
-        >
-            <span>{{ item.qty }}x {{ item.name }}</span>
-            <span>{{ item.total }}</span>
+
+        <div class="dashed-line" />
+
+        <div class="items">
+            <div
+                v-for="item in orderData.records"
+                :key="item.id"
+                class="item-row"
+            >
+                <span class="qty">{{ item.quantity }}x</span>
+                <span class="name">{{ (item.package) ? item.package.name : item.product.name }}</span>
+                <span class="price">{{ (item.item_price * item.quantity).toLocaleString() }}</span>
+            </div>
         </div>
-        <div class="border-t border-dashed my-2" />
-        <div class="flex justify-between font-bold">
-            <span>GRAND TOTAL</span>
-            <span>{{ grandTotal }}</span>
+
+        <div class="dashed-line" />
+
+        <div class="total-row">
+            <span>TOTAL</span>
+            <span class="font-black">Rp {{ ((orderData.records) ? orderData.records.reduce((acc, i) => acc + (i.item_price * i.quantity), 0) : 0).toLocaleString() }}</span>
         </div>
-        <p class="text-center mt-4">
-            Terima Kasih!
-        </p>
+
+        <div class="footer">
+            <div
+                v-if="props.isBill"
+                class="border-2 border-black my-2 p-1 text-lg"
+            >
+                *** BILL ONLY ***
+            </div>
+            <div
+                v-else
+                class="my-2"
+            >
+                <p>Settle: {{ new Date().toLocaleString() }}</p>
+                <p>Terima Kasih!</p>
+            </div>
+        </div>
     </div>
 </template>
 
+<script setup>
+const props = defineProps({
+    orderData: Object,
+    isBill: Boolean // Received from the PrintProvider
+})
+</script>
+
 <style>
-@media screen { .print-only { display: none; } }
-@media print {
-  body * { visibility: hidden; }
-  .print-only, .print-only * { visibility: visible; }
-  .print-only { position: absolute; left: 0; top: 0; }
+.print-area {
+    width: 80mm;
+    padding: 10px;
+    font-family: 'Courier New', Courier, monospace;
+  color: #000 !important;
+  background-color: #fff !important;
+  -webkit-print-color-adjust: exact; /* Forces background colors to show */
+  print-color-adjust: exact;
 }
+
+.print-area * {
+  color: #000 !important;
+}
+
+.dashed-line { border-top: 1px dashed #000; margin: 8px 0; }
+.item-row { display: flex; gap: 5px; font-size: 11px; }
+.name { flex: 1; }
+.total-row { display: flex; justify-content: space-between; font-size: 14px; }
+.receipt-header, .footer { text-align: center; }
 </style>

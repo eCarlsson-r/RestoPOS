@@ -134,7 +134,7 @@ const submit = async () => {
                     :key="idx"
                     class="grid grid-cols-4 gap-2 mb-2 items-center"
                 >
-                    <USelect
+                    <USelectMenu
                         v-model="prd.product_id"
                         :items="productSelects"
                         class="font-bold text-sm shadow-sm"

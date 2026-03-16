@@ -42,7 +42,7 @@ onMounted(() => {
         <div class="space-y-4">
             <div class="grid grid-cols-2 gap-4 text-xs">
                 <div><span class="text-gray-400">From:</span> {{ props.requestFrom }}</div>
-                <div><span class="text-gray-400">To:</span> <USelect :options="branches" /></div>
+                <div><span class="text-gray-400">To:</span> <USelectMenu :options="branches" /></div>
             </div>
 
             <UTable :data="props.requestItems" />

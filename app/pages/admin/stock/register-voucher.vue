@@ -15,25 +15,25 @@ watch(() => voucherForm.value.amount, (val) => {
     <UContainer class="p-6">
         <UForm class="space-y-4">
             <div class="grid grid-cols-3 gap-4">
-                <UFormGroup label="Nominal Voucher">
+                <UFormField label="Nominal Voucher">
                     <USelect
                         v-model="voucherForm.amount"
                         :items="[{ label: 'Rp 20.000', value: 20000 }, { label: 'Rp 50.000', value: 50000 }]"
                     />
-                </UFormGroup>
+                </UFormField>
 
-                <UFormGroup label="Prefix">
+                <UFormField label="Prefix">
                     <UInput
                         v-model="voucherForm.prefix"
                         readonly
                     />
-                </UFormGroup>
-                <UFormGroup label="Jumlah">
+                </UFormField>
+                <UFormField label="Jumlah">
                     <UInput
                         v-model="voucherForm.qty"
                         type="number"
                     />
-                </UFormGroup>
+                </UFormField>
             </div>
             <div class="p-4 bg-indigo-50 rounded-xl">
                 <p class="text-xs font-bold text-indigo-600">

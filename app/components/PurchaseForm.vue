@@ -125,7 +125,7 @@ onMounted(async () => {
                 <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
                     Supplier
                 </ULabel>
-                <USelect
+                <USelectMenu
                     v-model="form.supplier_id"
                     :items="supplierSelects"
                     class="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold focus:ring-2 ring-secondary"
@@ -153,7 +153,7 @@ onMounted(async () => {
                     <ULabel class="text-[10px] font-black text-slate-400 uppercase">
                         Bahan
                     </ULabel>
-                    <USelect
+                    <USelectMenu
                         v-model="record.item_code"
                         :items="ingredientSelects"
                         class="w-full bg-transparent border-none font-bold"

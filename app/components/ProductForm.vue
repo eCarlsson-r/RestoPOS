@@ -162,7 +162,7 @@ const submit = async () => {
                 name="category_id"
                 :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
             >
-                <USelect
+                <USelectMenu
                     v-model="form.category_id"
                     :items="categorySelects"
                     class="w-full font-bold shadow-sm"
@@ -246,7 +246,7 @@ const submit = async () => {
                     name="unit"
                     :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
                 >
-                    <USelect
+                    <USelectMenu
                         v-model="form.unit"
                         :items="unitList"
                         class="w-full font-bold shadow-sm"
@@ -276,7 +276,7 @@ const submit = async () => {
                     :key="idx"
                     class="grid grid-cols-4 gap-2 mb-2 items-center"
                 >
-                    <USelect
+                    <USelectMenu
                         v-model="ingr.ingredient_id"
                         :items="ingredientSelects"
                         class="font-bold text-sm shadow-sm"
