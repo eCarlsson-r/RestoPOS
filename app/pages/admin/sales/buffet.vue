@@ -40,7 +40,7 @@ const statusColors: Record<string, 'neutral' | 'warning' | 'info' | 'success' | 
     <UContainer class="py-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-black uppercase italic tracking-tighter">
-                Alacarte Sales
+                Buffet Sales
             </h1>
             <UButton
                 icon="i-lucide-plus"

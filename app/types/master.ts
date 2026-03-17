@@ -5,7 +5,8 @@ export interface Timestamps {
 
 export interface ApiResponse<T> {
     data: T
-    error?: number
+    err?: number
+    msg?: string
 }
 
 // --- Core Master Data ---
@@ -161,12 +162,14 @@ export interface Ingredient extends Timestamps {
     description?: string
     unit: string
     min_stock: number
+    purchase_price?: number
 }
 
 export interface Recipe extends Timestamps {
     id?: number
     product_id?: number
-    ingredient_id: number
+    item_type?: string
+    item_code: number
     quantity: number
     unit: string
     purchase_price: number
@@ -248,6 +251,7 @@ export interface Prepare extends Timestamps {
     quantity: number
     unit: string
     recipe: PrepareRecipe[]
+    purchase_price?: number
 }
 
 export interface PrepareLog extends Timestamps {
@@ -262,7 +266,8 @@ export interface PrepareLog extends Timestamps {
 export interface PrepareRecipe extends Timestamps {
     id?: number
     prepare_id?: number
-    ingredient_id: number
+    item_type?: string
+    item_code: number
     quantity: number
     unit: string
     purchase_price: number

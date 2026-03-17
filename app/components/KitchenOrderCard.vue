@@ -4,6 +4,23 @@ import type { KitchenTicket } from '~/types/master'
 const props = defineProps<{
     order: KitchenTicket
 }>()
+const elapsed = ref('')
+
+const calculateElapsed = () => {
+    const start = new Date(props.order.created_at).getTime()
+    const now = new Date().getTime()
+    const diff = Math.floor((now - start) / 1000 / 60) // minutes
+    elapsed.value = `${diff}m`
+}
+
+let timer: number
+onMounted(() => {
+    calculateElapsed()
+    timer = setInterval(calculateElapsed, 60000)
+})
+onUnmounted(() => clearInterval(timer))
+
+const isLate = computed(() => parseInt(elapsed.value) >= 15)
 
 const statusColors = {
     O: 'bg-slate-200',
@@ -20,7 +37,7 @@ const updateStatus = async (status: string) => {
 </script>
 
 <template>
-    <div :class="[statusColors[order.status], 'p-5 rounded-3xl transition-all border border-white/10 shadow-xl']">
+    <div :class="[statusColors[order.status], isLate ? 'ring-4 ring-rose-500 animate-pulse' : '', 'p-5 rounded-3xl transition-all border border-white/10 shadow-xl']">
         <div class="flex justify-between items-start mb-4">
             <div>
                 <span class="text-xs font-black uppercase bg-black/20 px-2 py-1 rounded">Table {{ order.table_number }}</span>
@@ -28,9 +45,17 @@ const updateStatus = async (status: string) => {
                     {{ order.customer_name }}
                 </h4>
             </div>
-            <p class="text-xs font-mono opacity-70">
-                {{ new Date(order.created_at).toLocaleString() }}
-            </p>
+            <div class="text-right">
+                <p
+                    class="text-lg font-black"
+                    :class="isLate ? 'text-rose-600' : 'text-slate-500'"
+                >
+                    {{ elapsed }}
+                </p>
+                <p class="text-[10px] font-mono opacity-50 uppercase">
+                    Waiting
+                </p>
+            </div>
         </div>
 
         <ul class="space-y-2 mb-6">

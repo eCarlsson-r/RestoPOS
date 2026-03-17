@@ -1,9 +1,8 @@
 <script setup>
 import TransferModal from '~/components/TransferModal.vue'
 
-const floors = [1, 2, 3] // Pull from branch-code floor-number logic
-const currentFloor = 1
-const { user, branch } = useAuth()
+const currentFloor = ref(1)
+const { user } = useAuth()
 const floorStore = useFloorMapStore()
 const isCalling = ref(false)
 const isMoveModalOpen = ref(false)
@@ -13,7 +12,37 @@ const isDrawerOpen = ref(false)
 const isShiftingMode = ref(false)
 const isMergingMode = ref(false)
 const mergeSelection = ref([])
+const branch = ref(user.value.employee?.branch)
+const branches = ref([])
 const printStore = usePrintStore()
+
+const refreshData = () => {
+    if (branch.value?.id) {
+        floorStore.fetchTables(branch.value.id, currentFloor.value)
+    }
+}
+
+const bindEcho = () => {
+    if (branch.value?.id) {
+        window.Echo.leave(`branch.*`)
+        window.Echo.channel(`branch.${branch.value.id}`)
+            .listen('WaiterCalled', (e) => {
+                const spottedTable = floorStore.tables.find(t => t.table_number === e.table)
+                if (spottedTable) {
+                    callingTable.value = spottedTable
+                    isCalling.value = true
+                }
+            })
+    }
+}
+
+watch(branch, (newVal) => {
+    if (newVal) {
+        currentFloor.value = 1 // Reset to floor 1 on branch change
+        refreshData()
+        bindEcho()
+    }
+}, { deep: true })
 
 const openActionDrawer = (table) => {
     if (isMergingMode.value && mergeSelection.value.length > 0) {
@@ -72,7 +101,7 @@ const updateTablePosition = async (table, newX, newY) => {
         await useApi('/api/tables/shift', {
             method: 'POST',
             body: {
-                branch_id: user.value.employee.branch_id,
+                branch_id: branch.value.id,
                 floor_number: currentFloor,
                 table_id: table.id,
                 position_x: newX,
@@ -80,7 +109,7 @@ const updateTablePosition = async (table, newX, newY) => {
             }
         })
         // Refresh the local store to show new positions
-        await floorStore.fetchTables(currentFloor)
+        await floorStore.fetchTables(branch.value.id, currentFloor)
         isShiftingMode.value = false
     } catch (e) {
         console.error('Failed to shift table', e)
@@ -101,7 +130,7 @@ const confirmMerge = async () => {
     })
     isMergingMode.value = false
     mergeSelection.value = []
-    floorStore.fetchTables(currentFloor)
+    floorStore.fetchTables(branch.value.id, currentFloor)
 }
 
 // 3. PRE-PAYMENT LOGIC (Waitress Bill)
@@ -118,36 +147,41 @@ const splitTable = async (table) => {
             table_id: table.id
         }
     })
-    floorStore.fetchTables(currentFloor)
+    floorStore.fetchTables(branch.value.id, currentFloor)
 }
 
-/* const printCaptainOrder = async (table) => {
+const printCaptainOrder = async (salesId) => {
     try {
-        const response = await useApi(`/api/orders/${table.sales_id}`)
+        // Fetch the latest state of the order
+        const data = await useApi(`/api/sales/orders/${salesId}`)
+
+        if (data) {
+            // Trigger print with 'captain' mode
+            await printStore.triggerPrint(data[0], 'captain')
+        }
     } catch (e) {
-        console.error('Failed to open table', e)
+        console.error('Failed to print captain order', e)
+        alert('Could not print kitchen ticket')
     }
-} */
+}
 
 definePageMeta({
     layout: 'default'
 })
 
 // Listen for the event (using Laravel Echo)
-onMounted(() => {
-    floorStore.fetchTables(currentFloor)
-
-    if (branch.value) {
-        window.Echo.channel(`branch.${branch.id}`)
-            .listen('WaiterCalled', (e) => {
-                // Find the table in the store to get full details if needed
-                const spottedTable = floorStore.tables.find(t => t.table_number === e.table)
-                if (spottedTable) {
-                    callingTable.value = spottedTable
-                    isCalling.value = true
-                }
-            })
+onMounted(async () => {
+    const response = await useApi('/api/branches')
+    if (Array.isArray(response)) {
+        branches.value = response
+    } else if (response && typeof response === 'object' && 'data' in response) {
+        branches.value = response.data
+    } else {
+        branches.value = []
     }
+
+    refreshData()
+    bindEcho()
 })
 </script>
 
@@ -161,25 +195,33 @@ onMounted(() => {
             </div>
             <div class="flex gap-2 p-4 backdrop-blur-md rounded-4xl border border-white shadow-sm">
                 <UButton
-                    v-for="f in floors"
+                    v-for="f in (branch?.floor_number || 1)"
                     :key="f"
                     :variant="currentFloor === f ? 'solid': 'soft'"
                     class="px-6 py-2 rounded-xl font-black uppercase italic text-xs transition-all shadow-sm"
-                    @click="currentFloor = f;floorStore.fetchTables(f)"
+                    @click="currentFloor = f; refreshData()"
                 >
                     Lantai {{ f }}
                 </UButton>
                 <div class="h-8 w-px bg-slate-200 mx-2" />
-                <div class="flex items-center px-4 text-[10px] font-black uppercase italic">
-                    Branch: {{ user?.employee?.branch?.name }}
-                </div>
+                <UFormField
+                    label="Cabang"
+                    class="flex items-center gap-2 font-black uppercase italic"
+                >
+                    <USelectMenu
+                        v-model="branch"
+                        :items="branches"
+                        label-key="name"
+                        value-key="id"
+                    />
+                </UFormField>
             </div>
             <div class="flex gap-3">
                 <UButton
                     color="neutral"
                     variant="soft"
                     icon="i-lucide-refresh-cw"
-                    @click="floorStore.fetchTables(currentFloor)"
+                    @click="refreshData()"
                 />
             </div>
         </header>
@@ -187,6 +229,7 @@ onMounted(() => {
         <main class="flex-1 flex overflow-hidden">
             <div class="flex-1 p-6 overflow-y-auto">
                 <TableCanvas
+                    v-if="branch"
                     :tables="floorStore.tables"
                     :is-shifting-mode="isShiftingMode"
                     :is-merging-mode="isMergingMode"

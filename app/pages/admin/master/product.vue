@@ -21,7 +21,7 @@ const columns: TableColumn<Product>[] = [
         meta: { class: { td: 'uppercase' } }
     },
     {
-        accessorKey: 'category_id',
+        accessorKey: 'category.name',
         header: 'Kategori'
     },
     {
@@ -78,16 +78,6 @@ const formatCurrency = (val: number) => {
                     :data="items"
                     :columns="columns"
                 >
-                    <template #category_id-cell="{ row }">
-                        <UBadge
-                            variant="subtle"
-                            color="neutral"
-                            size="sm"
-                        >
-                            {{ row.original.category_id }}
-                        </UBadge>
-                    </template>
-
                     <template #price-cell="{ row }">
                         {{ formatCurrency(row.original.price) }}
                     </template>

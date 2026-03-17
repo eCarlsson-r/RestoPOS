@@ -6,6 +6,16 @@ import type { TableColumn } from '@nuxt/ui'
 
 const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Category>('categories')
 
+const kitchenProcess = (value: string) => {
+    switch (value) {
+        case 'BART':
+            return 'Dapur Minuman'
+        case 'KTCN':
+            return 'Dapur Makanan'
+        default:
+            return 'Tidak Diketahui'
+    }
+}
 onMounted(() => {
     fetchItems()
 })
@@ -73,7 +83,7 @@ function editItem(item: Category) {
                     </template>
 
                     <template #kitchen_process-cell="{ row }">
-                        {{ row.original.kitchen_process }}
+                        {{ kitchenProcess(row.original.kitchen_process) }}
                     </template>
 
                     <template #description-cell="{ row }">

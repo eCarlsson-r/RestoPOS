@@ -2,7 +2,9 @@
 import type { SelectItem } from '@nuxt/ui'
 import { ref, onMounted, watch, computed } from 'vue'
 import { useApi } from '~/composables/useApi'
-import type { Product, Category, ApiResponse, Ingredient, Prepare } from '~/types/master'
+import type { Product, Category, ApiResponse, Ingredient, Prepare, Recipe, PrepareRecipe } from '~/types/master'
+
+type RecipeRow = (Recipe | PrepareRecipe) & { uid?: string }
 
 const props = defineProps<{
     type: 'product' | 'prepare'
@@ -15,7 +17,8 @@ const form = ref<Partial<Product & Prepare>>((props.item || {}) as Partial<Produ
 const categories = ref<Category[]>([])
 const categorySelects = ref<SelectItem[]>([])
 const allIngredients = ref<Ingredient[]>([])
-const ingredientSelects = ref<SelectItem[]>([])
+const allPrepares = ref<Prepare[]>([])
+
 const unitList = ref<SelectItem[]>([
     { label: 'Gram (gr)', value: 'GR' },
     { label: 'Kilogram (kg)', value: 'KG' },
@@ -24,46 +27,77 @@ const unitList = ref<SelectItem[]>([
 ])
 
 watch(() => props.item, (newVal) => {
-    // Avoid resetting the form if the parent component re-renders and passes a new empty object
     if (form.value && form.value.id === newVal?.id && !newVal?.id && newVal && Object.keys(newVal).length === 0) {
         return
     }
-    const baseItem = newVal ? { ...newVal } : {} as Partial<Product & Prepare>
+    const baseItem = newVal ? JSON.parse(JSON.stringify(newVal)) : {} as Partial<Product & Prepare>
     if (!baseItem.recipe) baseItem.recipe = []
+
+    // Hydrate UIDs for existing recipe rows
+    baseItem.recipe.forEach((row: RecipeRow) => {
+        if (!row.uid && row.item_type && row.item_code) {
+            row.uid = `${row.item_type}-${row.item_code}`
+        }
+    })
+
     form.value = baseItem
 }, { deep: true, immediate: true })
 
 const addIngrRow = () => {
-    if (form.value.recipe) form.value.recipe?.push({
-        ingredient_id: 0,
+    const newEntry: RecipeRow = {
+        item_code: 0,
         quantity: 0,
         unit: 'Pcs',
-        purchase_price: 0
-    })
-    else form.value.recipe = [{
-        ingredient_id: 0,
-        quantity: 0,
-        unit: 'Pcs',
-        purchase_price: 0
-    }]
+        purchase_price: 0,
+        item_type: 'INGR',
+        uid: ''
+    }
+    if (form.value.recipe) {
+        form.value.recipe.push(newEntry)
+    } else {
+        form.value.recipe = [newEntry]
+    }
 }
 
-// 2. Computed total for each row
 const totals = computed(() => {
-    return form.value.recipe?.map(field => field.quantity * field.purchase_price)
+    return form.value.recipe?.map(field => (field.quantity || 0) * (field.purchase_price || 0)) || []
 })
 
-// 3. Computed grand total
 const grandTotal = computed(() => {
-    return totals.value ? totals.value.reduce((sum, total) => sum + total, 0) : form.value.cost
+    return totals.value.reduce((sum, total) => sum + total, 0)
 })
 
-watch(() => form.value.recipe, (newIngrs) => {
-    if (newIngrs) newIngrs.forEach((ingr) => {
-        const match = allIngredients.value.find(a => a.id === ingr.ingredient_id)
-        if (match) ingr.unit = match.unit
-    })
-}, { deep: true })
+watch(grandTotal, (newVal) => {
+    form.value.cost = newVal
+}, { immediate: true })
+
+const compositionItems = computed(() => {
+    if (props.type === 'product') {
+        return [
+            ...allIngredients.value.map(i => ({
+                ...i,
+                item_type: 'INGR',
+                uid: `INGR-${i.id}`
+            })),
+            ...allPrepares.value.map(p => ({
+                id: p.id,
+                name: p.name,
+                unit: p.unit,
+                purchase_price: p.cost || 0,
+                item_type: 'PREP',
+                uid: `PREP-${p.id}`
+            }))
+        ]
+    } else {
+        return [
+            ...allIngredients.value.map(i => ({
+                ...i,
+                item_type: 'INGR',
+                uid: `INGR-${i.id}`
+            }))
+        ]
+    }
+})
 
 onMounted(async () => {
     if (props.type === 'product') {
@@ -84,22 +118,31 @@ onMounted(async () => {
         })
     }
 
-    const data = await useApi<Ingredient[] | ApiResponse<Ingredient[]>>('/api/ingredients')
-    if (Array.isArray(data)) {
-        allIngredients.value = data
-    } else if (data && typeof data === 'object' && 'data' in data) {
-        allIngredients.value = (data as ApiResponse<Ingredient[]>).data
-    } else {
-        allIngredients.value = []
-    }
+    const [ingrData, prepData] = await Promise.all([
+        useApi<Ingredient[] | ApiResponse<Ingredient[]>>('/api/ingredients'),
+        useApi<Prepare[] | ApiResponse<Prepare[]>>('/api/prepare')
+    ])
 
-    ingredientSelects.value = allIngredients.value.map((b) => {
-        return {
-            label: b.name,
-            value: b.id
-        }
-    })
+    if (Array.isArray(ingrData)) allIngredients.value = ingrData
+    else if (ingrData && typeof ingrData === 'object' && 'data' in ingrData) allIngredients.value = (ingrData as ApiResponse<Ingredient[]>).data
+
+    if (Array.isArray(prepData)) allPrepares.value = prepData
+    else if (prepData && typeof prepData === 'object' && 'data' in prepData) allPrepares.value = (prepData as ApiResponse<Prepare[]>).data
 })
+
+watch(() => form.value.recipe, (newEntries) => {
+    if (newEntries) {
+        (newEntries as RecipeRow[]).forEach((entry) => {
+            const match = compositionItems.value.find(item => item.uid === entry.uid)
+            if (match) {
+                entry.item_code = match.id
+                entry.item_type = match.item_type
+                entry.unit = match.unit
+                entry.purchase_price = match.purchase_price || 0
+            }
+        })
+    }
+}, { deep: true })
 
 const submit = async () => {
     emit('save', form.value)
@@ -162,7 +205,7 @@ const submit = async () => {
                 name="category_id"
                 :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
             >
-                <USelectMenu
+                <USelect
                     v-model="form.category_id"
                     :items="categorySelects"
                     class="w-full font-bold shadow-sm"
@@ -246,7 +289,7 @@ const submit = async () => {
                     name="unit"
                     :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
                 >
-                    <USelectMenu
+                    <USelect
                         v-model="form.unit"
                         :items="unitList"
                         class="w-full font-bold shadow-sm"
@@ -260,9 +303,10 @@ const submit = async () => {
                     :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
                 >
                     <UInput
-                        v-model="grandTotal"
+                        v-model="form.cost"
                         class="w-full font-bold shadow-sm"
                         required
+                        disabled
                     />
                 </UFormField>
             </div>
@@ -272,13 +316,15 @@ const submit = async () => {
                     Komposisi Bahan
                 </h4>
                 <div
-                    v-for="(ingr, idx) in form.recipe"
+                    v-for="(ingr, idx) in (form.recipe as RecipeRow[])"
                     :key="idx"
                     class="grid grid-cols-4 gap-2 mb-2 items-center"
                 >
                     <USelectMenu
-                        v-model="ingr.ingredient_id"
-                        :items="ingredientSelects"
+                        v-model="ingr.uid"
+                        :items="compositionItems"
+                        label-key="name"
+                        value-key="uid"
                         class="font-bold text-sm shadow-sm"
                     />
 
@@ -292,17 +338,17 @@ const submit = async () => {
                         <span class="text-[10px] font-black uppercase text-slate-400">{{ ingr.unit }}</span>
                     </div>
 
-                    <UInput
-                        v-model="ingr.purchase_price"
-                        class="font-bold text-center shadow-sm"
-                        placeholder="0"
-                        disabled
-                    />
+                    <div class="grid grid-cols-6 col-span-2 gap-2 items-center">
+                        <UInput
+                            v-model="ingr.purchase_price"
+                            class="col-span-2 font-bold text-center shadow-sm"
+                            placeholder="0"
+                            disabled
+                        />
 
-                    <div class="flex gap-2 items-center">
                         <UInput
                             v-model="totals![idx]"
-                            class="font-bold text-center shadow-sm"
+                            class="col-span-3 font-bold text-center shadow-sm"
                             placeholder="0"
                             disabled
                         />

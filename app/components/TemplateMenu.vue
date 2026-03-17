@@ -4,9 +4,31 @@ import type { NavigationMenuItem } from '@nuxt/ui'
 const { user } = useAuth()
 
 const navigation = computed<NavigationMenuItem[]>(() => {
+    console.info(user.value)
     switch (user.value?.type) {
         case 'ADMIN':
             return [
+                {
+                    label: 'Sales',
+                    icon: 'i-lucide-shopping-cart',
+                    children: [
+                        {
+                            label: 'Floor Map',
+                            icon: 'i-lucide-map',
+                            to: '/pos/floor-map'
+                        },
+                        {
+                            label: 'Alacarte Sales List',
+                            icon: 'i-lucide-list',
+                            to: '/admin/sales/alacarte'
+                        },
+                        {
+                            label: 'Buffet Sales List',
+                            icon: 'i-lucide-list',
+                            to: '/admin/sales/buffet'
+                        }
+                    ]
+                },
                 {
                     label: 'Purchasing',
                     icon: 'i-lucide-shopping-cart',
@@ -15,6 +37,11 @@ const navigation = computed<NavigationMenuItem[]>(() => {
                             label: 'Purchase Order',
                             icon: 'i-lucide-file-text',
                             to: '/admin/purchase/order'
+                        },
+                        {
+                            label: 'Purchase Return',
+                            icon: 'i-lucide-file-undo',
+                            to: '/admin/purchase/return'
                         }
                     ]
                 },

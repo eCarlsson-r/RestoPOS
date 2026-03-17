@@ -9,8 +9,8 @@ export const useFloorMapStore = defineStore('floorMap', {
         loading: false
     }),
     actions: {
-        async fetchTables(floor: string) {
-            const { data } = await useApi<{ data: Table[] }>(`/api/tables?floor=${floor}`)
+        async fetchTables(branch: number, floor: number) {
+            const { data } = await useApi<{ data: Table[] }>(`/api/tables?branch_id=${branch || 1}&floor_number=${floor}`)
             this.tables = data || []
         },
         // This will be triggered by Laravel Reverb (WebSockets) later

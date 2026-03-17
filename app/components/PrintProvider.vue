@@ -4,8 +4,14 @@
         class="global-print-portal"
     >
         <SalesReceipt
+            v-if="printStore.mode === 'receipt'"
             :order-data="printStore.data"
             :is-bill="printStore.isPrePayment"
+        />
+
+        <CaptainOrder
+            v-else-if="printStore.mode === 'captain'"
+            :order-data="printStore.data"
         />
     </div>
 </template>

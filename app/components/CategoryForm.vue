@@ -67,7 +67,7 @@ watch(() => props.item, (newItem) => {
                 name="kitchen_process"
                 :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
             >
-                <USelectMenu
+                <USelect
                     v-model="form.kitchen_process"
                     :items="kitchenProcessList"
                     class="w-full font-bold shadow-sm"

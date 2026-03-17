@@ -2,6 +2,7 @@ import type { Package, Product, Sale, SaleRecord } from '~/types/master'
 
 interface BasketItem extends SaleRecord {
     is_sent: boolean
+    printed_at?: string
 }
 
 export const useOrderStore = defineStore('order', {

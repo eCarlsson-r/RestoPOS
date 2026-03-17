@@ -4,7 +4,7 @@ import { useMaster } from '~/composables/useMaster'
 import type { Sale } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, fetchItems } = useMaster<Sale>('sales/alacarte')
+const { items, fetchItems } = useMaster<Sale>('sales')
 
 onMounted(() => {
     fetchItems()
@@ -15,8 +15,8 @@ const columns: TableColumn<Sale>[] = [
     { accessorKey: 'branch.name', header: 'Branch Name' },
     { accessorKey: 'customer.name', header: 'Customer Name' },
     { accessorKey: 'employee.name', header: 'Employee Name' },
-    { accessorKey: 'floor_number', header: 'Floor' },
-    { accessorKey: 'table_number', header: 'Table' },
+    { accessorKey: 'table.floor_number', header: 'Floor' },
+    { accessorKey: 'table.table_number', header: 'Table' },
     { accessorKey: 'status', header: 'Status' }
 ]
 
@@ -58,6 +58,9 @@ const statusColors: Record<string, 'neutral' | 'warning' | 'info' | 'success' | 
                     :data="items"
                     :columns="columns"
                 >
+                    <template #created_at-cell="{ row }">
+                        {{ new Date(row.original.created_at??'').toLocaleString() }}
+                    </template>
                     <template #status-cell="{ row }">
                         <UBadge
                             :color="statusColors[row.original.status]"

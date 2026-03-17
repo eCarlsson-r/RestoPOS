@@ -3,28 +3,23 @@ import type { Sale } from '~/types/master'
 
 export const usePrintStore = defineStore('print', {
     state: () => ({
-        data: null as unknown as Sale,
-        isPrePayment: false,
-        isPrinting: false
+        data: null as Sale | null,
+        mode: 'receipt' as 'receipt' | 'captain' // New state field
     }),
     actions: {
-        async triggerPrint(payload: Sale, prePayment = false) {
-            if (!payload) return
+        async triggerPrint(payload: Sale | null, mode: 'receipt' | 'captain') {
             this.data = payload
-            this.isPrePayment = prePayment
-            this.isPrinting = true
+            this.mode = mode
 
-            // Wait for Vue to acknowledge the data change
             await nextTick()
-
-            // Wait one more tick to ensure the child components (SalesReceipt)
-            // have finished their internal setup/rendering
             await nextTick()
 
             setTimeout(() => {
                 window.print()
-                this.isPrinting = false
-            }, 100) // 100ms is usually the sweet spot for thermal printer drivers
+                setTimeout(() => {
+                    this.data = null
+                }, 500)
+            }, 250)
         }
     }
 })

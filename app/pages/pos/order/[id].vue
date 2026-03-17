@@ -166,6 +166,20 @@ const submitOrder = async () => {
                             :ui="{ base: 'text-[10px] text-neutral-400 p-0 h-auto' }"
                         />
                     </div>
+                    <div class="flex items-center gap-2">
+                        <span
+                            v-if="item.printed_at"
+                            class="text-[10px] bg-slate-100 px-2 rounded-full text-slate-400"
+                        >
+                            IN KITCHEN
+                        </span>
+                        <span
+                            v-else
+                            class="text-[10px] bg-amber-100 px-2 rounded-full text-amber-600 animate-pulse"
+                        >
+                            NEW
+                        </span>
+                    </div>
                     <div class="flex items-center gap-3">
                         <UButton
                             variant="ghost"

@@ -3,8 +3,7 @@ export default defineNuxtConfig({
     modules: [
         '@nuxt/eslint',
         '@nuxt/ui',
-        '@pinia/nuxt',
-        'nuxt-laravel-echo'
+        '@pinia/nuxt'
     ],
 
     devtools: {
@@ -15,7 +14,14 @@ export default defineNuxtConfig({
 
     runtimeConfig: {
         public: {
-            apiBase: 'http://restosystem-api.test/'
+            apiBase: 'http://restosystem-api.test/',
+            echo: {
+                key: 'h041wsoaf2e5u5irq4hd', // Your Laravel Echo app key
+                authentication: {
+                    mode: 'cookie',
+                    baseUrl: 'http://restosystem-api.test/' // Your Laravel app URL
+                }
+            }
         }
     },
 
@@ -27,15 +33,7 @@ export default defineNuxtConfig({
 
     vite: {
         optimizeDeps: {
-            include: ['nuxt-laravel-echo > pusher-js']
-        }
-    },
-
-    echo: {
-        key: 'h041wsoaf2e5u5irq4hd', // Your Laravel Echo app key
-        authentication: {
-            mode: 'cookie',
-            baseUrl: 'http://restosystem-api.test/' // Your Laravel app URL
+            include: ['pusher-js', 'laravel-echo']
         }
     },
 
