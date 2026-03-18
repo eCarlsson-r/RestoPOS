@@ -15,9 +15,17 @@ function openNewForm() {
     isFormOpen.value = true
 }
 
-function editItem(item: PurchaseOrder) {
-    selectedItem.value = item
-    isFormOpen.value = true
+async function receivePurchase(item: PurchaseOrder) {
+    const confirm = window.confirm('Are you sure you want to receive this purchase order?')
+    if (confirm) {
+        await useApi('/api/purchasing/receive', {
+            method: 'POST',
+            body: {
+                order_id: item.id
+            }
+        })
+        fetchItems()
+    }
 }
 
 const columns: TableColumn<PurchaseOrder>[] = [
@@ -43,8 +51,7 @@ const columns: TableColumn<PurchaseOrder>[] = [
     },
     {
         accessorKey: 'actions',
-        header: 'Aksi',
-        meta: { class: { td: 'text-center text-right' } }
+        header: 'Aksi'
     }
 ]
 </script>
@@ -98,11 +105,12 @@ const columns: TableColumn<PurchaseOrder>[] = [
 
                     <template #actions-cell="{ row }">
                         <UButton
+                            v-if="row.original.status === 'P'"
                             variant="ghost"
                             color="primary"
-                            icon="i-lucide-pencil"
+                            icon="i-lucide-hand-helping"
                             square
-                            @click="editItem(row.original)"
+                            @click="receivePurchase(row.original)"
                         />
                     </template>
                 </UTable>
@@ -111,16 +119,20 @@ const columns: TableColumn<PurchaseOrder>[] = [
 
         <UModal
             v-model:open="isFormOpen"
+            scrollable
+            fullscreen
+            :title="selectedItem ? 'Edit Purchase Order' : 'Tambah Purchase Order'"
+            :ui="{
+                title: 'text-xl font-black uppercase italic tracking-tighter'
+            }"
         >
-            <template #content>
-                <UCard>
-                    <PurchaseForm
-                        type="order"
-                        :item="selectedItem"
-                        @save="saveItem"
-                        @close="isFormOpen = false"
-                    />
-                </UCard>
+            <template #body>
+                <PurchaseForm
+                    type="order"
+                    :item="selectedItem"
+                    @save="saveItem"
+                    @close="isFormOpen = false"
+                />
             </template>
         </UModal>
     </UContainer>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SelectItem } from '@nuxt/ui'
-import type { ApiResponse, Ingredient, PurchaseOrder, PurchaseReturn, Supplier } from '~/types/master'
+import type { ApiResponse, Branch, Ingredient, PurchaseOrder, PurchaseOrderItem, PurchaseReturn, PurchaseReturnItem, Supplier, Utility } from '~/types/master'
 
 const props = defineProps<{
     type: 'order' | 'return'
@@ -10,10 +10,19 @@ const props = defineProps<{
 const emit = defineEmits(['save', 'close'])
 
 const form = ref<Partial<PurchaseOrder | PurchaseReturn>>((props.item || {}) as Partial<PurchaseOrder | PurchaseReturn>)
+
+const branches = ref<Branch[]>([])
+const branchSelects = ref<SelectItem[]>([])
 const suppliers = ref<Supplier[]>([])
 const supplierSelects = ref<SelectItem[]>([])
 const ingredients = ref<Ingredient[]>([])
-const ingredientSelects = ref<SelectItem[]>([])
+const utilities = ref<Utility[]>([])
+
+const storageList = ref<SelectItem[]>([
+    { label: 'Main Storage', value: 'MAIN' },
+    { label: 'Kitchen', value: 'KTCN' },
+    { label: 'Bartender', value: 'BART' }
+])
 
 watch(() => props.item, (newVal) => {
     // Avoid resetting the form if the parent component re-renders and passes a new empty object
@@ -30,14 +39,46 @@ const addItem = () => {
         item_type: '',
         item_code: 0,
         quantity: 0,
-        price: 0
+        price: 0,
+        unit: ''
     })
     else form.value.items = [{
         item_type: '',
         item_code: 0,
         quantity: 0,
-        price: 0
+        price: 0,
+        unit: ''
     }]
+}
+
+if (props.type === 'order') {
+    watch(() => form.value.items, (newEntries) => {
+        if (newEntries) {
+            (newEntries as PurchaseOrderItem[]).forEach((entry) => {
+                const match = compositionItems.value.find(item => item.uid === entry.uid)
+                if (match) {
+                    entry.item_code = match.id
+                    entry.item_type = match.item_type
+                    entry.unit = match.unit
+                }
+            })
+        }
+    }, { deep: true })
+}
+
+if (props.type === 'return') {
+    watch(() => form.value.items, (newEntries) => {
+        if (newEntries) {
+            (newEntries as PurchaseReturnItem[]).forEach((entry) => {
+                const match = compositionItems.value.find(item => item.uid === entry.uid)
+                if (match) {
+                    entry.item_code = match.id
+                    entry.item_type = match.item_type
+                    entry.unit = match.unit
+                }
+            })
+        }
+    }, { deep: true })
 }
 
 const submit = async () => {
@@ -50,6 +91,21 @@ const calculateRow = computed(() => {
 
 const grandTotal = computed(() => {
     return calculateRow.value?.reduce((sum, total) => sum + total, 0)
+})
+
+const compositionItems = computed(() => {
+    return [
+        ...ingredients.value.map(i => ({
+            ...i,
+            item_type: 'INGR',
+            uid: `INGR-${i.id}`
+        })),
+        ...utilities.value.map(u => ({
+            ...u,
+            item_type: 'UTLT',
+            uid: `UTLT-${u.id}`
+        }))
+    ]
 })
 
 onMounted(async () => {
@@ -69,47 +125,98 @@ onMounted(async () => {
         }
     })
 
-    const ingredientData = await useApi<Ingredient[] | ApiResponse<Ingredient[]>>('/api/ingredients')
-    if (Array.isArray(ingredientData)) {
-        ingredients.value = ingredientData
-    } else if (ingredientData && typeof ingredientData === 'object' && 'data' in ingredientData) {
-        ingredients.value = (ingredientData as ApiResponse<Ingredient[]>).data
+    const branchData = await useApi<Branch[] | ApiResponse<Branch[]>>('/api/branches')
+    if (Array.isArray(branchData)) {
+        branches.value = branchData
+    } else if (branchData && typeof branchData === 'object' && 'data' in branchData) {
+        branches.value = (branchData as ApiResponse<Branch[]>).data
     } else {
-        ingredients.value = []
+        branches.value = []
     }
 
-    ingredientSelects.value = ingredients.value.map((b) => {
+    branchSelects.value = branches.value.map((b) => {
         return {
             label: b.name,
             value: b.id
         }
     })
+
+    const [ingrData, utltData] = await Promise.all([
+        useApi<Ingredient[] | ApiResponse<Ingredient[]>>('/api/ingredients'),
+        useApi<Utility[] | ApiResponse<Utility[]>>('/api/utilities')
+    ])
+
+    if (Array.isArray(ingrData)) ingredients.value = ingrData
+    else if (ingrData && typeof ingrData === 'object' && 'data' in ingrData) ingredients.value = (ingrData as ApiResponse<Ingredient[]>).data
+
+    if (Array.isArray(utltData)) utilities.value = utltData
+    else if (utltData && typeof utltData === 'object' && 'data' in utltData) utilities.value = (utltData as ApiResponse<Utility[]>).data
 })
 </script>
 
 <template>
     <UContainer class="p-6">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-black uppercase italic tracking-tighter">
-                {{ form.id ? 'Edit' : 'Tambah' }} {{ props.type }}
-            </h2>
-            <UButton
-                variant="ghost"
-                color="neutral"
-                icon="i-lucide-x"
-                @click="emit('close')"
-            />
-        </div>
+        <div class="flex justify-between items-center">
+            <div class="w-3/4 grid grid-cols-2 gap-6 mb-6">
+                <UFormField
+                    label="Supplier"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
+                    <USelect
+                        v-model="form.supplier_id"
+                        searchable
+                        :items="supplierSelects"
+                        class="w-full font-bold focus:ring-2 ring-secondary"
+                    />
+                </UFormField>
 
-        <div class="flex justify-between items-end mb-10">
-            <div>
-                <h1 class="text-4xl font-black uppercase italic tracking-tighter">
-                    Input Pembelian
-                </h1>
-                <p class="text-slate-400 font-bold text-xs uppercase">
-                    Restock Ingredients to MAIN Storage
-                </p>
+                <div class="grid grid-cols-2 gap-3">
+                    <UFormField
+                        label="Tanggal Invoice"
+                        :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                    >
+                        <UInput
+                            v-model="form.date"
+                            type="date"
+                            class="w-full font-bold focus:ring-2 ring-indigo-500"
+                        />
+                    </UFormField>
+
+                    <UFormField
+                        label="Tanggal Jalan"
+                        :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                    >
+                        <UInput
+                            v-model="form.delivery_date"
+                            type="date"
+                            class="w-full font-bold focus:ring-2 ring-indigo-500"
+                        />
+                    </UFormField>
+                </div>
+
+                <UFormField
+                    label="Branch"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
+                    <USelect
+                        v-model="form.branch_id"
+                        :items="branchSelects"
+                        class="w-full font-bold focus:ring-2 ring-secondary"
+                    />
+                </UFormField>
+
+                <UFormField
+                    label="Storage"
+                    :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+                >
+                    <USelect
+                        v-model="form.storage"
+                        :items="storageList"
+                        class="w-full font-bold focus:ring-2 ring-secondary"
+                    />
+                </UFormField>
             </div>
+
             <div class="text-right">
                 <p class="text-[10px] font-black text-slate-400 uppercase">
                     Total Invoice
@@ -120,56 +227,50 @@ onMounted(async () => {
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-6 mb-10">
-            <div>
-                <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                    Supplier
-                </ULabel>
-                <USelectMenu
-                    v-model="form.supplier_id"
-                    :items="supplierSelects"
-                    class="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold focus:ring-2 ring-secondary"
-                />
-            </div>
-            <div>
-                <ULabel class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-                    Tanggal Invoice
-                </ULabel>
-                <UInput
-                    v-model="form.date"
-                    type="date"
-                    class="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold focus:ring-2 ring-indigo-500"
-                />
-            </div>
-        </div>
+        <UFormField
+            label="Keterangan"
+            name="description"
+            :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+        >
+            <UTextarea
+                v-model="form.description"
+                class="w-full font-bold shadow-sm mb-10"
+                required
+            />
+        </UFormField>
 
         <div class="space-y-3 mb-10">
             <div
                 v-for="(record, idx) in form.items"
                 :key="idx"
-                class="flex gap-4 items-end bg-slate-50 p-4 rounded-2xl"
+                class="grid grid-cols-12 gap-4 items-end bg-slate-50 p-4 rounded-2xl"
             >
-                <div class="flex-1">
+                <div class="col-span-6">
                     <ULabel class="text-[10px] font-black text-slate-400 uppercase">
                         Bahan
                     </ULabel>
                     <USelectMenu
-                        v-model="record.item_code"
-                        :items="ingredientSelects"
+                        v-model="record.uid"
+                        :items="compositionItems"
+                        label-key="name"
+                        value-key="uid"
                         class="w-full bg-transparent border-none font-bold"
                     />
                 </div>
-                <div class="w-24">
+                <div class="col-span-2">
                     <ULabel class="text-[10px] font-black text-slate-400 uppercase">
                         Qty
                     </ULabel>
-                    <UInput
-                        v-model="record.quantity"
-                        type="number"
-                        class="w-full bg-transparent border-none font-bold text-center"
-                    />
+                    <div class="flex items-center gap-2">
+                        <UInput
+                            v-model="record.quantity"
+                            type="number"
+                            class="w-full bg-transparent border-none font-bold text-center"
+                        />
+                        <span class="text-[10px] font-black uppercase text-slate-400">{{ record.unit }}</span>
+                    </div>
                 </div>
-                <div class="w-40">
+                <div class="col-span-2">
                     <ULabel class="text-[10px] font-black text-slate-400 uppercase">
                         Harga Satuan
                     </ULabel>
@@ -179,15 +280,15 @@ onMounted(async () => {
                         class="w-full bg-transparent border-none font-bold text-right"
                     />
                 </div>
-                <div class="w-40 text-right pr-4 font-black text-indigo-900">
+                <div class="col-span-2 text-right pr-4 font-black text-indigo-900">
                     Rp {{ ((calculateRow) ? calculateRow[idx] : 0)?.toLocaleString() }}
                 </div>
             </div>
         </div>
 
-        <div class="flex gap-4">
+        <div class="grid grid-cols-4 gap-4">
             <UButton
-                class="flex-1 py-4 rounded-2xl font-black uppercase italic justify-center"
+                class="p-4 rounded-2xl font-black uppercase italic justify-center"
                 variant="outline"
                 color="neutral"
                 @click="addItem"
@@ -196,9 +297,8 @@ onMounted(async () => {
             </UButton>
             <UButton
                 size="xl"
-                block
                 :label="`Simpan ${props.type === 'order' ? 'Pembelian' : 'Retur'}`"
-                class="font-black uppercase italic"
+                class="col-span-3 font-black uppercase italic justify-center"
                 @click="submit"
             />
         </div>

@@ -4,7 +4,7 @@ import { useMaster } from '~/composables/useMaster'
 import type { Package } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Package>('packages')
+const { items, isFormOpen, selectedItem, fetchItems, saveItem, deleteItem, deleteExistingImage } = useMaster<Package>('packages')
 
 onMounted(() => {
     fetchItems()
@@ -40,6 +40,13 @@ function openNewForm() {
 function editItem(item: Package) {
     selectedItem.value = item
     isFormOpen.value = true
+}
+
+function removeItem(item: Package) {
+    const confirm = window.confirm('Are you sure you want to delete this item?')
+    if (confirm) {
+        deleteItem(item)
+    }
 }
 
 const formatCurrency = (val: number) => {
@@ -92,6 +99,14 @@ const formatCurrency = (val: number) => {
                             square
                             @click="editItem(row.original)"
                         />
+
+                        <UButton
+                            variant="ghost"
+                            color="error"
+                            icon="i-lucide-trash"
+                            square
+                            @click="removeItem(row.original)"
+                        />
                     </template>
                 </UTable>
             </ClientOnly>
@@ -99,16 +114,21 @@ const formatCurrency = (val: number) => {
 
         <UModal
             v-model:open="isFormOpen"
-            title="Form Paket"
+            scrollable
+            :title="selectedItem ? 'Edit Paket' : 'Tambah Paket'"
+            description="Silahkan isi detail data master paket di bawah ini."
+            :ui="{
+                title: 'text-xl font-black uppercase italic tracking-tighter'
+            }"
+            class="sm:max-w-4xl"
         >
-            <template #content>
-                <UCard class="overflow-y-auto">
-                    <PackageForm
-                        :item="selectedItem"
-                        @save="saveItem"
-                        @close="isFormOpen = false"
-                    />
-                </UCard>
+            <template #body>
+                <PackageForm
+                    :item="selectedItem"
+                    @save="saveItem"
+                    @delete-existing-image="deleteExistingImage"
+                    @close="isFormOpen = false"
+                />
             </template>
         </UModal>
     </UContainer>

@@ -28,18 +28,6 @@ const submit = async () => {
 
 <template>
     <div class="h-full flex flex-col bg-white space-y-4">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-black uppercase italic tracking-tighter">
-                {{ form.id ? 'Edit' : 'Tambah' }} Pelanggan
-            </h2>
-            <UButton
-                variant="ghost"
-                color="neutral"
-                icon="i-lucide-x"
-                @click="emit('close')"
-            />
-        </div>
-
         <UForm
             :state="form"
             class="space-y-4 overflow-y-auto pr-2"
@@ -109,7 +97,7 @@ const submit = async () => {
                     name="gender"
                     :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
                 >
-                    <USelectMenu
+                    <USelect
                         v-model="form.gender"
                         :items="genders"
                         class="w-full font-bold shadow-sm"

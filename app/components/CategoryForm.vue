@@ -5,15 +5,17 @@ import type { Category } from '~/types/master'
 const props = defineProps<{
     item: Category | null
 }>()
-const emit = defineEmits(['save', 'close'])
+const emit = defineEmits(['save', 'deleteExistingImage', 'close'])
+const value = ref<File[]>([])
 
 const form = ref({
-    id: props.item?.id,
-    name: props.item?.name,
-    kitchen_process: props.item?.kitchen_process,
-    description: props.item?.description
+    ...props.item
 })
 
+const deleteExistingImage = (id: number) => {
+    emit('deleteExistingImage', id)
+    form.value.files = form.value.files?.filter(file => file.id !== id)
+}
 const kitchenProcessList = ref<SelectItem[]>([
     { label: 'Dapur', value: 'KTCN' },
     { label: 'Bar', value: 'BART' },
@@ -34,22 +36,10 @@ watch(() => props.item, (newItem) => {
 
 <template>
     <div class="space-y-6">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-black uppercase italic tracking-tighter">
-                {{ form.id ? 'Edit' : 'Tambah' }} Kategori
-            </h2>
-            <UButton
-                variant="ghost"
-                color="neutral"
-                icon="i-lucide-x"
-                @click="emit('close')"
-            />
-        </div>
-
         <UForm
             :state="form"
             class="space-y-4"
-            @submit="emit('save', form)"
+            @submit="emit('save', objectToFormData(form, value))"
         >
             <UFormField
                 label="Nama Kategori"
@@ -82,6 +72,49 @@ watch(() => props.item, (newItem) => {
                 <UTextarea
                     v-model="form.description"
                     class="w-full font-bold shadow-sm"
+                />
+            </UFormField>
+
+            <UFormField
+                label="Foto Kategori"
+                name="images"
+                :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+            >
+                <div
+                    v-if="form.files && form.files.length"
+                    class="flex flex-wrap gap-4"
+                >
+                    <div
+                        v-for="file in form.files"
+                        :key="file.id"
+                        class="relative rounded-lg overflow-hidden border border-slate-200"
+                    >
+                        <img
+                            :src="file.url"
+                            class="w-24 h-24 object-cover"
+                            alt="Branch Photo"
+                        >
+                        <!-- Optional: Add a button to delete existing images -->
+                        <button
+                            type="button"
+                            class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                            @click="deleteExistingImage(file.id)"
+                        >
+                            <UIcon
+                                name="i-lucide-x"
+                                class="w-3 h-3"
+                            />
+                        </button>
+                    </div>
+                </div>
+                <UFileUpload
+                    v-model="value"
+                    accept="image/*"
+                    icon="i-lucide-image"
+                    label="Drop your images here"
+                    description="SVG, PNG, JPG or GIF (max. 2MB)"
+                    layout="list"
+                    multiple
                 />
             </UFormField>
 

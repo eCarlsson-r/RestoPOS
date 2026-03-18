@@ -45,18 +45,6 @@ const submit = () => emit('save', form.value)
 
 <template>
     <div class="space-y-6">
-        <header class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-black uppercase italic tracking-tighter">
-                {{ form.id ? 'Edit' : 'Tambah' }} {{ props.type === 'utility' ? 'Utility' : 'Bahan Baku' }}
-            </h2>
-            <UButton
-                variant="ghost"
-                color="neutral"
-                icon="i-lucide-x"
-                @click="emit('close')"
-            />
-        </header>
-
         <UForm
             :state="form"
             class="space-y-4"
@@ -79,7 +67,7 @@ const submit = () => emit('save', form.value)
                     name="unit"
                     :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
                 >
-                    <USelectMenu
+                    <USelect
                         v-model="form.unit"
                         :items="unitList"
                         class="w-full font-bold shadow-sm"

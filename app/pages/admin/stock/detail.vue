@@ -9,10 +9,10 @@ onMounted(() => {
 })
 
 const columns: TableColumn<Stock>[] = [
-    { accessorKey: 'branch_name', header: 'Branch' },
-    { accessorKey: 'item_code', header: 'Code' },
+    { accessorKey: 'branch.name', header: 'Branch' },
+    { accessorKey: 'item_type', header: 'Type' },
     { accessorKey: 'item_name', header: 'Name' },
-    { accessorKey: 'stock_quantity', header: 'Qty' },
+    { accessorKey: 'quantity', header: 'Qty' },
     { accessorKey: 'unit', header: 'Unit' },
     { accessorKey: 'actions', header: 'Actions' }
 ]

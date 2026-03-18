@@ -4,7 +4,6 @@ import type { NavigationMenuItem } from '@nuxt/ui'
 const { user } = useAuth()
 
 const navigation = computed<NavigationMenuItem[]>(() => {
-    console.info(user.value)
     switch (user.value?.type) {
         case 'ADMIN':
             return [
@@ -40,7 +39,7 @@ const navigation = computed<NavigationMenuItem[]>(() => {
                         },
                         {
                             label: 'Purchase Return',
-                            icon: 'i-lucide-file-undo',
+                            icon: 'i-lucide-undo',
                             to: '/admin/purchase/return'
                         }
                     ]

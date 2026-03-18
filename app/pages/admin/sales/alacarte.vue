@@ -43,12 +43,6 @@ const statusColors: Record<string, 'neutral' | 'warning' | 'info' | 'success' | 
             <h1 class="text-2xl font-black uppercase italic tracking-tighter">
                 Alacarte Sales
             </h1>
-            <UButton
-                icon="i-lucide-plus"
-                label="Penjualan Baru"
-                size="md"
-                to="/pos/order"
-            />
         </div>
 
         <UCard :ui="{ body: 'p-0' }">

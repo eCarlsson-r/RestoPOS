@@ -4,7 +4,7 @@ import { useMaster } from '~/composables/useMaster'
 import type { Supplier } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Supplier>('suppliers')
+const { items, isFormOpen, selectedItem, fetchItems, saveItem, deleteItem } = useMaster<Supplier>('suppliers')
 
 onMounted(() => {
     fetchItems()
@@ -46,6 +46,13 @@ function openNewForm() {
 function editItem(item: Supplier) {
     selectedItem.value = item
     isFormOpen.value = true
+}
+
+function removeItem(item: Supplier) {
+    const confirm = window.confirm('Are you sure you want to delete this item?')
+    if (confirm) {
+        deleteItem(item)
+    }
 }
 </script>
 
@@ -98,6 +105,14 @@ function editItem(item: Supplier) {
                             square
                             @click="editItem(row.original)"
                         />
+
+                        <UButton
+                            variant="ghost"
+                            color="error"
+                            icon="i-lucide-trash"
+                            square
+                            @click="removeItem(row.original)"
+                        />
                     </template>
                 </UTable>
             </ClientOnly>
@@ -105,16 +120,20 @@ function editItem(item: Supplier) {
 
         <UModal
             v-model:open="isFormOpen"
-            class="w-[500px]"
+            scrollable
+            :title="selectedItem ? 'Edit Pemasok' : 'Tambah Pemasok'"
+            description="Lengkapi detail pemasok di bawah ini untuk menyimpan data master."
+            :ui="{
+                title: 'text-xl font-black uppercase italic tracking-tighter'
+            }"
+            class="sm:max-w-xl"
         >
-            <template #content>
-                <UCard class="overflow-y-auto">
-                    <SupplierForm
-                        :item="selectedItem"
-                        @save="saveItem"
-                        @close="isFormOpen = false"
-                    />
-                </UCard>
+            <template #body>
+                <SupplierForm
+                    :item="selectedItem"
+                    @save="saveItem"
+                    @close="isFormOpen = false"
+                />
             </template>
         </UModal>
     </UContainer>

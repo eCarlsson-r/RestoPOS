@@ -42,18 +42,6 @@ const submit = () => emit('save', form.value)
 
 <template>
     <div class="h-full flex flex-col bg-white">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-black uppercase italic tracking-tighter">
-                {{ form.id ? 'Edit' : 'Tambah' }} Pemasok
-            </h2>
-            <UButton
-                variant="ghost"
-                color="neutral"
-                icon="i-lucide-x"
-                @click="emit('close')"
-            />
-        </div>
-
         <UForm
             :state="form"
             class="space-y-6 flex-1 overflow-y-auto pr-2"
@@ -65,7 +53,7 @@ const submit = () => emit('save', form.value)
                     name="branch_id"
                     :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
                 >
-                    <USelectMenu
+                    <USelect
                         v-model="form.branch_id"
                         :items="branchSelects"
                         class="w-full font-bold shadow-sm"
@@ -77,7 +65,7 @@ const submit = () => emit('save', form.value)
                     name="storage"
                     :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
                 >
-                    <USelectMenu
+                    <USelect
                         v-model="form.storage"
                         :items="storageList"
                         class="w-full font-bold shadow-sm"

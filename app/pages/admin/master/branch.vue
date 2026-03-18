@@ -4,17 +4,13 @@ import { useMaster } from '~/composables/useMaster'
 import type { Branch } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Branch>('branches')
+const { items, isFormOpen, selectedItem, fetchItems, saveItem, deleteItem, deleteExistingImage } = useMaster<Branch>('branches')
 
 onMounted(() => {
     fetchItems()
 })
 
 const columns: TableColumn<Branch>[] = [
-    {
-        accessorKey: 'id',
-        header: 'ID'
-    },
     {
         accessorKey: 'name',
         header: 'Nama Cabang',
@@ -43,6 +39,13 @@ function openNewForm() {
 function editItem(item: Branch) {
     selectedItem.value = item
     isFormOpen.value = true
+}
+
+function removeItem(item: Branch) {
+    const confirm = window.confirm('Are you sure you want to delete this item?')
+    if (confirm) {
+        deleteItem(item)
+    }
 }
 </script>
 
@@ -87,6 +90,14 @@ function editItem(item: Branch) {
                             square
                             @click="editItem(row.original)"
                         />
+
+                        <UButton
+                            variant="ghost"
+                            color="error"
+                            icon="i-lucide-trash"
+                            square
+                            @click="removeItem(row.original)"
+                        />
                     </template>
                 </UTable>
             </ClientOnly>
@@ -94,16 +105,21 @@ function editItem(item: Branch) {
 
         <UModal
             v-model:open="isFormOpen"
-            class="w-[500px]"
+            scrollable
+            class="sm:max-w-xl"
+            :title="selectedItem ? 'Edit Cabang' : 'Tambah Cabang'"
+            description="Silahkan isi detail cabang di bawah ini."
+            :ui="{
+                title: 'text-xl font-black uppercase italic tracking-tighter'
+            }"
         >
-            <template #content>
-                <UCard>
-                    <BranchForm
-                        :item="selectedItem"
-                        @save="saveItem"
-                        @close="isFormOpen = false"
-                    />
-                </UCard>
+            <template #body>
+                <BranchForm
+                    :item="selectedItem"
+                    @save="saveItem"
+                    @delete-existing-image="deleteExistingImage"
+                    @close="isFormOpen = false"
+                />
             </template>
         </UModal>
     </UContainer>

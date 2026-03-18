@@ -95,18 +95,6 @@ const submit = async () => {
 
 <template>
     <div class="h-full flex flex-col bg-white space-y-4">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-black uppercase italic tracking-tighter">
-                {{ form.id ? 'Edit' : 'Tambah' }} Pegawai
-            </h2>
-            <UButton
-                variant="ghost"
-                color="neutral"
-                icon="i-lucide-x"
-                @click="emit('close')"
-            />
-        </div>
-
         <UForm
             :state="form"
             class="space-y-4 overflow-y-auto pr-2"

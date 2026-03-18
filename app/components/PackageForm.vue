@@ -2,13 +2,19 @@
 import type { SelectItem } from '@nuxt/ui'
 import { ref, onMounted, watch, computed } from 'vue'
 import { useApi } from '~/composables/useApi'
-import type { Product, ApiResponse, Package } from '~/types/master'
+import type { Product, ApiResponse, Package, PackageProduct } from '~/types/master'
 
 const props = defineProps<{
     item: Package | null
 }>()
 
-const emit = defineEmits(['save', 'close'])
+const emit = defineEmits(['save', 'deleteExistingImage', 'close'])
+const value = ref<File[]>([])
+
+const deleteExistingImage = (id: number) => {
+    emit('deleteExistingImage', id)
+    form.value.files = form.value.files?.filter(file => file.id !== id)
+}
 
 const form = ref<Partial<Package>>((props.item || {}) as Partial<Package>)
 const allProducts = ref<Product[]>([])
@@ -60,25 +66,25 @@ onMounted(async () => {
     })
 })
 
+const onProductSelect = (productId: number, row: PackageProduct) => {
+    if (!productId) return
+    const product = allProducts.value.find(p => p.id === productId)
+    if (product) {
+        row.price = product.price
+        if (!row.quantity || row.quantity === 0) {
+            row.quantity = 1
+        }
+    }
+}
+
 const submit = async () => {
-    emit('save', form.value)
+    const fd = objectToFormData(form.value, value.value)
+    emit('save', fd)
 }
 </script>
 
 <template>
     <div class="h-full flex flex-col bg-white">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-black uppercase italic tracking-tighter">
-                {{ form.id ? 'Edit' : 'Tambah' }} Paket
-            </h2>
-            <UButton
-                variant="ghost"
-                color="neutral"
-                icon="i-lucide-x"
-                @click="emit('close')"
-            />
-        </div>
-
         <UForm
             :state="form"
             class="space-y-6 flex-1 overflow-y-auto pr-2"
@@ -137,7 +143,9 @@ const submit = async () => {
                     <USelectMenu
                         v-model="prd.product_id"
                         :items="productSelects"
+                        value-key="value"
                         class="font-bold text-sm shadow-sm"
+                        @update:model-value="val => onProductSelect(Number(val), prd)"
                     />
 
                     <UInput
@@ -179,9 +187,52 @@ const submit = async () => {
                     class="mt-2 text-[10px] font-black uppercase italic px-4 py-2 rounded-lg"
                     @click="addProductRow"
                 >
-                    + Tambah Bahan
+                    + Tambah Produk
                 </UButton>
             </div>
+
+            <UFormField
+                label="Foto Paket"
+                name="images"
+                :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+            >
+                <div
+                    v-if="form.files && form.files.length"
+                    class="flex flex-wrap gap-4"
+                >
+                    <div
+                        v-for="file in form.files"
+                        :key="file.id"
+                        class="relative rounded-lg overflow-hidden border border-slate-200"
+                    >
+                        <img
+                            :src="file.url"
+                            class="w-24 h-24 object-cover"
+                            alt="Branch Photo"
+                        >
+                        <!-- Optional: Add a button to delete existing images -->
+                        <button
+                            type="button"
+                            class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                            @click="deleteExistingImage(file.id)"
+                        >
+                            <UIcon
+                                name="i-lucide-x"
+                                class="w-3 h-3"
+                            />
+                        </button>
+                    </div>
+                </div>
+                <UFileUpload
+                    v-model="value"
+                    accept="image/*"
+                    icon="i-lucide-image"
+                    label="Drop your images here"
+                    description="SVG, PNG, JPG or GIF (max. 2MB)"
+                    layout="list"
+                    multiple
+                />
+            </UFormField>
 
             <UButton
                 type="submit"

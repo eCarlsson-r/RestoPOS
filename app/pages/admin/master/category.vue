@@ -4,7 +4,7 @@ import { useMaster } from '~/composables/useMaster'
 import type { Category } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<Category>('categories')
+const { items, isFormOpen, selectedItem, fetchItems, saveItem, deleteItem, deleteExistingImage } = useMaster<Category>('categories')
 
 const kitchenProcess = (value: string) => {
     switch (value) {
@@ -55,6 +55,13 @@ function editItem(item: Category) {
     selectedItem.value = item
     isFormOpen.value = true
 }
+
+function removeItem(item: Category) {
+    const confirm = window.confirm('Are you sure you want to delete this item?')
+    if (confirm) {
+        deleteItem(item)
+    }
+}
 </script>
 
 <template>
@@ -98,6 +105,14 @@ function editItem(item: Category) {
                             square
                             @click="editItem(row.original)"
                         />
+
+                        <UButton
+                            variant="ghost"
+                            color="error"
+                            icon="i-lucide-trash"
+                            square
+                            @click="removeItem(row.original)"
+                        />
                     </template>
                 </UTable>
             </ClientOnly>
@@ -105,16 +120,21 @@ function editItem(item: Category) {
 
         <UModal
             v-model:open="isFormOpen"
-            class="w-[500px]"
+            scrollable
+            :title="selectedItem ? 'Edit Kategori' : 'Tambah Kategori'"
+            description="Silahkan isi detail kategori di bawah ini."
+            :ui="{
+                title: 'text-xl font-black uppercase italic tracking-tighter'
+            }"
+            class="sm:max-w-xl"
         >
-            <template #content>
-                <UCard>
-                    <CategoryForm
-                        :item="selectedItem"
-                        @save="saveItem"
-                        @close="isFormOpen = false"
-                    />
-                </UCard>
+            <template #body>
+                <CategoryForm
+                    :item="selectedItem"
+                    @save="saveItem"
+                    @delete-existing-image="deleteExistingImage"
+                    @close="isFormOpen = false"
+                />
             </template>
         </UModal>
     </UContainer>

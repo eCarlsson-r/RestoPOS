@@ -20,13 +20,27 @@ export const useMaster = <T extends { id?: number }>(endpoint: string) => {
         }
     }
 
-    const saveItem = async (formData: T) => {
-        const method = formData.id ? 'PUT' : 'POST'
-        const url = formData.id ? `/api/${endpoint}/${formData.id}` : `/api/${endpoint}`
+    const saveItem = async (formData: T | FormData) => {
+        const method = 'POST'
+        const url = `/api/${endpoint}`
         await useApi(url, { method, body: formData })
         await fetchItems()
         isFormOpen.value = false
     }
 
-    return { items, selectedItem, isFormOpen, fetchItems, saveItem }
+    const deleteItem = async (formData: T) => {
+        const method = 'DELETE'
+        const url = `/api/${endpoint}/${formData.id}`
+        await useApi(url, { method })
+        await fetchItems()
+    }
+
+    const deleteExistingImage = async (id: number) => {
+        const method = 'DELETE'
+        const url = `/api/${endpoint}/image/${id}`
+        await useApi(url, { method })
+        await fetchItems()
+    }
+
+    return { items, selectedItem, isFormOpen, fetchItems, saveItem, deleteItem, deleteExistingImage }
 }

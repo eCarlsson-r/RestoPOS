@@ -20,6 +20,7 @@ export interface Branch extends Timestamps {
     table_number: number
     kitchen_no: number
     bartender_no: number
+    files?: File[]
 }
 
 export interface Category extends Timestamps {
@@ -27,6 +28,7 @@ export interface Category extends Timestamps {
     name: string
     kitchen_process: string
     description: string
+    files?: File[]
 }
 
 export interface Product extends Timestamps {
@@ -41,7 +43,7 @@ export interface Product extends Timestamps {
     soldout?: number
     category?: Category
     recipe?: Recipe[]
-    image?: string
+    files?: File[]
 }
 
 export interface Customer extends Timestamps {
@@ -192,6 +194,8 @@ export interface Stock extends Timestamps {
     id: number
     item_type: string
     item_code: string
+    ingredient?: Ingredient
+    utility?: Utility
     branch_id: string
     storage: string
     purchase_price: number
@@ -234,6 +238,7 @@ export interface Package extends Timestamps {
     price: number
     description?: string
     products?: PackageProduct[]
+    files?: File[]
 }
 
 export interface PackageProduct extends Timestamps {
@@ -310,6 +315,9 @@ export interface PurchaseOrder extends Timestamps {
     id: number
     supplier_id: number
     supplier?: Supplier
+    branch_id: number
+    branch?: Branch
+    storage: string
     date: string
     delivery_date: string
     status: string
@@ -325,14 +333,19 @@ export interface PurchaseOrderItem extends Timestamps {
     ingredient?: Ingredient
     utility?: Utility
     quantity: number
+    unit: string
     price: number
     discount?: number
+    uid?: string
 }
 
 export interface PurchaseReturn extends Timestamps {
     id: number
     supplier_id: number
     supplier?: Supplier
+    branch_id: number
+    branch?: Branch
+    storage: string
     date: string
     delivery_date: string
     description: string
@@ -347,8 +360,10 @@ export interface PurchaseReturnItem extends Timestamps {
     ingredient?: Ingredient
     utility?: Utility
     quantity: number
+    unit: string
     price: number
     discount?: number
+    uid?: string
 }
 
 export interface KitchenTicketItem {
@@ -373,11 +388,11 @@ export interface KitchenTicket {
 
 export interface File extends Timestamps {
     id: number
-    name: string
-    type: string
-    ext: string
+    file_name: string
+    mime_type: string
+    extension: string
     size: number
-    upload_date: string
+    url: string
 }
 
 export interface NotificationSubscription extends Timestamps {

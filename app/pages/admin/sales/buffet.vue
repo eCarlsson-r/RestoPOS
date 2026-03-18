@@ -4,7 +4,7 @@ import { useMaster } from '~/composables/useMaster'
 import type { Sale } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, fetchItems } = useMaster<Sale>('sales/alacarte')
+const { items, fetchItems } = useMaster<Sale>('sales/buffet')
 
 onMounted(() => {
     fetchItems()

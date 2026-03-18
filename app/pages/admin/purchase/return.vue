@@ -15,11 +15,6 @@ function openNewForm() {
     isFormOpen.value = true
 }
 
-function editItem(item: PurchaseReturn) {
-    selectedItem.value = item
-    isFormOpen.value = true
-}
-
 const columns: TableColumn<PurchaseReturn>[] = [
     {
         accessorKey: 'supplier.name',
@@ -36,11 +31,6 @@ const columns: TableColumn<PurchaseReturn>[] = [
     {
         accessorKey: 'description',
         header: 'Keterangan'
-    },
-    {
-        accessorKey: 'actions',
-        header: 'Aksi',
-        meta: { class: { td: 'text-center text-right' } }
     }
 ]
 </script>
@@ -81,32 +71,26 @@ const columns: TableColumn<PurchaseReturn>[] = [
                     <template #description-cell="{ row }">
                         {{ row.original.description }}
                     </template>
-
-                    <template #actions-cell="{ row }">
-                        <UButton
-                            variant="ghost"
-                            color="primary"
-                            icon="i-lucide-pencil"
-                            square
-                            @click="editItem(row.original)"
-                        />
-                    </template>
                 </UTable>
             </ClientOnly>
         </UCard>
 
         <UModal
             v-model:open="isFormOpen"
+            scrollable
+            fullscreen
+            :title="selectedItem ? 'Edit Retur Pembelian' : 'Tambah Retur Pembelian'"
+            :ui="{
+                title: 'text-xl font-black uppercase italic tracking-tighter'
+            }"
         >
-            <template #content>
-                <UCard>
-                    <PurchaseForm
-                        type="return"
-                        :item="selectedItem"
-                        @save="saveItem"
-                        @close="isFormOpen = false"
-                    />
-                </UCard>
+            <template #body>
+                <PurchaseForm
+                    type="return"
+                    :item="selectedItem"
+                    @save="saveItem"
+                    @close="isFormOpen = false"
+                />
             </template>
         </UModal>
     </UContainer>
