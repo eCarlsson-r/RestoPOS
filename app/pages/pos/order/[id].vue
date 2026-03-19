@@ -94,8 +94,8 @@ const submitOrder = async () => {
 
                     <div class="h-28 bg-neutral-50 rounded-2xl mb-3 flex items-center justify-center">
                         <img
-                            v-if="prod.image"
-                            :src="prod.image"
+                            v-if="prod.files && prod.files.length > 0"
+                            :src="prod.files[0]?.url"
                             class="h-full w-full object-cover rounded-2xl"
                         >
                         <UIcon

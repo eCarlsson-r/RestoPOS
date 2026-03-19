@@ -2,6 +2,7 @@
 import TransferModal from '~/components/TransferModal.vue'
 
 const currentFloor = ref(1)
+const { $echo } = useNuxtApp() // Assuming you have an Echo plugin
 const { user } = useAuth()
 const floorStore = useFloorMapStore()
 const isCalling = ref(false)
@@ -23,9 +24,11 @@ const refreshData = () => {
 }
 
 const bindEcho = () => {
+    if (!$echo) return
+
     if (branch.value?.id) {
-        window.Echo.leave(`branch.*`)
-        window.Echo.channel(`branch.${branch.value.id}`)
+        $echo.leave(`branch.*`)
+        $echo.channel(`branch.${branch.value.id}`)
             .listen('WaiterCalled', (e) => {
                 const spottedTable = floorStore.tables.find(t => t.table_number === e.table)
                 if (spottedTable) {
@@ -212,7 +215,6 @@ onMounted(async () => {
                         v-model="branch"
                         :items="branches"
                         label-key="name"
-                        value-key="id"
                     />
                 </UFormField>
             </div>

@@ -1,37 +1,5 @@
 import Echo from 'laravel-echo'
-import { defineNuxtPlugin, useCookie, useRuntimeConfig } from 'nuxt/app'
 import Pusher from 'pusher-js'
-
-declare module 'nuxt/schema' {
-    interface PublicRuntimeConfig {
-        echo: {
-            key: string
-            authentication: {
-                mode: string
-                baseUrl: string
-            }
-        }
-    }
-}
-
-declare global {
-    interface Window {
-        Pusher: typeof Pusher
-        Echo: Echo<'pusher'>
-    }
-}
-
-declare module 'nuxt/app' {
-    interface NuxtApp {
-        $echo: Echo<'pusher'>
-    }
-}
-
-declare module 'vue' {
-    interface ComponentCustomProperties {
-        $echo: Echo<'pusher'>
-    }
-}
 
 export default defineNuxtPlugin(() => {
     const config = useRuntimeConfig()

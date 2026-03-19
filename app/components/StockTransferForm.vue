@@ -22,12 +22,12 @@ const storageList = ref<SelectItem[]>([
 
 const addRecordRow = () => {
     if (form.value.items) form.value.items?.push({
-        item_code: '',
+        item_code: 0,
         item_type: 'INGR',
         qty: 0
     })
     else form.value.items = [{
-        item_code: '',
+        item_code: 0,
         item_type: 'INGR',
         qty: 0
     }]
@@ -70,29 +70,39 @@ onMounted(async () => {
                 <p class="text-[10px] font-black uppercase text-slate-400">
                     Source (From)
                 </p>
-                <USelectMenu
-                    v-model="form.from_branch_id"
-                    :options="branches"
-                    placeholder="Branch"
-                />
-                <USelectMenu
-                    v-model="form.from_storage"
-                    :items="storageList"
-                />
+                <div class="grid grid-cols-2 gap-2">
+                    <USelectMenu
+                        v-model="form.from_branch_id"
+                        :items="branches"
+                        label-key="name"
+                        value-key="id"
+                        value-attribute="id"
+                        placeholder="Branch"
+                    />
+                    <USelect
+                        v-model="form.from_storage"
+                        :items="storageList"
+                    />
+                </div>
             </div>
             <div class="space-y-2">
                 <p class="text-[10px] font-black uppercase text-slate-400">
                     Destination (To)
                 </p>
-                <USelectMenu
-                    v-model="form.to_branch_id"
-                    :options="branches"
-                    placeholder="Branch"
-                />
-                <USelectMenu
-                    v-model="form.to_storage"
-                    :items="storageList"
-                />
+                <div class="grid grid-cols-2 gap-2">
+                    <USelectMenu
+                        v-model="form.to_branch_id"
+                        :items="branches"
+                        label-key="name"
+                        value-key="id"
+                        placeholder="Branch"
+                        value-attribute="id"
+                    />
+                    <USelect
+                        v-model="form.to_storage"
+                        :items="storageList"
+                    />
+                </div>
             </div>
         </div>
 
@@ -108,15 +118,18 @@ onMounted(async () => {
                 <UFormField label="Item Type">
                     <URadioGroup
                         v-model="record.item_type"
-                        :options="[{ label: 'Ingredient', value: 'INGR' }, { label: 'Utility', value: 'UTLT' }]"
+                        orientation="horizontal"
+                        :items="[{ label: 'Ingredient', value: 'INGR' }, { label: 'Utility', value: 'UTLT' }]"
                     />
                 </UFormField>
 
                 <UFormField label="Item">
-                    <USelectMenu
+                    <USelect
                         v-model="record.item_code"
-                        :options="record.item_type === 'INGR' ? ingredients : utilities"
-                        searchable
+                        :items="record.item_type === 'INGR' ? ingredients : utilities"
+                        label-key="name"
+                        value-key="id"
+                        class="w-full font-bold shadow-sm"
                     />
                 </UFormField>
 
@@ -127,21 +140,17 @@ onMounted(async () => {
                             type="number"
                         >
                             <template #trailing>
-                                <span class="text-xs text-gray-400">grams</span>
+                                <span class="text-xs text-gray-400">{{ record.item_type === 'INGR' ? ingredients[record.item_code - 1]?.unit : utilities[record.item_code - 1]?.unit }}</span>
                             </template>
                         </UInput>
                     </UFormField>
 
-                    <button
-                        type="button"
-                        class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg"
+                    <UButton
+                        variant="ghost"
                         @click="form.items?.splice(idx, 1)"
                     >
-                        <UIcon
-                            name="i-lucide-trash-2"
-                            class="w-4 h-4"
-                        />
-                    </button>
+                        <UIcon name="i-lucide-trash-2" />
+                    </UButton>
                 </div>
             </div>
 
@@ -154,20 +163,22 @@ onMounted(async () => {
             </UButton>
         </div>
 
-        <div class="flex gap-4">
-            <UButton
-                flex-1
-                variant="outline"
-                @click="emit('receive')"
-            >
-                Receive Items
-            </UButton>
-            <UButton
-                flex-1
-                @click="emit('save', form)"
-            >
-                Submit Transfer
-            </UButton>
-        </div>
+        <UButton
+            v-if="form.id"
+            variant="outline"
+            size="xl"
+            class="w-full font-black uppercase italic justify-center py-4"
+            @click="emit('receive')"
+        >
+            Receive Items
+        </UButton>
+        <UButton
+            v-else
+            size="xl"
+            class="w-full font-black uppercase italic justify-center py-4"
+            @click="emit('save', form)"
+        >
+            Submit Transfer
+        </UButton>
     </div>
 </template>

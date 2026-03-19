@@ -193,14 +193,15 @@ export interface Supplier extends Timestamps {
 export interface Stock extends Timestamps {
     id: number
     item_type: string
-    item_code: string
+    item_code: number
     ingredient?: Ingredient
     utility?: Utility
-    branch_id: string
+    branch_id: number
     storage: string
     purchase_price: number
     quantity: number
     min_stock: number
+    description?: string
 }
 
 export interface StockMove extends Timestamps {
@@ -218,7 +219,7 @@ export interface StockMoveItem {
     id?: number
     movement_id?: number
     item_type: string
-    item_code: string
+    item_code: number
     qty: number
     purchase_price?: number
 }
@@ -300,6 +301,8 @@ export interface KitchenRequestItem extends Timestamps {
     item_type: string
     item_code: number
     quantity: number
+    ingredient?: Ingredient
+    utility?: Utility
 }
 
 export interface StockCardLog {

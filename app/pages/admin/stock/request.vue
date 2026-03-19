@@ -2,7 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 import type { KitchenRequest } from '~/types/master'
 
-const { items, isFormOpen, selectedItem, fetchItems, saveItem } = useMaster<KitchenRequest>('stock/requests')
+const { items, isFormOpen, selectedItem, fetchItems } = useMaster<KitchenRequest>('stock/requests')
 
 onMounted(() => {
     fetchItems()
@@ -10,9 +10,10 @@ onMounted(() => {
 
 const columns: TableColumn<KitchenRequest>[] = [
     { accessorKey: 'id', header: 'Req #' },
-    { accessorKey: 'from_branch.name', header: 'From' },
-    { accessorKey: 'items.length', header: 'Items' },
-    { accessorKey: 'status', header: 'Status' },
+    { accessorKey: 'from_branch.name', header: 'From Branch' },
+    { accessorKey: 'from_storage', header: 'From Storage' },
+    { accessorKey: 'to_branch.name', header: 'To Branch' },
+    { accessorKey: 'to_storage', header: 'To Storage' },
     { accessorKey: 'actions', header: '' }
 ]
 
@@ -30,41 +31,47 @@ const openRespond = (req: KitchenRequest) => {
             </h1>
         </div>
 
-        <UTable
-            :data="items"
-            :columns="columns"
-        >
-            <template #status-data="{ row }">
-                <UBadge
-                    :color="row.original.status === 'PENDING' ? 'warning' : 'success'"
-                    variant="subtle"
-                    class="font-black italic text-[10px]"
+        <UCard :ui="{ body: 'p-0' }">
+            <ClientOnly>
+                <UTable
+                    :data="items"
+                    :columns="columns"
                 >
-                    {{ row.original.status }}
-                </UBadge>
-            </template>
+                    <template #actions-cell="{ row }">
+                        <UButton
+                            v-if="row.original.status === 'Q'"
+                            size="xs"
+                            variant="ghost"
+                            label="Respond"
+                            icon="i-lucide-reply"
+                            @click="openRespond(row.original)"
+                        />
+                    </template>
+                </UTable>
+            </ClientOnly>
+        </UCard>
 
-            <template #actions-data="{ row }">
-                <UButton
-                    v-if="row.original.status === 'PENDING'"
-                    size="xs"
-                    variant="ghost"
-                    label="Respond"
-                    icon="i-lucide-reply"
-                    @click="openRespond(row.original)"
+        <UModal
+            v-model:open="isFormOpen"
+            scrollable
+            :title="`Request #${selectedItem?.id}`"
+            :ui="{
+                title: 'text-xl font-black uppercase italic tracking-tighter'
+            }"
+            class="sm:max-w-4xl"
+        >
+            <template #body>
+                <RespondKitchenForm
+                    v-if="selectedItem"
+                    :request-no="selectedItem.id"
+                    :request-from="selectedItem.from_branch.id"
+                    :request-from-storage="selectedItem.from_storage"
+                    :request-to="selectedItem.to_branch.id"
+                    :request-to-storage="selectedItem.to_storage"
+                    :request-items="selectedItem.items"
+                    @close="isFormOpen = false"
                 />
             </template>
-        </UTable>
-
-        <USlideover v-model="isFormOpen">
-            <RespondKitchenForm
-                v-if="selectedItem"
-                :request-no="selectedItem.id"
-                :request-from="selectedItem.from_branch.name"
-                :request-items="selectedItem.items"
-                @save="saveItem"
-                @close="isFormOpen = false"
-            />
-        </USlideover>
+        </UModal>
     </UContainer>
 </template>

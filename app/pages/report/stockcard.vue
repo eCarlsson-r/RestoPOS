@@ -16,64 +16,70 @@ const selectedType = ref('ingredient')
 const logs = ref([])
 
 const fetchAudit = async () => {
-    const { data } = await useApi('/api/stock/card', {
-        params: {
-            type: selectedType.value,
-            ingredient_id: selectedIngredient.value,
-            utility_id: selectedUtility.value,
-            start: dateRange.value.start,
-            end: dateRange.value.end
-        }
-    })
+    const params = {
+        item_type: selectedType.value,
+        start: dateRange.value.start.toISOString().substr(0, 10),
+        end: dateRange.value.end.toISOString().substr(0, 10)
+    }
+    if (selectedType.value === 'INGR') {
+        params.item_code = selectedIngredient.value
+    } else {
+        params.item_code = selectedUtility.value
+    }
+
+    const { data } = await useApi('/api/stock/card', { params })
     logs.value = data
 }
 </script>
 
 <template>
     <UContainer class="p-6">
-        <div class="flex justify-between items-end mb-8">
+        <div class="flex justify-between items-start mb-8">
             <h1 class="text-3xl font-black uppercase italic tracking-tighter">
                 Kartu Stok (Audit)
             </h1>
-            <div class="flex gap-4">
-                <USelectMenu
+            <div class="grid grid-cols-5 gap-4">
+                <USelect
                     v-model="selectedType"
-                    class="font-bold shadow-sm w-64"
+                    class="font-bold shadow-sm w-full"
                     :items="[
-                        { value: 'ingredient', label: 'Bahan' },
-                        { value: 'utility', label: 'Alat' }
+                        { value: 'INGR', label: 'Bahan' },
+                        { value: 'UTLT', label: 'Alat' }
                     ]"
-                    option-key="value"
-                    option-label="label"
                 />
                 <USelectMenu
-                    v-if="selectedType === 'ingredient'"
+                    v-if="selectedType === 'INGR'"
                     v-model="selectedIngredient"
-                    :options="ingredients"
-                    option-key="id"
-                    option-label="name"
-                    class="font-bold shadow-sm w-64"
+                    :items="ingredients"
+                    value-key="id"
+                    label-key="name"
+                    value-attribute="id"
+                    class="font-bold shadow-sm w-full"
                 />
                 <USelectMenu
-                    v-if="selectedType === 'utility'"
+                    v-if="selectedType === 'UTLT'"
                     v-model="selectedUtility"
-                    :options="utilities"
-                    option-key="id"
-                    option-label="name"
-                    class="font-bold shadow-sm w-64"
+                    :items="utilities"
+                    value-key="id"
+                    label-key="name"
+                    value-attribute="id"
+                    class="font-bold shadow-sm w-full"
                 />
                 <USelectMenu
                     v-model="selectedBranch"
                     :items="branchList"
-                    class="font-bold shadow-sm w-64"
+                    value-key="id"
+                    label-key="name"
+                    value-attribute="id"
+                    class="font-bold shadow-sm w-full"
                 />
                 <USelectMenu
                     v-model="selectedStorage"
                     :items="storageList"
-                    class="font-bold shadow-sm w-64"
+                    class="font-bold shadow-sm w-full"
                 />
                 <UButton
-                    class="px-8 font-black uppercase italic"
+                    class="justify-center font-black uppercase italic"
                     @click="fetchAudit"
                 >
                     Filter

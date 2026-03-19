@@ -54,52 +54,52 @@ onMounted(async () => {
 
 <template>
     <div class="h-full flex flex-col bg-white">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-black uppercase italic tracking-tighter">
-                {{ form.id ? 'Edit' : 'Tambah' }} Stok
-            </h2>
-            <UButton
-                variant="ghost"
-                color="neutral"
-                icon="i-lucide-x"
-                @click="emit('close')"
-            />
-        </div>
-
         <UForm
             :state="form"
             :submit="emit('save', form)"
-            class="space-y-4 p-4"
+            class="space-y-4"
         >
             <div class="grid grid-cols-2 gap-4">
                 <UFormField label="Branch">
                     <USelectMenu
                         v-model="form.branch_id"
-                        :options="branches"
+                        :items="branches"
+                        label-key="name"
+                        value-key="id"
+                        class="w-full font-bold shadow-sm"
                     />
                 </UFormField>
                 <UFormField label="Storage">
-                    <USelectMenu
+                    <USelect
                         v-model="form.storage"
-                        :options="storageList"
+                        :items="storageList"
+                        class="w-full font-bold shadow-sm"
                     />
                 </UFormField>
             </div>
 
-            <UFormField label="Item Type">
-                <URadioGroup
-                    v-model="form.item_type"
-                    :options="[{ label: 'Ingredient', value: 'INGR' }, { label: 'Utility', value: 'UTLT' }]"
-                />
-            </UFormField>
+            <div class="grid grid-cols-4 gap-4">
+                <UFormField label="Jenis Barang">
+                    <URadioGroup
+                        v-model="form.item_type"
+                        :items="[{ label: 'Bahan Baku', value: 'INGR' }, { label: 'Peralatan', value: 'UTLT' }]"
+                    />
+                </UFormField>
 
-            <UFormField label="Item">
-                <USelectMenu
-                    v-model="form.item_code"
-                    :options="form.item_type === 'INGR' ? ingredients : utilities"
-                    searchable
-                />
-            </UFormField>
+                <UFormField
+                    label="Barang"
+                    class="col-span-3"
+                >
+                    <USelect
+                        v-model="form.item_code"
+                        :items="form.item_type === 'INGR' ? ingredients : utilities"
+                        label-key="name"
+                        value-key="id"
+                        searchable
+                        class="w-full font-bold shadow-sm"
+                    />
+                </UFormField>
+            </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <UFormField label="Purchase Price">
@@ -107,12 +107,15 @@ onMounted(async () => {
                         v-model="form.purchase_price"
                         type="number"
                         icon="i-lucide-banknote"
+
+                        class="w-full font-bold shadow-sm"
                     />
                 </UFormField>
                 <UFormField label="Quantity">
                     <UInput
                         v-model="form.quantity"
                         type="number"
+                        class="w-full font-bold shadow-sm"
                     >
                         <template #trailing>
                             <span class="text-xs text-gray-400">grams</span>
@@ -120,6 +123,17 @@ onMounted(async () => {
                     </UInput>
                 </UFormField>
             </div>
+
+            <UFormField
+                label="Keterangan"
+                name="description"
+                :ui="{ label: 'text-[10px] font-black uppercase text-slate-400 tracking-widest' }"
+            >
+                <UTextarea
+                    v-model="form.description"
+                    class="w-full font-bold shadow-sm"
+                />
+            </UFormField>
 
             <UButton
                 type="submit"

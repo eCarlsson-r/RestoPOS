@@ -63,25 +63,35 @@ const generateReport = async (reportType) => {
                 <UFormField label="Branch">
                     <USelectMenu
                         v-model="filters.branch"
-                        :options="branches"
+                        :items="branches"
+                        value-key="id"
+                        label-key="name"
+                        value-attribute="id"
+                        class="w-full shadow-sm"
                     />
                 </UFormField>
                 <UFormField label="Salesman">
                     <USelectMenu
                         v-model="filters.employee_id"
-                        :options="employees"
+                        :items="employees"
+                        value-key="id"
+                        label-key="name"
+                        value-attribute="id"
+                        class="w-full shadow-sm"
                     />
                 </UFormField>
                 <UFormField label="Start Date">
                     <UInput
                         v-model="filters.start"
                         type="date"
+                        class="w-full shadow-sm"
                     />
                 </UFormField>
                 <UFormField label="End Date">
                     <UInput
                         v-model="filters.end"
                         type="date"
+                        class="w-full shadow-sm"
                     />
                 </UFormField>
             </UForm>
