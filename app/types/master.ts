@@ -90,6 +90,11 @@ export interface User extends Timestamps {
     employee?: Employee
 }
 
+export interface AuthData {
+    user: User
+    employee: Employee | null
+}
+
 export interface Table extends Timestamps {
     id: number
     table_number: string
@@ -208,11 +213,13 @@ export interface StockMove extends Timestamps {
     id: number
     move_date: string
     from_branch_id: number
+    from_branch?: Branch
     from_storage: string
     to_branch_id: number
+    to_branch?: Branch
     to_storage: string
     status: string
-    items?: StockMoveItem[]
+    records?: StockMoveItem[]
 }
 
 export interface StockMoveItem {
@@ -220,7 +227,9 @@ export interface StockMoveItem {
     movement_id?: number
     item_type: string
     item_code: number
-    qty: number
+    quantity: number
+    ingredient?: Ingredient
+    utility?: Utility
     purchase_price?: number
 }
 
@@ -277,6 +286,7 @@ export interface PrepareRecipe extends Timestamps {
     quantity: number
     unit: string
     purchase_price: number
+    item?: Ingredient
 }
 
 export interface KitchenRequest extends Timestamps {

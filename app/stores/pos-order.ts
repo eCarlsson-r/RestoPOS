@@ -100,6 +100,24 @@ export const useOrderStore = defineStore('order', {
             // Mark as sent so they don't print twice
             this.basket.forEach(i => i.is_sent = true)
             return sales
+        },
+        // In your Table Store / Order Logic
+        startBuffet: async (tableId: number, packageId: number, guestCount: { adult: number, child: number }) => {
+            const startTime = new Date()
+            const duration = 90 // 90 minutes
+            const endTime = new Date(startTime.getTime() + duration * 60000)
+
+            await useApi('/api/buffet/start', {
+                method: 'POST',
+                body: {
+                    table_id: tableId,
+                    package_id: packageId,
+                    adults: guestCount.adult,
+                    children: guestCount.child,
+                    start_time: startTime.toISOString(),
+                    end_time: endTime.toISOString()
+                }
+            })
         }
     }
 })

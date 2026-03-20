@@ -1,29 +1,33 @@
-<script setup>
-const { data: prepareList } = await useApi('/api/prepare') // Items like 'Nasi', 'Sambal', 'Ayam Marinated'
+<script setup lang="ts">
+import type { ApiResponse, Prepare } from '~/types/master'
+
 const { user } = useAuth()
 
 const form = ref({
-    prepare_code: '',
+    prepare_code: 1,
     qty: 1,
     note: ''
 })
 
 const isProcessing = ref(false)
 
+const prepares = ref<Prepare[]>([])
+
 const submitPrepare = async () => {
     if (!form.value.prepare_code) return alert('Pilih bahan yang diproduksi!')
 
     isProcessing.value = true
     try {
-        await useApi('/api/prepare', {
+        await useApi('/api/kitchen/prepare', {
             method: 'POST',
             body: {
                 ...form.value,
-                branch_code: user.value?.username.split('_')[0]
+                branch_code: Number(user.value?.username.split('_')[0]),
+                storage: user.value?.username.split('_')[1]
             }
         })
         alert('Produksi berhasil! Stok bahan baku berkurang & stok hasil produksi bertambah.')
-        form.value = { prepare_code: '', qty: 1, note: '' }
+        form.value = { prepare_code: 1, qty: 1, note: '' }
     } catch (e) {
         console.log(e)
         alert('Gagal: Stok bahan baku mungkin tidak mencukupi.')
@@ -31,6 +35,17 @@ const submitPrepare = async () => {
         isProcessing.value = false
     }
 }
+
+onMounted(async () => {
+    const data = await useApi<Prepare[] | ApiResponse<Prepare[]>>('/api/prepare')
+    if (Array.isArray(data)) {
+        prepares.value = data
+    } else if (data && typeof data === 'object' && 'data' in data) {
+        prepares.value = (data as ApiResponse<Prepare[]>).data
+    } else {
+        prepares.value = []
+    }
+})
 </script>
 
 <template>
@@ -46,19 +61,23 @@ const submitPrepare = async () => {
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="space-y-6">
-                <div>
-                    <label class="block text-[10px] font-black uppercase mb-2 tracking-widest;">Item yang Dibuat</label>
+                <UFormField
+                    label="Item yang Dibuat"
+                    :ui="{ label: 'block text-[10px] font-black uppercase tracking-widest' }"
+                >
                     <USelectMenu
                         v-model="form.prepare_code"
-                        :items="prepareList"
-                        value-key="code"
+                        :items="prepares"
+                        value-key="id"
                         label-key="name"
                         class="w-full rounded-2xl font-black text-lg"
                     />
-                </div>
+                </UFormField>
 
-                <div>
-                    <label class="block text-[10px] font-black uppercase mb-2 tracking-widest;">Jumlah Produksi</label>
+                <UFormField
+                    label="Jumlah Produksi"
+                    :ui="{ label: 'block text-[10px] font-black uppercase tracking-widest' }"
+                >
                     <div class="flex items-center gap-4">
                         <UInput
                             v-model="form.qty"
@@ -68,24 +87,24 @@ const submitPrepare = async () => {
                         />
                         <span class="font-black italic">BATCH</span>
                     </div>
-                </div>
+                </UFormField>
             </div>
 
             <div class="bg-slate-50 rounded-4xl p-6 border border-dashed border-slate-200">
-                <h3 class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest text-center">
+                <h3 class="text-[10px] font-black uppercase mb-4 tracking-widest text-center">
                     Estimasi Penggunaan Bahan
                 </h3>
                 <div
                     v-if="form.prepare_code"
                     class="space-y-2"
                 >
-                    <div class="flex justify-between text-xs font-bold uppercase italic">
-                        <span>Bahan Baku A</span>
-                        <span>- {{ 2 * form.qty }} kg</span>
-                    </div>
-                    <div class="flex justify-between text-xs font-bold uppercase italic text-rose-500">
-                        <span>Bahan Baku B</span>
-                        <span>- {{ 0.5 * form.qty }} kg</span>
+                    <div
+                        v-for="item in prepares.find((item) => item.id === form.prepare_code)?.recipe"
+                        :key="item.id"
+                        class="flex justify-between text-xs font-bold uppercase italic"
+                    >
+                        <span>{{ item.item?.name }}</span>
+                        <span>- {{ item.quantity * form.qty }} {{ item.item?.unit }}</span>
                     </div>
                 </div>
                 <p
@@ -97,14 +116,18 @@ const submitPrepare = async () => {
             </div>
         </div>
 
-        <div class="mt-10">
-            <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest;">Catatan (Optional)</label>
-            <textarea
+        <UFormField
+            label="Catatan"
+            class="mt-6"
+            :ui="{ label: 'block text-[10px] font-black uppercase tracking-widest' }"
+        >
+            <UTextarea
                 v-model="form.note"
-                class="w-full p-5 bg-slate-50 border-none rounded-2xl font-black focus:ring-2 ring-indigo-500 h-24 pt-4"
+                required
+                class="w-full font-black focus:ring-2 ring-indigo-500"
                 placeholder="Contoh: Produksi untuk persiapan weekend..."
             />
-        </div>
+        </UFormField>
 
         <UButton
             :disabled="isProcessing"

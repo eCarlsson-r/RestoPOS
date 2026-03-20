@@ -71,8 +71,8 @@ const approveRequest = async () => {
 <template>
     <div class="space-y-4">
         <div class="grid grid-cols-2 gap-4 text-xs">
-            <div class="w-full grid grid-cols-7 gap-4 items-center">
-                <span class="text-gray-400">From:</span>
+            <div class="w-full grid grid-cols-8 gap-4 items-center">
+                <span class="text-gray-400 col-span-2">Request from:</span>
                 <USelect
                     :model-value="props.requestFrom"
                     readonly
@@ -88,8 +88,8 @@ const approveRequest = async () => {
                     :items="storageList"
                 />
             </div>
-            <div class="w-full grid grid-cols-7 gap-4 items-center">
-                <span class="text-gray-400">To:</span>
+            <div class="w-full grid grid-cols-8 gap-4 items-center">
+                <span class="text-gray-400 col-span-2">Requesting to:</span>
                 <USelect
                     :model-value="props.requestTo"
                     readonly

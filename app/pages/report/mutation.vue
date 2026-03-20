@@ -12,18 +12,33 @@ type Mutation = {
 }
 
 const branches = ref<Branch[]>([])
-const branchList = ref<SelectItem[]>([])
 const storageList = ref<SelectItem[]>([
     { label: 'Main Storage', value: 'MAIN' },
     { label: 'Kitchen', value: 'KTCN' },
     { label: 'Bartender', value: 'BART' }
 ])
 
+const { user } = useAuth()
+const isAdmin = computed(() => user.value?.type === 'ADMIN')
+
 const mutationFilter = ref({
-    branch: 'ALL',
+    branch: 0,
     storage: 'MAIN',
     start: new Date().toISOString().substr(0, 10),
     end: new Date().toISOString().substr(0, 10)
+})
+
+// Lockdown filter for non-admin users
+watchEffect(() => {
+    if (user.value && !isAdmin.value) {
+        mutationFilter.value.branch = Number(user.value.employee?.branch_id) || 0
+        // KITCHEN users are locked to their station identifier from username (e.g., KTCN or BART)
+        if (user.value.type === 'KITCHEN' && user.value.username.includes('_')) {
+            mutationFilter.value.storage = user.value.username.split('_')[1] || ''
+        } else {
+            mutationFilter.value.storage = 'MAIN'
+        }
+    }
 })
 
 const mutationColumns = [
@@ -61,11 +76,6 @@ onMounted(async () => {
     } else {
         branches.value = []
     }
-
-    branchList.value = branches.value.map(branch => ({
-        label: branch.name,
-        value: branch.id
-    }))
 })
 
 fetchMutation()
@@ -73,7 +83,7 @@ fetchMutation()
 
 <template>
     <UContainer class="p-6 space-y-6">
-        <div class="bg-primary-900 text-white p-8 rounded-[2.5rem] flex justify-between items-center">
+        <div class="flex justify-between items-center">
             <div>
                 <h2 class="text-2xl font-black uppercase italic tracking-tighter">
                     Stock Mutation
@@ -83,16 +93,51 @@ fetchMutation()
                 </p>
             </div>
             <div class="flex gap-2">
-                <USelectMenu
-                    v-model="mutationFilter.branch"
-                    :items="branchList"
-                    class="font-bold shadow-sm w-64"
-                />
-                <USelectMenu
-                    v-model="mutationFilter.storage"
-                    :items="storageList"
-                    class="font-bold shadow-sm w-64"
-                />
+                <UFormField
+                    label="Cabang"
+                    :ui="{ label: 'block text-[10px] font-black uppercase tracking-widest' }"
+                >
+                    <USelectMenu
+                        v-model="mutationFilter.branch"
+                        :items="branches"
+                        :disabled="!isAdmin"
+                        value-key="id"
+                        label-key="name"
+                        value-attribute="id"
+                        class="font-bold shadow-sm w-full"
+                    />
+                </UFormField>
+                <UFormField
+                    label="Gudang"
+                    :ui="{ label: 'block text-[10px] font-black uppercase tracking-widest' }"
+                >
+                    <USelect
+                        v-model="mutationFilter.storage"
+                        :items="storageList"
+                        :disabled="!isAdmin"
+                        class="font-bold shadow-sm w-full"
+                    />
+                </UFormField>
+                <UFormField
+                    label="Start Date"
+                    :ui="{ label: 'block text-[10px] font-black uppercase tracking-widest' }"
+                >
+                    <UInput
+                        v-model="mutationFilter.start"
+                        type="date"
+                        class="w-full shadow-sm"
+                    />
+                </UFormField>
+                <UFormField
+                    label="End Date"
+                    :ui="{ label: 'block text-[10px] font-black uppercase tracking-widest' }"
+                >
+                    <UInput
+                        v-model="mutationFilter.end"
+                        type="date"
+                        class="w-full shadow-sm"
+                    />
+                </UFormField>
                 <UButton
                     @click="fetchMutation"
                 >

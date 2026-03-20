@@ -34,10 +34,10 @@ const playNotificationSound = (type: string) => {
 const getActionsForType = (payload: StationNotificationPayload) => {
     const actions = []
 
-    if (payload['sales-id']) {
+    if (payload.sales_id) {
         actions.push({
             label: 'View Order',
-            click: () => navigateTo(`/orders/${payload['sales-id']}`)
+            click: () => navigateTo(`/orders/${payload.sales_id}`)
         })
     }
 
@@ -66,12 +66,13 @@ const handleNotification = (payload: StationNotificationPayload) => {
     // 3. Logic-specific updates (e.g., Sold Out)
     if (payload.type === 'soldout' || payload.type === 'available') {
         const productStore = useProductStore()
-        productStore.syncStatus(payload.data.id, payload.type === 'soldout')
+        productStore.syncStatus(payload.product_id, payload.type === 'soldout')
     }
 }
 
 const getNotificationColor = (type: string) => {
     const map = {
+        called: 'primary' as const,
         sales: 'primary' as const,
         pendingorder: 'warning' as const,
         cancelorder: 'error' as const,

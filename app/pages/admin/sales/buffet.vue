@@ -4,7 +4,7 @@ import { useMaster } from '~/composables/useMaster'
 import type { Sale } from '~/types/master'
 import type { TableColumn } from '@nuxt/ui'
 
-const { items, fetchItems } = useMaster<Sale>('sales/buffet')
+const { items, fetchItems } = useMaster<Sale>('buffet/orders')
 
 onMounted(() => {
     fetchItems()
@@ -16,7 +16,7 @@ const columns: TableColumn<Sale>[] = [
     { accessorKey: 'branch-name', header: 'Branch Name' },
     { accessorKey: 'customer-name', header: 'Customer Name' },
     { accessorKey: 'room-name', header: 'Room Number' },
-    { accessorKey: 'event-status', header: 'Table Number' }
+    { accessorKey: 'event-status', header: 'Status' }
 ]
 
 const getStatus = (value: 'O' | 'P' | 'C' | 'D' | 'X') => {

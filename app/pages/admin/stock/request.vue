@@ -69,7 +69,7 @@ const openRespond = (req: KitchenRequest) => {
                     :request-to="selectedItem.to_branch.id"
                     :request-to-storage="selectedItem.to_storage"
                     :request-items="selectedItem.items"
-                    @close="isFormOpen = false"
+                    @close="isFormOpen = false; fetchItems()"
                 />
             </template>
         </UModal>

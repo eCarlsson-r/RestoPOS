@@ -21,15 +21,15 @@ const storageList = ref<SelectItem[]>([
 ])
 
 const addRecordRow = () => {
-    if (form.value.items) form.value.items?.push({
+    if (form.value.records) form.value.records?.push({
         item_code: 0,
         item_type: 'INGR',
-        qty: 0
+        quantity: 0
     })
-    else form.value.items = [{
+    else form.value.records = [{
         item_code: 0,
         item_type: 'INGR',
-        qty: 0
+        quantity: 0
     }]
 }
 
@@ -73,7 +73,7 @@ onMounted(async () => {
                 <div class="grid grid-cols-2 gap-2">
                     <USelectMenu
                         v-model="form.from_branch_id"
-                        :items="branches"
+                        :records="branches"
                         label-key="name"
                         value-key="id"
                         value-attribute="id"
@@ -81,7 +81,7 @@ onMounted(async () => {
                     />
                     <USelect
                         v-model="form.from_storage"
-                        :items="storageList"
+                        :records="storageList"
                     />
                 </div>
             </div>
@@ -92,7 +92,7 @@ onMounted(async () => {
                 <div class="grid grid-cols-2 gap-2">
                     <USelectMenu
                         v-model="form.to_branch_id"
-                        :items="branches"
+                        :records="branches"
                         label-key="name"
                         value-key="id"
                         placeholder="Branch"
@@ -100,7 +100,7 @@ onMounted(async () => {
                     />
                     <USelect
                         v-model="form.to_storage"
-                        :items="storageList"
+                        :records="storageList"
                     />
                 </div>
             </div>
@@ -111,32 +111,32 @@ onMounted(async () => {
                 Daftar Produk
             </h4>
             <div
-                v-for="(record, idx) in form.items"
+                v-for="(record, idx) in form.records"
                 :key="idx"
-                class="grid grid-cols-3 gap-2 mb-2 items-center"
+                class="grid grid-cols-3 gap-2 mb-2 records-center"
             >
                 <UFormField label="Item Type">
                     <URadioGroup
                         v-model="record.item_type"
                         orientation="horizontal"
-                        :items="[{ label: 'Ingredient', value: 'INGR' }, { label: 'Utility', value: 'UTLT' }]"
+                        :records="[{ label: 'Ingredient', value: 'INGR' }, { label: 'Utility', value: 'UTLT' }]"
                     />
                 </UFormField>
 
                 <UFormField label="Item">
                     <USelect
                         v-model="record.item_code"
-                        :items="record.item_type === 'INGR' ? ingredients : utilities"
+                        :records="record.item_type === 'INGR' ? ingredients : utilities"
                         label-key="name"
                         value-key="id"
                         class="w-full font-bold shadow-sm"
                     />
                 </UFormField>
 
-                <div class="flex gap-2 items-center">
+                <div class="flex gap-2 records-center">
                     <UFormField label="Quantity">
                         <UInput
-                            v-model="record.qty"
+                            v-model="record.quantity"
                             type="number"
                         >
                             <template #trailing>
@@ -147,7 +147,7 @@ onMounted(async () => {
 
                     <UButton
                         variant="ghost"
-                        @click="form.items?.splice(idx, 1)"
+                        @click="form.records?.splice(idx, 1)"
                     >
                         <UIcon name="i-lucide-trash-2" />
                     </UButton>

@@ -29,27 +29,6 @@ onMounted(() => {
             playNotificationSound(notification.type)
         })
 
-    $echo.private(`waiter.${user.value?.id}`)
-        .listen('OrderReady', (e) => {
-            toast.add({
-                title: 'Order Ready! 🍽️',
-                description: `Table ${e.sale.table_number} of floor ${e.sale.floor_number} is ready to serve.`,
-                color: 'primary'
-            })
-        })
-
-    $echo.channel('inventory')
-        .listen('ProductStatusChanged', (e) => {
-            const productStore = useProductStore()
-            productStore.toggleSoldOutLocally(e.productId, e.isSoldOut)
-
-            toast.add({
-                title: 'Menu Update',
-                description: `An item was just marked as ${e.isSoldOut ? 'Sold Out' : 'Available'}`,
-                color: 'info'
-            })
-        })
-
     const handleNotificationClick = (n) => {
         if (n.type === 'pendingorder') navigateTo('/kitchen')
         if (n.type === 'movestock') navigateTo('/inventory/transfer/' + n.move_id)
@@ -61,15 +40,13 @@ onMounted(() => {
 <template>
     <div>
         <UHeader>
-            <template #left>
+            <template #title>
                 <NuxtLink to="/">
                     <AppLogo class="w-auto h-12 shrink-0" />
                 </NuxtLink>
             </template>
 
-            <template #default>
-                <TemplateMenu />
-            </template>
+            <TemplateMenu />
 
             <template #right>
                 <UColorModeButton />

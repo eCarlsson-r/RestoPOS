@@ -2,9 +2,13 @@
 import type { SelectItem } from '@nuxt/ui'
 import type { ApiResponse, Branch, Ingredient, KitchenRequestItem, Utility } from '~/types/master'
 
+const { user } = useAuth()
+
 const form = ref({
     from_branch: 1,
     from_storage: 'MAIN',
+    to_branch: Number(user.value?.username.split('_')[0]),
+    to_storage: user.value?.username.split('_')[1],
     items: [] as KitchenRequestItem[]
 })
 
@@ -22,15 +26,17 @@ const addItem = () => {
     currentItem.value = { item_code: 1, quantity: 1, item_type: 'INGR' } // Reset
 }
 
+const removeItem = (itemCode: number) => {
+    form.value.items = form.value.items.filter(item => item.item_code !== itemCode)
+}
+
 const submitRequest = async () => {
-    await useApi('/api/inventory/requests', {
+    await useApi('/api/stock/requests', {
         method: 'POST',
         body: form.value
     })
-    emit('success')
+    navigateTo('/kitchen')
 }
-
-const emit = defineEmits(['success'])
 
 const branches = ref<Branch[]>([])
 const ingredients = ref<Ingredient[]>([])
@@ -122,12 +128,13 @@ onMounted(async () => {
             <UFormField
                 label="Qty"
             >
-                <div class="flex gap-2">
+                <div class="flex gap-2 items-center">
                     <UInput
                         v-model="currentItem.quantity"
                         type="number"
                         class="w-full"
                     />
+                    <span class="text-slate-400 font-bold italic">{{ currentItem.item_type === 'INGR' ? ingredients.find((item) => item.id === currentItem.item_code)?.unit : utilities.find((item) => item.id === currentItem.item_code)?.unit }}</span>
                     <UButton
                         icon="i-lucide-plus"
                         @click="addItem"
@@ -140,6 +147,22 @@ onMounted(async () => {
             :data="form.items"
             :columns="[{ accessorKey: 'item_code', header: 'Item' }, { accessorKey: 'quantity', header: 'Quantity' }]"
         >
+            <template #item_code-cell="{ row }">
+                {{ row.original.item_type === 'INGR' ? ingredients.find((item) => item.id === row.original.item_code)?.name : utilities.find((item) => item.id === row.original.item_code)?.name }}
+            </template>
+            <template #quantity-cell="{ row }">
+                <div class="flex gap-2 items-center">
+                    <UInput
+                        v-model="row.original.quantity"
+                        type="number"
+                    />
+                    <span class="text-slate-400 font-bold italic">{{ row.original.item_type === 'INGR' ? ingredients.find((item) => item.id === row.original.item_code)?.unit : utilities.find((item) => item.id === row.original.item_code)?.unit }}</span>
+                    <UButton
+                        icon="i-lucide-minus"
+                        @click="removeItem(row.original.item_code)"
+                    />
+                </div>
+            </template>
             <template #empty>
                 <div class="py-10 text-center italic text-slate-400">
                     No items added yet.

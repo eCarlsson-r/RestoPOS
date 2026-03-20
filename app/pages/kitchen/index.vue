@@ -1,43 +1,59 @@
 <script setup lang="ts">
-import type { KitchenTicket, KitchenTicketItem, Product, ApiResponse } from '~/types/master'
+import type { KitchenTicket, KitchenTicketItem, Product, ApiResponse, StockMove } from '~/types/master'
 
-const { $echo } = useNuxtApp() // Assuming you have an Echo plugin
+const { $echo } = useNuxtApp()
 const { user } = useAuth()
 
-const branch = user.value?.username.split('_')[0]
-const station = user.value?.username.split('_')[1]
-// Real-time active orders
-const { data: activeOrders } = await useLazyAsyncData<ApiResponse<KitchenTicket[]>, Error, KitchenTicket[]>(
+// Safely split username
+const branch = computed(() => user.value?.username?.split('_')[0] || '')
+const station = computed(() => user.value?.username?.split('_')[1] || '')
+
+// 1. Fetch orders (Lazy, no await)
+const { data: activeOrders, refresh } = useLazyAsyncData<KitchenTicket[]>(
     'kitchen-tickets',
-    () => useApi<ApiResponse<KitchenTicket[]>>('/api/kitchen/tickets', { params: { station } }),
+    () => useApi<ApiResponse<KitchenTicket[]>>('/api/kitchen/tickets', {
+        params: { station: station.value }
+    }).then(res => res.data),
     {
-        default: () => [], // Solves 'Object is possibly undefined'
-        transform: res => res.data // If your API wraps response in a { data: [] }
+        default: () => [],
+        watch: [station]
     }
 )
 
-// Sold out state
-const { data: allProducts } = await useApi<{ data: Product[] }>('/api/products')
+// 2. Fetch movements (Lazy, no await)
+const { data: incomingStockMovement, refresh: refreshMovement } = useLazyAsyncData<StockMove[]>(
+    'incoming-stock-movement',
+    () => useApi<ApiResponse<StockMove[]>>('/api/kitchen/movement', {
+        params: { branch: branch.value, station: station.value }
+    }).then(res => res.data),
+    {
+        default: () => [],
+        watch: [branch, station]
+    }
+)
 
-const products = computed(() => allProducts || [])
+// 3. Fetch products using useAsyncData
+const { data: allProducts } = useAsyncData('products-list', () => useApi<{ data: Product[] }>('/api/products'))
+
+const products = computed(() => allProducts.value?.data || [])
 const soldOutProducts = ref<Product[]>([])
 
 const playChime = () => {
     const audio = new Audio('/sounds/new-order.mp3')
-    audio.play().catch(() => {}) // Handle browser autoplay blocking
+    audio.play().catch(() => {})
 }
 
 // Initialize soldOutProducts from the fetched data
 onMounted(() => {
-    soldOutProducts.value = products.value.filter(p => p.soldout === 1)
+    if (products.value) {
+        soldOutProducts.value = products.value.filter(p => p.soldout === 1)
+    }
 
     if (!$echo) return
 
     // Listen for new orders for this specific kitchen station
-    $echo.channel(`kitchen.${branch}.${station}`)
-        // Specify the type instead of 'any' to fix 'Unexpected any'
+    $echo.channel(`kitchen.${branch.value}.${station.value}`)
         .listen('OrderDispatched', (e: { ticket: KitchenTicket }) => {
-            // Use .value to fix 'Cannot assign to constant'
             if (activeOrders.value) {
                 activeOrders.value = [e.ticket, ...activeOrders.value]
             }
@@ -97,7 +113,7 @@ watch(soldOutProducts, async (newVal, oldVal) => {
         <div class="grid grid-cols-4 gap-6">
             <div class="col-span-4 lg:col-span-3 space-y-4">
                 <div
-                    v-if="!activeOrders || !activeOrders.length"
+                    v-if="!activeOrders?.length"
                     class="grid grid-cols-2 gap-4"
                 >
                     <USkeleton
@@ -115,6 +131,7 @@ watch(soldOutProducts, async (newVal, oldVal) => {
                         v-for="order in activeOrders"
                         :key="order.id"
                         :order="order"
+                        @refresh="refresh()"
                     />
                 </div>
             </div>
@@ -151,18 +168,32 @@ watch(soldOutProducts, async (newVal, oldVal) => {
                 </section>
 
                 <section class="p-6 lg:p-3 rounded-2xl border border-primary-500/20">
-                    <h3 class="text-xs font-black uppercase mb-4 tracking-widest">
-                        Recipe Batching
-                    </h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xs font-black uppercase mb-4 tracking-widest">
+                            Incoming Stock Movement
+                        </h3>
+                        <UButton
+                            color="primary"
+                            variant="solid"
+                            size="xs"
+                            icon="i-lucide-refresh-cw"
+                            @click="refreshMovement()"
+                        />
+                    </div>
                     <p class="text-xs mb-4 italic">
-                        Convert raw ingredients into prepared stock (e.g. Sambal, Marinated Chicken).
+                        Approved requests are stocking the requested items, please confirm.
                     </p>
-                    <UButton
-                        block
-                        @click="navigateTo('/kitchen/prepare')"
+                    <div
+                        v-if="(incomingStockMovement?.length ?? 0) > 0"
+                        class="grid grid-cols-2 md:grid-cols-1 gap-4"
                     >
-                        Open Prepare Tool
-                    </UButton>
+                        <IncomingTransferCard
+                            v-for="item in incomingStockMovement"
+                            :key="item.id"
+                            :transfer="item"
+                            @refresh="refreshMovement()"
+                        />
+                    </div>
                 </section>
             </div>
         </div>

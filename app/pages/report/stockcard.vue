@@ -1,5 +1,10 @@
 <script setup>
-const dateRange = ref({ start: new Date(), end: new Date() })
+import { today, getLocalTimeZone } from '@internationalized/date'
+
+const dateRange = ref({
+    start: today(getLocalTimeZone()),
+    end: today(getLocalTimeZone())
+})
 const selectedIngredient = ref(null)
 const { data: ingredients } = await useApi('/api/ingredients')
 const selectedUtility = ref(null)
@@ -12,14 +17,31 @@ const storageList = ref([
     { label: 'Kitchen', value: 'KTCN' },
     { label: 'Bartender', value: 'BART' }
 ])
-const selectedType = ref('ingredient')
+const selectedType = ref('INGR')
+const { user } = useAuth()
+const isAdmin = computed(() => user.value?.type === 'ADMIN')
+
+watchEffect(() => {
+    if (user.value && !isAdmin.value) {
+        if (user.value.type === 'KITCHEN' && user.value.username.includes('_')) {
+            selectedBranch.value = Number(user.value.username.split('_')[0]) || null
+            selectedStorage.value = user.value.username.split('_')[1]
+        } else {
+            selectedBranch.value = Number(user.value.employee?.branch_id) || null
+            selectedStorage.value = 'MAIN'
+        }
+    }
+})
+
 const logs = ref([])
 
 const fetchAudit = async () => {
     const params = {
         item_type: selectedType.value,
-        start: dateRange.value.start.toISOString().substr(0, 10),
-        end: dateRange.value.end.toISOString().substr(0, 10)
+        branch_id: selectedBranch.value,
+        storage: selectedStorage.value,
+        start: dateRange.value.start.toString(),
+        end: dateRange.value.end.toString()
     }
     if (selectedType.value === 'INGR') {
         params.item_code = selectedIngredient.value
@@ -34,51 +56,94 @@ const fetchAudit = async () => {
 
 <template>
     <UContainer class="p-6">
-        <div class="flex justify-between items-start mb-8">
+        <div class="flex justify-between items-center mb-8 gap-4">
             <h1 class="text-3xl font-black uppercase italic tracking-tighter">
                 Kartu Stok (Audit)
             </h1>
-            <div class="grid grid-cols-5 gap-4">
-                <USelect
-                    v-model="selectedType"
-                    class="font-bold shadow-sm w-full"
-                    :items="[
-                        { value: 'INGR', label: 'Bahan' },
-                        { value: 'UTLT', label: 'Alat' }
-                    ]"
-                />
-                <USelectMenu
-                    v-if="selectedType === 'INGR'"
-                    v-model="selectedIngredient"
-                    :items="ingredients"
-                    value-key="id"
-                    label-key="name"
-                    value-attribute="id"
-                    class="font-bold shadow-sm w-full"
-                />
-                <USelectMenu
-                    v-if="selectedType === 'UTLT'"
-                    v-model="selectedUtility"
-                    :items="utilities"
-                    value-key="id"
-                    label-key="name"
-                    value-attribute="id"
-                    class="font-bold shadow-sm w-full"
-                />
-                <USelectMenu
-                    v-model="selectedBranch"
-                    :items="branchList"
-                    value-key="id"
-                    label-key="name"
-                    value-attribute="id"
-                    class="font-bold shadow-sm w-full"
-                />
-                <USelectMenu
-                    v-model="selectedStorage"
-                    :items="storageList"
-                    class="font-bold shadow-sm w-full"
-                />
+            <div class="grid grid-cols-4 gap-4">
+                <UFormField
+                    label="Tipe"
+                    class="w-full"
+                    :ui="{ label: 'block text-[10px] font-black uppercase tracking-widest' }"
+                >
+                    <USelect
+                        v-model="selectedType"
+                        class="font-bold shadow-sm w-full"
+                        :items="[
+                            { value: 'INGR', label: 'Bahan' },
+                            { value: 'UTLT', label: 'Alat' }
+                        ]"
+                    />
+                </UFormField>
+
+                <UFormField
+                    label="Item"
+                    class="w-full"
+                    :ui="{ label: 'block text-[10px] font-black uppercase tracking-widest' }"
+                >
+                    <USelectMenu
+                        v-if="selectedType === 'INGR'"
+                        v-model="selectedIngredient"
+                        :items="ingredients"
+                        value-key="id"
+                        label-key="name"
+                        value-attribute="id"
+                        class="font-bold shadow-sm w-full"
+                    />
+                    <USelectMenu
+                        v-if="selectedType === 'UTLT'"
+                        v-model="selectedUtility"
+                        :items="utilities"
+                        value-key="id"
+                        label-key="name"
+                        value-attribute="id"
+                        class="font-bold shadow-sm w-full"
+                    />
+                </UFormField>
+
+                <UFormField
+                    label="Cabang"
+                    class="w-full"
+                    :ui="{ label: 'block text-[10px] font-black uppercase tracking-widest' }"
+                >
+                    <USelectMenu
+                        v-model="selectedBranch"
+                        :items="branchList"
+                        :disabled="!isAdmin"
+                        value-key="id"
+                        label-key="name"
+                        value-attribute="id"
+                        class="font-bold shadow-sm w-full"
+                    />
+                </UFormField>
+
+                <UFormField
+                    label="Gudang"
+                    class="w-full"
+                    :ui="{ label: 'block text-[10px] font-black uppercase tracking-widest' }"
+                >
+                    <USelect
+                        v-model="selectedStorage"
+                        :items="storageList"
+                        :disabled="!isAdmin"
+                        class="font-bold shadow-sm w-full"
+                    />
+                </UFormField>
+            </div>
+            <div class="grid grid-cols-4 gap-4 items-end">
+                <UFormField
+                    label="Periode"
+                    class="col-span-3"
+                    :ui="{ label: 'block text-[10px] font-black uppercase tracking-widest' }"
+                >
+                    <UInputDate
+                        v-model="dateRange"
+                        range
+                        class="font-bold shadow-sm w-full"
+                    />
+                </UFormField>
                 <UButton
+                    block
                     class="justify-center font-black uppercase italic"
                     @click="fetchAudit"
                 >
@@ -115,7 +180,7 @@ const fetchAudit = async () => {
                         class="border-t border-slate-50 hover:bg-slate-50/50"
                     >
                         <td class="p-6 text-slate-400 text-xs">
-                            {{ log.created_at }}
+                            {{ log.date }}
                         </td>
                         <td class="p-6">
                             {{ log.description }}

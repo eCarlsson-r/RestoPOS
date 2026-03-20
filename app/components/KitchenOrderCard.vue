@@ -4,6 +4,7 @@ import type { KitchenTicket } from '~/types/master'
 const props = defineProps<{
     order: KitchenTicket
 }>()
+const emit = defineEmits(['refresh'])
 const elapsed = ref('')
 
 const calculateElapsed = () => {
@@ -31,8 +32,8 @@ const statusColors = {
 }
 
 const updateStatus = async (status: string) => {
-    // Call API to notify waiter/change status
     await useApi(`/api/kitchen/order/${props.order.sales_id}/status`, { method: 'POST', body: { status } })
+    emit('refresh')
 }
 </script>
 

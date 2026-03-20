@@ -1,4 +1,4 @@
-import type { User } from '~/types/master'
+import type { User, AuthData } from '~/types/master'
 
 export const useAuth = () => {
     const config = useRuntimeConfig()
@@ -8,22 +8,22 @@ export const useAuth = () => {
 
     const login = async (credentials: { username: string, password: string }) => {
         const url = config.public.apiBase || 'http://localhost:8000/'
-        const result = await $fetch<{ data: User[], token: string }>(url + 'api/login', {
+        const result = await $fetch<{ data: AuthData[], token: string }>(url + 'api/login', {
             method: 'POST',
             body: credentials
         })
 
-        const data = result.data
-        if (!data || data.length === 0 || !data[0]) {
+        if (!result.data || !result.data[0]) {
             throw new Error('Invalid login response')
         }
 
-        const loggedInUser: User = data[0]
-
-        // Set token from the backend response
+        // The API returns { user: {...}, employee: {...} } inside data[0]
+        const data = result.data[0]
+        const loggedInUser: User = data.user
         token.value = result.token
-
         user.value = loggedInUser
+        console.info(loggedInUser)
+
         if (loggedInUser.employee?.branch_id) {
             branch.value = loggedInUser.employee.branch_id
         }
@@ -40,8 +40,9 @@ export const useAuth = () => {
     const checkAuth = async () => {
         if (token.value && !user.value) {
             try {
-                const response = await useApi<{ data: User }>('/api/user-profile')
-                user.value = response.data
+                // Adjusting to extract the nested 'user' object
+                const response = await useApi<{ data: AuthData }>('/api/user-profile')
+                user.value = response.data.user
             } catch (e) {
                 if (e) logout()
             }

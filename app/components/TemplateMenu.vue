@@ -34,7 +34,7 @@ const navigation = computed<NavigationMenuItem[]>(() => {
                     children: [
                         {
                             label: 'Purchase Order',
-                            icon: 'i-lucide-file-text',
+                            icon: 'i-lucide-receipt-text',
                             to: '/admin/purchase/order'
                         },
                         {
@@ -141,6 +141,11 @@ const navigation = computed<NavigationMenuItem[]>(() => {
                             to: '/report/sales'
                         },
                         {
+                            label: 'Pembelian',
+                            icon: 'i-lucide-chart-line',
+                            to: '/report/purchase'
+                        },
+                        {
                             label: 'Kartu Stok',
                             icon: 'i-lucide-wallet-cards',
                             to: '/report/stockcard'
@@ -178,8 +183,32 @@ const navigation = computed<NavigationMenuItem[]>(() => {
                             label: 'Kartu Stok',
                             icon: 'i-lucide-wallet-cards',
                             to: '/report/stockcard'
+                        },
+                        {
+                            label: 'Mutasi Stok',
+                            icon: 'i-lucide-logs',
+                            to: '/report/mutation'
                         }
                     ]
+                }
+            ]
+        case 'CASHIER':
+        case 'WAITER':
+            return [
+                {
+                    label: 'POS Dashboard',
+                    icon: 'i-lucide-layout-dashboard',
+                    to: '/pos/floor-map'
+                },
+                {
+                    label: 'Active Sales',
+                    icon: 'i-lucide-list',
+                    to: '/admin/sales/alacarte'
+                },
+                {
+                    label: 'Reports',
+                    icon: 'i-lucide-file-text',
+                    to: '/report/sales'
                 }
             ]
         default:
