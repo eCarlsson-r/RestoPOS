@@ -6,7 +6,7 @@ const props = defineProps<{
 }>()
 
 const receiveTransfer = async (transfer: StockMove) => {
-    await useApi('/api/stock/receive/' + transfer.id, {
+    await useApi('stock/receive/' + transfer.id, {
         method: 'POST'
     })
 }

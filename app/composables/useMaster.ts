@@ -6,15 +6,22 @@ export const useMaster = <T extends { id?: number }>(endpoint: string) => {
     const loading = ref(false)
     const selectedItem = ref<T | null>(null)
     const isFormOpen = ref(false)
+    const api = useApi()
 
-    const fetchItems = async () => {
+    const fetchItems = async (params: Record<string, string | number | boolean | null | undefined> = {}) => {
         loading.value = true
         try {
-            const response = await useApi<T[] | ApiResponse<T[]>>(`/api/${endpoint}`)
+            const response = await api<T[] | ApiResponse<T[]>>(`${endpoint}`, { params })
+            console.log(`[useMaster] Fetched ${endpoint}:`, response)
+
             const result = (response && typeof response === 'object' && 'data' in response)
                 ? (response as ApiResponse<T[]>).data
                 : (response as T[])
-            items.value = [...result] // Spread to trigger a new reference
+
+            items.value = Array.isArray(result) ? result : []
+        } catch (e) {
+            console.error(`[useMaster] Failed to fetch ${endpoint}:`, e)
+            items.value = []
         } finally {
             loading.value = false
         }
@@ -22,23 +29,23 @@ export const useMaster = <T extends { id?: number }>(endpoint: string) => {
 
     const saveItem = async (formData: T | FormData) => {
         const method = 'POST'
-        const url = `/api/${endpoint}`
-        await useApi(url, { method, body: formData })
+        const url = `${endpoint}`
+        await api(url, { method, body: formData })
         await fetchItems()
         isFormOpen.value = false
     }
 
     const deleteItem = async (formData: T) => {
         const method = 'DELETE'
-        const url = `/api/${endpoint}/${formData.id}`
-        await useApi(url, { method })
+        const url = `${endpoint}/${formData.id}`
+        await api(url, { method })
         await fetchItems()
     }
 
     const deleteExistingImage = async (id: number) => {
         const method = 'DELETE'
-        const url = `/api/${endpoint}/image/${id}`
-        await useApi(url, { method })
+        const url = `${endpoint}/image/${id}`
+        await api(url, { method })
         await fetchItems()
     }
 

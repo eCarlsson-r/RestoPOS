@@ -17,7 +17,7 @@ const destinationTable = ref(null)
 const confirmMove = async () => {
     if (!destinationTable.value) return
 
-    await useApi('/api/tables/move', {
+    await useApi('tables/move', {
         method: 'POST',
         body: {
             old_table: props.sourceTable,

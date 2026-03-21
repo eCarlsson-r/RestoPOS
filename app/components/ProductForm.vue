@@ -107,7 +107,7 @@ const compositionItems = computed(() => {
 
 onMounted(async () => {
     if (props.type === 'product') {
-        const data = await useApi<Category[] | ApiResponse<Category[]>>('/api/categories')
+        const data = await useApi<Category[] | ApiResponse<Category[]>>('categories')
         if (Array.isArray(data)) {
             categories.value = data
         } else if (data && typeof data === 'object' && 'data' in data) {
@@ -125,8 +125,8 @@ onMounted(async () => {
     }
 
     const [ingrData, prepData] = await Promise.all([
-        useApi<Ingredient[] | ApiResponse<Ingredient[]>>('/api/ingredients'),
-        useApi<Prepare[] | ApiResponse<Prepare[]>>('/api/prepare')
+        useApi<Ingredient[] | ApiResponse<Ingredient[]>>('ingredients'),
+        useApi<Prepare[] | ApiResponse<Prepare[]>>('prepare')
     ])
 
     if (Array.isArray(ingrData)) allIngredients.value = ingrData

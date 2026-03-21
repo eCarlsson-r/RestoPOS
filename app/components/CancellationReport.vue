@@ -13,20 +13,16 @@
             :rows="voidData"
             :columns="columns"
         >
-            <template #reason-data="{ row }">
-                <span class="text-xs font-bold text-rose-500 italic uppercase">
-                    "{{ row.reason }}"
+            <template #date-data="{ row }">
+                <span class="text-xs font-bold text-slate-500 italic uppercase">
+                    {{ new Date(row.date).toLocaleDateString('id-ID') }}
                 </span>
             </template>
 
-            <template #authorized_by-data="{ row }">
-                <UBadge
-                    color="white"
-                    variant="solid"
-                    class="border border-slate-200 text-slate-700 font-black italic"
-                >
-                    {{ row.authorized_by }}
-                </UBadge>
+            <template #total_price-data="{ row }">
+                <span class="font-bold text-rose-500 italic">
+                    Rp {{ row.total_price.toLocaleString() }}
+                </span>
             </template>
         </UTable>
     </div>
@@ -41,16 +37,17 @@ const props = defineProps({
 })
 
 const totalLost = computed(() => {
-    return props.voidData.reduce((acc, item) => acc + item.total_lost, 0)
+    return props.voidData.reduce((acc, item) => acc + item['total_price'], 0)
 })
 
 const columns = [
-    { key: 'time', label: 'Time' },
-    { key: 'invoice', label: 'Inv #' },
-    { key: 'items', label: 'Items Voided' },
-    { key: 'reason', label: 'Reason' },
-    { key: 'waiter', label: 'Waiter' },
-    { key: 'authorized_by', label: 'Auth By' },
-    { key: 'total_lost', label: 'Amount' }
+    { accessorKey: 'date', header: 'Date' },
+    { accessorKey: 'sales_id', header: 'Invoice' },
+    { accessorKey: 'branch_name', header: 'Branch' },
+    { accessorKey: 'item_name', header: 'Item' },
+    { accessorKey: 'quantity', header: 'Qty' },
+    { accessorKey: 'item_price', header: 'Price' },
+    { accessorKey: 'discount_percent', header: 'Disc%' },
+    { accessorKey: 'total_price', header: 'Amount' }
 ]
 </script>

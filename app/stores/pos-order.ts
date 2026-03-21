@@ -8,11 +8,19 @@ interface BasketItem extends SaleRecord {
 export const useOrderStore = defineStore('order', {
     state: () => ({
         basket: [] as BasketItem[],
-        employee: ''
+        employee: '',
+        activeBuffet: null as {
+            id: number
+            product_ids: number[]
+        } | null
     }),
     actions: {
-        addProductToBasket(product: Product) {
+        addProductToBasket(product: Product): boolean {
+            const isBuffetItem = this.activeBuffet?.product_ids.includes(product.id)
+            const price = isBuffetItem ? 0 : product.price
+
             const existing = this.basket.find(i => i.item_code === product.id && !i.is_sent)
+
             if (existing) {
                 existing.quantity++
             } else {
@@ -21,14 +29,16 @@ export const useOrderStore = defineStore('order', {
                     item_type: 'product',
                     item_code: product.id,
                     quantity: 1,
-                    item_price: product.price,
+                    item_price: price, // Will be 0 if included in buffet
                     discount_pcnt: 0,
                     discount_amnt: 0,
-                    item_note: '',
+                    item_note: isBuffetItem ? '[BUFFET]' : '',
                     item_status: 'O',
                     is_sent: false
                 })
             }
+
+            return isBuffetItem || false // Return status to the UI
         },
         addPackageToBasket(paket: Package) {
             const existing = this.basket.find(i => i.item_code === paket.id && !i.is_sent)
@@ -50,11 +60,11 @@ export const useOrderStore = defineStore('order', {
             }
         },
         removeFromBasket(item: BasketItem) {
-            const existing = this.basket.find(i => i.item_code === item.id && !i.is_sent)
+            const existing = this.basket.find(i => i.item_code === item.item_code && !i.is_sent)
             if (existing) {
                 existing.quantity--
                 if (existing.quantity === 0) {
-                    this.basket = this.basket.filter(i => i.id !== item.id || i.is_sent)
+                    this.basket = this.basket.filter(i => i.item_code !== item.item_code || i.is_sent)
                 }
             }
         },
@@ -62,7 +72,14 @@ export const useOrderStore = defineStore('order', {
             this.basket = []
         },
         async loadBasket(salesId: number) {
-            const sale = await useApi<Sale>(`/api/sales/${salesId}`)
+            const sale = await useApi<Sale>(`sales/${salesId}`)
+            if (sale.buffet) {
+                this.activeBuffet = {
+                    id: sale.buffet.id,
+                    product_ids: sale.buffet.products?.map(p => p.id) || []
+                }
+            }
+
             this.basket = (sale.records || []).map((record: SaleRecord & { product?: Product }) => ({
                 item: record.product!,
                 item_type: 'product',
@@ -92,14 +109,18 @@ export const useOrderStore = defineStore('order', {
             }
             if (salesId) formData.sales_id = salesId
 
-            const sales = await useApi('/api/sales', {
+            const sales = await useApi('sales', {
                 method: 'POST',
                 body: formData
             })
 
             // Mark as sent so they don't print twice
-            this.basket.forEach(i => i.is_sent = true)
-            return sales
+            unsentItems.forEach(i => i.is_sent = true)
+
+            return {
+                sales,
+                sentItems: unsentItems
+            }
         },
         // In your Table Store / Order Logic
         startBuffet: async (tableId: number, packageId: number, guestCount: { adult: number, child: number }) => {
@@ -107,7 +128,7 @@ export const useOrderStore = defineStore('order', {
             const duration = 90 // 90 minutes
             const endTime = new Date(startTime.getTime() + duration * 60000)
 
-            await useApi('/api/buffet/start', {
+            await useApi('buffet/start', {
                 method: 'POST',
                 body: {
                     table_id: tableId,

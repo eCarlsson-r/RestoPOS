@@ -18,7 +18,7 @@ function openNewForm() {
 async function receivePurchase(item: PurchaseOrder) {
     const confirm = window.confirm('Are you sure you want to receive this purchase order?')
     if (confirm) {
-        await useApi('/api/purchasing/receive', {
+        await useApi('purchasing/receive', {
             method: 'POST',
             body: {
                 order_id: item.id

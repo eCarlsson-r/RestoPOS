@@ -236,7 +236,7 @@ watch(remainingBalance, (newVal) => {
 }, { immediate: true })
 
 const verifyVoucher = async () => {
-    const { data } = await useApi(`/api/vouchers/${voucherCode.value}`)
+    const { data } = await useApi(`vouchers/${voucherCode.value}`)
     if (data) {
         voucherMessage.value = data.message
     }
@@ -280,7 +280,7 @@ const removePayment = (index) => {
 
 const processPayment = async () => {
     try {
-        const result = await useApi('/api/sales/checkout', {
+        const result = await useApi('sales/checkout', {
             method: 'POST',
             body: {
                 sales_id: props.salesId,

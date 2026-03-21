@@ -34,8 +34,8 @@ const getColumnsFor = (type) => {
     }
 }
 
-const { data: branches } = await useApi('/api/branches')
-const { data: suppliers } = await useApi('/api/suppliers')
+const { data: branches } = await useApi('branches')
+const { data: suppliers } = await useApi('suppliers')
 const loading = ref(false)
 const reportData = ref(null)
 
@@ -44,7 +44,7 @@ const generateReport = async (reportType) => {
     loading.value = true
     // In Nuxt, we fetch JSON for the UI, or a Blob URL for the PDF
     try {
-        const { data } = await useApi(`/api/report/${reportType}`, { params: filters.value })
+        const { data } = await useApi(`report/${reportType}`, { params: filters.value })
         reportData.value = data
     } finally {
         loading.value = false

@@ -28,6 +28,7 @@ export interface Category extends Timestamps {
     name: string
     kitchen_process: string
     description: string
+    products?: Product[]
     files?: File[]
 }
 
@@ -108,6 +109,7 @@ export interface Table extends Timestamps {
     position_y: number
     shape: 'circle' | 'square'
     active_sales_id?: number
+    sales?: Sale[]
 }
 
 // --- Transactional ---
@@ -118,6 +120,7 @@ export interface Sale extends Timestamps {
     table_id: number
     employee_id: number
     customer_id: number
+    buffet_id: number
     date: string
     time: string
     discount: number
@@ -128,6 +131,8 @@ export interface Sale extends Timestamps {
     customer?: Customer
     records?: SaleRecord[]
     invoice?: SaleInvoice
+    buffet?: BuffetPackage
+    buffet_end_at?: string | null
 }
 
 export interface SaleRecord extends Timestamps {
@@ -383,6 +388,7 @@ export interface KitchenTicketItem {
     id: number
     name: string
     quantity: number
+    item_price: number
     item_status: 'O' | 'P' | 'C' | 'D' | 'X'
     note: string
 }
@@ -397,6 +403,39 @@ export interface KitchenTicket {
     customer_name: string
     created_at: Date
     time_elapsed: number
+}
+
+export interface BuffetPackage extends Timestamps {
+    id: number
+    name: string
+    price_adult: number
+    price_child: number
+    duration_minutes: number
+    is_active: boolean
+    description: string
+    products?: Product[]
+    files?: File[]
+}
+
+export interface Reservation extends Timestamps {
+    id: number
+    customer_id: number
+    employee_id: number
+    event_date: string
+    event_time: string
+    buffet_id: number
+    branch_id: number
+    guaranteed_pax: number
+    deposit_amount: number
+    deposit_status: string
+    status: 'confirmed' | 'checked_in'
+    notes: string
+    sale_id: number
+    customer?: Customer
+    employee?: Employee
+    buffet?: BuffetPackage
+    branch?: Branch
+    sale?: Sale
 }
 
 export interface File extends Timestamps {

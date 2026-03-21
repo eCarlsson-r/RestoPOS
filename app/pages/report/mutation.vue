@@ -60,7 +60,7 @@ const mutationData = ref<Array<{
 }>>([])
 
 const fetchMutation = async () => {
-    const response = await useApi('/api/stock/mutation', { params: mutationFilter.value })
+    const response = await useApi('stock/mutation', { params: mutationFilter.value })
     const result = (response && typeof response === 'object' && 'data' in response)
         ? (response as ApiResponse<Mutation[]>).data
         : (response as Mutation[])
@@ -68,7 +68,7 @@ const fetchMutation = async () => {
 }
 
 onMounted(async () => {
-    const data = await useApi<Branch[] | ApiResponse<Branch[]>>('/api/branches')
+    const data = await useApi<Branch[] | ApiResponse<Branch[]>>('branches')
     if (Array.isArray(data)) {
         branches.value = data
     } else if (data && typeof data === 'object' && 'data' in data) {

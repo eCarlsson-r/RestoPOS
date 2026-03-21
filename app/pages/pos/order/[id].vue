@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { watchDebounced } from '@vueuse/core'
-import type { Category, Product } from '~/types/master'
+import type { ApiResponse, Category, Product, Sale } from '~/types/master'
 
 const route = useRoute()
-const { data: categories } = await useApi<{ data: Category[] }>('/api/categories')
+const api = useApi()
+const { data: categories } = await useApi<{ data: Category[] }>('categories')
 const activeCategory = ref(1) // Default to Nasi
 const isPaymentModalOpen = ref(false)
 const search = ref('')
 const products = ref<Product[]>([])
+const printStore = usePrintStore()
 
 const fetchProducts = async () => {
-    let productURL = `/api/products?category=${activeCategory.value}`
+    let productURL = `products?category=${activeCategory.value}`
     if (search.value) productURL += `&q=${search.value}`
     const { data } = await useApi<{ data: Product[] }>(productURL)
     products.value = data || []
@@ -31,17 +33,57 @@ await fetchProducts()
 const { user } = useAuth()
 const orderStore = useOrderStore()
 const salesId = ref<number | null>(Number(route.query.salesId) || null) // Store this if adding to existing table
+const buffetInfo = ref<{ id: number, included_ids: number[] } | null>(null)
 
+// 1. Fetch current sale details to see if it's a buffet
 if (salesId.value) {
+    const { data: saleData } = await useApi<{ data: Sale }>(`sales/${salesId.value}`)
+    if (saleData?.buffet) {
+        buffetInfo.value = {
+            id: saleData.buffet.id,
+            included_ids: saleData.buffet.products?.map((p: Product) => p.id) || []
+        }
+    }
     orderStore.loadBasket(salesId.value)
 }
 
+const toast = useToast()
+
+const handleAddProduct = (prod: Product) => {
+    const isIncluded = orderStore.addProductToBasket(prod)
+
+    // Show warning if it's an Ala Carte item being added to a Buffet Table
+    if (orderStore.activeBuffet && !isIncluded) {
+        toast.add({
+            title: 'Ala Carte Item Added',
+            description: `${prod.name} is NOT included in this buffet package and will be charged full price.`,
+            color: 'success',
+            icon: 'i-lucide-alert-triangle'
+        })
+    }
+}
+
 const submitOrder = async () => {
-    await orderStore.sendToKitchen(
+    const { sentItems } = await orderStore.sendToKitchen(
         salesId.value,
         user?.value?.employee?.branch?.id || 1,
         route.params.id
     )
+
+    try {
+        const data = await api<ApiResponse<Sale[]>>(`sales/orders/${salesId.value}`)
+        if (data && data.data[0]) {
+            console.info(sentItems)
+            data.data[0].records = sentItems
+            await printStore.triggerPrint(data.data[0], 'captain')
+        }
+    } catch (e) {
+        console.error('Failed to print captain order', e)
+        alert('Could not print kitchen ticket')
+    } finally {
+        navigateTo('/pos/floor-map')
+        orderStore.clearBasket()
+    }
 }
 </script>
 
@@ -81,8 +123,31 @@ const submitOrder = async () => {
                         'relative cursor-pointer hover:ring-2 hover:ring-primary transition-all rounded-3xl overflow-hidden',
                         prod.soldout ? 'opacity-50 grayscale pointer-events-none' : ''
                     ]"
-                    @click="orderStore.addProductToBasket(prod)"
+                    @click="handleAddProduct(prod)"
                 >
+                    <div
+                        v-if="orderStore.activeBuffet"
+                        class="absolute top-3 left-3"
+                    >
+                        <UBadge
+                            v-if="orderStore.activeBuffet.product_ids.includes(prod.id)"
+                            color="success"
+                            variant="solid"
+                            size="xs"
+                            class="font-black italic uppercase text-[8px]"
+                        >
+                            Included
+                        </UBadge>
+                        <UBadge
+                            v-else
+                            color="neutral"
+                            variant="outline"
+                            size="xs"
+                            class="font-black italic uppercase text-[8px] bg-white"
+                        >
+                            Ala Carte
+                        </UBadge>
+                    </div>
                     <div class="absolute top-3 right-3 flex gap-1">
                         <span
                             :class="prod.category?.kitchen_process === 'KTCN' ? 'bg-orange-500' : 'bg-blue-500'"

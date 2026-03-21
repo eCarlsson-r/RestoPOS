@@ -18,7 +18,7 @@ const submitPrepare = async () => {
 
     isProcessing.value = true
     try {
-        await useApi('/api/kitchen/prepare', {
+        await useApi('kitchen/prepare', {
             method: 'POST',
             body: {
                 ...form.value,
@@ -37,7 +37,7 @@ const submitPrepare = async () => {
 }
 
 onMounted(async () => {
-    const data = await useApi<Prepare[] | ApiResponse<Prepare[]>>('/api/prepare')
+    const data = await useApi<Prepare[] | ApiResponse<Prepare[]>>('prepare')
     if (Array.isArray(data)) {
         prepares.value = data
     } else if (data && typeof data === 'object' && 'data' in data) {

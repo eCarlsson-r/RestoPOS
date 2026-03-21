@@ -6,11 +6,11 @@ const dateRange = ref({
     end: today(getLocalTimeZone())
 })
 const selectedIngredient = ref(null)
-const { data: ingredients } = await useApi('/api/ingredients')
+const { data: ingredients } = await useApi('ingredients')
 const selectedUtility = ref(null)
-const { data: utilities } = await useApi('/api/utilities')
+const { data: utilities } = await useApi('utilities')
 const selectedBranch = ref(null)
-const { data: branchList } = await useApi('/api/branches')
+const { data: branchList } = await useApi('branches')
 const selectedStorage = ref(null)
 const storageList = ref([
     { label: 'Main Storage', value: 'MAIN' },
@@ -49,7 +49,7 @@ const fetchAudit = async () => {
         params.item_code = selectedUtility.value
     }
 
-    const { data } = await useApi('/api/stock/card', { params })
+    const { data } = await useApi('stock/card', { params })
     logs.value = data
 }
 </script>

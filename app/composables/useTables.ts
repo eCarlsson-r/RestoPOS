@@ -8,7 +8,7 @@ export const useTables = () => {
     const fetchTables = async (branchCode: string) => {
         loading.value = true
         try {
-            const response = await useApi<Table[] | ApiResponse<Table[]>>(`/api/tables?branch=${branchCode}`)
+            const response = await useApi<Table[] | ApiResponse<Table[]>>(`tables?branch=${branchCode}`)
             const result = (response && typeof response === 'object' && 'data' in response)
                 ? (response as ApiResponse<Table[]>).data
                 : (response as Table[])

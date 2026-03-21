@@ -59,6 +59,11 @@ const navigation = computed<NavigationMenuItem[]>(() => {
                             to: '/admin/master/category'
                         },
                         {
+                            label: 'Produk',
+                            icon: 'i-lucide-salad',
+                            to: '/admin/master/product'
+                        },
+                        {
                             label: 'Pegawai',
                             icon: 'i-lucide-user',
                             to: '/admin/master/employee'
@@ -79,14 +84,14 @@ const navigation = computed<NavigationMenuItem[]>(() => {
                             to: '/admin/master/utility'
                         },
                         {
-                            label: 'Produk',
-                            icon: 'i-lucide-salad',
-                            to: '/admin/master/product'
-                        },
-                        {
-                            label: 'Paket',
+                            label: 'Paket Alacarte',
                             icon: 'i-lucide-package',
                             to: '/admin/master/package'
+                        },
+                        {
+                            label: 'Paket Buffet',
+                            icon: 'i-lucide-package',
+                            to: '/admin/master/buffet'
                         },
                         {
                             label: 'Bahan Mentah',

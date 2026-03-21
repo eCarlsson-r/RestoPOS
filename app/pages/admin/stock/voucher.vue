@@ -6,7 +6,7 @@ const loading = ref(false)
 const checkVoucher = async () => {
     loading.value = true
     try {
-        voucherData.value = await useApi(`/api/vouchers/${query.value}`)
+        voucherData.value = await useApi(`vouchers/${query.value}`)
     } finally {
         loading.value = false
     }

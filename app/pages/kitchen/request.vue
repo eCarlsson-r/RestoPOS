@@ -31,7 +31,7 @@ const removeItem = (itemCode: number) => {
 }
 
 const submitRequest = async () => {
-    await useApi('/api/stock/requests', {
+    await useApi('stock/requests', {
         method: 'POST',
         body: form.value
     })
@@ -43,7 +43,7 @@ const ingredients = ref<Ingredient[]>([])
 const utilities = ref<Utility[]>([])
 
 onMounted(async () => {
-    const data = await useApi<Branch[] | ApiResponse<Branch[]>>('/api/branches')
+    const data = await useApi<Branch[] | ApiResponse<Branch[]>>('branches')
     if (Array.isArray(data)) {
         branches.value = data
     } else if (data && typeof data === 'object' && 'data' in data) {
@@ -52,7 +52,7 @@ onMounted(async () => {
         branches.value = []
     }
 
-    const ingredientData = await useApi<Ingredient[] | ApiResponse<Ingredient[]>>('/api/ingredients')
+    const ingredientData = await useApi<Ingredient[] | ApiResponse<Ingredient[]>>('ingredients')
     if (Array.isArray(ingredientData)) {
         ingredients.value = ingredientData
     } else if (ingredientData && typeof ingredientData === 'object' && 'data' in ingredientData) {
@@ -61,7 +61,7 @@ onMounted(async () => {
         ingredients.value = []
     }
 
-    const utilityData = await useApi<Utility[] | ApiResponse<Utility[]>>('/api/utilities')
+    const utilityData = await useApi<Utility[] | ApiResponse<Utility[]>>('utilities')
     if (Array.isArray(utilityData)) {
         utilities.value = utilityData
     } else if (utilityData && typeof utilityData === 'object' && 'data' in utilityData) {

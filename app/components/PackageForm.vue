@@ -49,7 +49,7 @@ const totals = computed(() => {
 })
 
 onMounted(async () => {
-    const data = await useApi<Product[] | ApiResponse<Product[]>>('/api/products')
+    const data = await useApi<Product[] | ApiResponse<Product[]>>('products')
     if (Array.isArray(data)) {
         allProducts.value = data
     } else if (data && typeof data === 'object' && 'data' in data) {

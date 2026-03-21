@@ -39,14 +39,16 @@ onMounted(() => {
 
 <template>
     <div>
-        <UHeader>
+        <UHeader title="">
             <template #title>
                 <NuxtLink to="/">
                     <AppLogo class="w-auto h-12 shrink-0" />
                 </NuxtLink>
             </template>
 
-            <TemplateMenu />
+            <ClientOnly>
+                <TemplateMenu />
+            </ClientOnly>
 
             <template #right>
                 <UColorModeButton />

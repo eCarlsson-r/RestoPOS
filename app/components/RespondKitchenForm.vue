@@ -37,7 +37,7 @@ const storageList = ref<SelectItem[]>([
 ])
 
 onMounted(async () => {
-    const data = await useApi<Branch[] | ApiResponse<Branch[]>>('/api/branches')
+    const data = await useApi<Branch[] | ApiResponse<Branch[]>>('branches')
     if (Array.isArray(data)) {
         branches.value = data
     } else if (data && typeof data === 'object' && 'data' in data) {
@@ -57,7 +57,7 @@ const columns = [
 
 const approveRequest = async () => {
     const data = await useApi<ApiResponse<StockMove>>(
-        '/api/stock/requests/approve',
+        'stock/requests/approve',
         {
             method: 'POST',
             body: { id: props.requestNo }

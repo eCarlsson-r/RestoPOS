@@ -21,7 +21,7 @@
                 <div class="flex justify-between items-start">
                     <span class="text-xl font-black">{{ item.quantity }}x</span>
                     <span class="text-lg font-bold flex-1 ml-3 uppercase">
-                        {{ item.package ? item.package.name : item.product?.name }}
+                        {{ (item.item) ? item.item.name : item.item_type == "product" ? item.product?.name : item.package?.name }}
                     </span>
                 </div>
                 <div

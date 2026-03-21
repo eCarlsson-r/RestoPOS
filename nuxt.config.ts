@@ -14,12 +14,12 @@ export default defineNuxtConfig({
 
     runtimeConfig: {
         public: {
-            apiBase: 'http://restosystem-api.test/',
+            apiBase: 'http://restosystem-api.test/api/',
             echo: {
                 key: 'h041wsoaf2e5u5irq4hd', // Your Laravel Echo app key
                 authentication: {
                     mode: 'cookie',
-                    baseUrl: 'http://restosystem-api.test/' // Your Laravel app URL
+                    baseUrl: 'http://restosystem-api.test' // Your Laravel app URL
                 }
             }
         }

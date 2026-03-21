@@ -16,7 +16,7 @@ export default defineNuxtPlugin(() => {
         forceTLS: false,
         enabledTransports: ['ws', 'wss'],
         // Authentication for Private Channels
-        authEndpoint: 'http://restosystem-api.test/api/broadcasting/auth',
+        authEndpoint: config.public.apiBase + 'broadcasting/auth',
         auth: {
             headers: {
                 Authorization: token.value ? `Bearer ${token.value}` : '',

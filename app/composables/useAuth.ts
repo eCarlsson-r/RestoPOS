@@ -1,34 +1,35 @@
 import type { User, AuthData } from '~/types/master'
 
 export const useAuth = () => {
-    const config = useRuntimeConfig()
+    const nuxtApp = useNuxtApp()
+    // Capturing these within the Nuxt instance context
     const user = useState<User | null>('user', () => null)
-    const token = useCookie('auth_token', { maxAge: 60 * 60 * 12 }) // 12-hour shift
+    const token = useCookie('auth_token', { maxAge: 60 * 60 * 12 })
     const branch = ref(user.value?.employee?.branch_id)
 
     const login = async (credentials: { username: string, password: string }) => {
-        const url = config.public.apiBase || 'http://localhost:8000/'
-        const result = await $fetch<{ data: AuthData[], token: string }>(url + 'api/login', {
-            method: 'POST',
-            body: credentials
+        return nuxtApp.runWithContext(async () => {
+            const api = useApi()
+            const result = await api<{ data: User[], token: string }>('login', {
+                method: 'POST',
+                body: credentials
+            })
+
+            if (!result.data || !result.data[0]) {
+                throw new Error('Invalid login response')
+            }
+
+            // The API returns { user: {...}, employee: {...} } inside data[0]
+            const loggedInUser: User = result.data[0]
+            token.value = result.token
+            user.value = loggedInUser
+
+            if (loggedInUser && loggedInUser.employee) {
+                branch.value = loggedInUser.employee.branch_id
+            }
+
+            return loggedInUser
         })
-
-        if (!result.data || !result.data[0]) {
-            throw new Error('Invalid login response')
-        }
-
-        // The API returns { user: {...}, employee: {...} } inside data[0]
-        const data = result.data[0]
-        const loggedInUser: User = data.user
-        token.value = result.token
-        user.value = loggedInUser
-        console.info(loggedInUser)
-
-        if (loggedInUser.employee?.branch_id) {
-            branch.value = loggedInUser.employee.branch_id
-        }
-
-        return loggedInUser
     }
 
     const logout = () => {
@@ -40,9 +41,11 @@ export const useAuth = () => {
     const checkAuth = async () => {
         if (token.value && !user.value) {
             try {
-                // Adjusting to extract the nested 'user' object
-                const response = await useApi<{ data: AuthData }>('/api/user-profile')
-                user.value = response.data.user
+                return nuxtApp.runWithContext(async () => {
+                    const api = useApi()
+                    const response = await api<{ data: AuthData }>('user-profile')
+                    user.value = response.data.user
+                })
             } catch (e) {
                 if (e) logout()
             }

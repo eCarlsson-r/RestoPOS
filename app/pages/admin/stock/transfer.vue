@@ -81,7 +81,7 @@ const openTransferStock = (item = null) => {
 }
 
 const receiveStock = async (id: number) => {
-    await useApi(`/api/stock/receive/${id}`, {
+    await useApi(`stock/receive/${id}`, {
         method: 'POST'
     })
     fetchItems()

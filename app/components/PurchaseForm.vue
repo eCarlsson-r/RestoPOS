@@ -109,7 +109,7 @@ const compositionItems = computed(() => {
 })
 
 onMounted(async () => {
-    const supplierData = await useApi<Supplier[] | ApiResponse<Supplier[]>>('/api/suppliers')
+    const supplierData = await useApi<Supplier[] | ApiResponse<Supplier[]>>('suppliers')
     if (Array.isArray(supplierData)) {
         suppliers.value = supplierData
     } else if (supplierData && typeof supplierData === 'object' && 'data' in supplierData) {
@@ -125,7 +125,7 @@ onMounted(async () => {
         }
     })
 
-    const branchData = await useApi<Branch[] | ApiResponse<Branch[]>>('/api/branches')
+    const branchData = await useApi<Branch[] | ApiResponse<Branch[]>>('branches')
     if (Array.isArray(branchData)) {
         branches.value = branchData
     } else if (branchData && typeof branchData === 'object' && 'data' in branchData) {
@@ -142,8 +142,8 @@ onMounted(async () => {
     })
 
     const [ingrData, utltData] = await Promise.all([
-        useApi<Ingredient[] | ApiResponse<Ingredient[]>>('/api/ingredients'),
-        useApi<Utility[] | ApiResponse<Utility[]>>('/api/utilities')
+        useApi<Ingredient[] | ApiResponse<Ingredient[]>>('ingredients'),
+        useApi<Utility[] | ApiResponse<Utility[]>>('utilities')
     ])
 
     if (Array.isArray(ingrData)) ingredients.value = ingrData

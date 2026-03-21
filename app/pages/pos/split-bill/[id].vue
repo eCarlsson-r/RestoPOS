@@ -1,6 +1,6 @@
 <script setup>
 const route = useRoute()
-const originalSale = await useApi(`/api/sales/${route.params.id}`)
+const originalSale = await useApi(`sales/${route.params.id}`)
 console.info(originalSale)
 
 definePageMeta({
@@ -16,7 +16,7 @@ const toggleSelection = (id) => {
 }
 
 const processSplit = async () => {
-    await useApi('/api/sales/split', {
+    await useApi('sales/split', {
         method: 'POST',
         body: {
             original_sales_id: route.params.id,

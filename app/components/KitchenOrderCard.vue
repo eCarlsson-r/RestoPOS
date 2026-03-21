@@ -32,7 +32,7 @@ const statusColors = {
 }
 
 const updateStatus = async (status: string) => {
-    await useApi(`/api/kitchen/order/${props.order.sales_id}/status`, { method: 'POST', body: { status } })
+    await useApi(`kitchen/order/${props.order.sales_id}/status`, { method: 'POST', body: { status } })
     emit('refresh')
 }
 </script>
@@ -65,10 +65,39 @@ const updateStatus = async (status: string) => {
                 :key="item.id"
                 class="flex justify-between border-b border-white/10 pb-2"
             >
-                <span class="font-bold">
-                    <span class="text-yellow-600">x{{ item.quantity }}</span> {{ item.name }}
-                </span>
-                {{ item.note }}
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-2">
+                        <span class="font-black text-lg">
+                            <span class="text-primary-600">x{{ item.quantity }}</span> {{ item.name }}
+                        </span>
+                        <UBadge
+                            v-if="item.item_price === 0"
+                            color="success"
+                            variant="solid"
+                            size="xs"
+                            class="text-[8px] font-black uppercase italic"
+                        >
+                            AYCE
+                        </UBadge>
+                        <UBadge
+                            v-else
+                            color="error"
+                            variant="soft"
+                            size="xs"
+                            class="text-[8px] font-black uppercase italic"
+                        >
+                            Ala Carte
+                        </UBadge>
+                    </div>
+
+                    <span
+                        v-if="item.note"
+                        class="text-[10px] font-bold text-slate-500 uppercase italic"
+                    >
+                        Note: {{ item.note }}
+                    </span>
+                </div>
+
                 <UIcon
                     v-if="item.item_status === 'D'"
                     name="i-lucide-check-circle"

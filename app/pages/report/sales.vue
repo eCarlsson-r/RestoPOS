@@ -20,8 +20,8 @@ watchEffect(() => {
     }
 })
 
-const { data: branches } = await useApi('/api/branches')
-const { data: employees } = await useApi('/api/employees')
+const { data: branches } = await useApi('branches')
+const { data: employees } = await useApi('employees')
 const loading = ref(false)
 const reportData = ref(null)
 
@@ -76,7 +76,7 @@ const getColumnsFor = (type) => {
             return [
                 ...common,
                 { key: 'table_number', header: 'Table' },
-                { key: 'buffet_package.name', header: 'Package' },
+                { key: 'buffet.name', header: 'Package' },
                 { key: 'adult_count', header: 'Adults' },
                 { key: 'child_count', header: 'Children' },
                 { key: 'duration_minutes', header: 'Limit' },
@@ -89,10 +89,11 @@ const getColumnsFor = (type) => {
 }
 
 const generateReport = async (reportType) => {
+    reportData.value = null
     filters.value.type = reportType
     loading.value = true
     try {
-        const { data } = await useApi(`/api/report/${reportType}`, { params: filters.value })
+        const { data } = await useApi(`report/${reportType}`, { params: filters.value })
         reportData.value = data
     } finally {
         loading.value = false
@@ -118,9 +119,9 @@ const exportToExcel = () => {
                 'Void Reason': row.void_reason || 'No Reason Provided',
                 'Authorized By': row.void_by?.name || 'Unknown',
                 // Add Buffet specific columns if applicable
-                ...(row.buffet_package
+                ...(row.buffet
                     ? {
-                            Package: row.buffet_package.name,
+                            Package: row.buffet.name,
                             Adults: row.adult_count,
                             Children: row.child_count
                         }
@@ -156,6 +157,7 @@ const exportToExcel = () => {
                 </h1>
                 <div class="flex gap-2">
                     <UButton
+                        v-if="user.type != 'WAITER'"
                         color="primary"
                         variant="solid"
                         icon="i-lucide-printer"
@@ -229,7 +231,7 @@ const exportToExcel = () => {
 
         <div class="grid grid-cols-1 gap-8">
             <ReportSummaryCards
-                v-if="reportData && filters.type != 'invoice'"
+                v-if="reportData && filters.type == 'sales'"
                 :data="reportData.summary"
             />
 
@@ -296,8 +298,11 @@ const exportToExcel = () => {
                 </UTable>
             </UCard>
 
-            <UCard class="rounded-[2.5rem] border-rose-100 bg-rose-50/20">
-                <div class="flex justify-between items-center">
+            <UCard
+                v-if="user.type != 'WAITER'"
+                class="rounded-[2.5rem] border-rose-100 bg-rose-50/20"
+            >
+                <div class="flex justify-between items-center mb-5">
                     <div>
                         <h3 class="font-black uppercase italic text-rose-600">
                             Cancellation Audit

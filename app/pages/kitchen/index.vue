@@ -11,7 +11,7 @@ const station = computed(() => user.value?.username?.split('_')[1] || '')
 // 1. Fetch orders (Lazy, no await)
 const { data: activeOrders, refresh } = useLazyAsyncData<KitchenTicket[]>(
     'kitchen-tickets',
-    () => useApi<ApiResponse<KitchenTicket[]>>('/api/kitchen/tickets', {
+    () => useApi<ApiResponse<KitchenTicket[]>>('kitchen/tickets', {
         params: { station: station.value }
     }).then(res => res.data),
     {
@@ -23,7 +23,7 @@ const { data: activeOrders, refresh } = useLazyAsyncData<KitchenTicket[]>(
 // 2. Fetch movements (Lazy, no await)
 const { data: incomingStockMovement, refresh: refreshMovement } = useLazyAsyncData<StockMove[]>(
     'incoming-stock-movement',
-    () => useApi<ApiResponse<StockMove[]>>('/api/kitchen/movement', {
+    () => useApi<ApiResponse<StockMove[]>>('kitchen/movement', {
         params: { branch: branch.value, station: station.value }
     }).then(res => res.data),
     {
@@ -33,7 +33,7 @@ const { data: incomingStockMovement, refresh: refreshMovement } = useLazyAsyncDa
 )
 
 // 3. Fetch products using useAsyncData
-const { data: allProducts } = useAsyncData('products-list', () => useApi<{ data: Product[] }>('/api/products'))
+const { data: allProducts } = useAsyncData('products-list', () => useApi<{ data: Product[] }>('products'))
 
 const products = computed(() => allProducts.value?.data || [])
 const soldOutProducts = ref<Product[]>([])
@@ -78,14 +78,14 @@ watch(soldOutProducts, async (newVal, oldVal) => {
     const removed = oldVal.filter(o => !newVal.find(n => n.id === o.id))
 
     for (const item of added) {
-        await useApi(`/api/products/${item.id}/soldout`, {
+        await useApi(`products/${item.id}/soldout`, {
             method: 'POST',
             body: { soldout: 1 }
         })
     }
 
     for (const item of removed) {
-        await useApi(`/api/products/${item.id}/soldout`, {
+        await useApi(`products/${item.id}/soldout`, {
             method: 'POST',
             body: { soldout: 0 }
         })
