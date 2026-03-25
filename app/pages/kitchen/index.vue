@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { KitchenTicket, KitchenTicketItem, Product, ApiResponse, StockMove } from '~/types/master'
+import type { KitchenTicket, Product, ApiResponse, StockMove } from '~/types/master'
 
-const { $echo } = useNuxtApp()
 const { user } = useAuth()
 
 // Safely split username
@@ -38,35 +37,11 @@ const { data: allProducts } = useAsyncData('products-list', () => useApi<{ data:
 const products = computed(() => allProducts.value?.data || [])
 const soldOutProducts = ref<Product[]>([])
 
-const playChime = () => {
-    const audio = new Audio('/sounds/new-order.mp3')
-    audio.play().catch(() => {})
-}
-
 // Initialize soldOutProducts from the fetched data
 onMounted(() => {
     if (products.value) {
         soldOutProducts.value = products.value.filter(p => p.soldout === 1)
     }
-
-    if (!$echo) return
-
-    // Listen for new orders for this specific kitchen station
-    $echo.channel(`kitchen.${branch.value}.${station.value}`)
-        .listen('OrderDispatched', (e: { ticket: KitchenTicket }) => {
-            if (activeOrders.value) {
-                activeOrders.value = [e.ticket, ...activeOrders.value]
-            }
-            playChime()
-        })
-        .listen('OrderUpdated', (e: { sales_id: number, items: KitchenTicketItem[] }) => {
-            if (!activeOrders.value) return
-
-            const index = activeOrders.value.findIndex(o => o.sales_id === e.sales_id)
-            if (index !== -1 && activeOrders.value[index]) {
-                activeOrders.value[index].items = e.items
-            }
-        })
 })
 
 watch(soldOutProducts, async (newVal, oldVal) => {

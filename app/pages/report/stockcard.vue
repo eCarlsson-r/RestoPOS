@@ -52,6 +52,41 @@ const fetchAudit = async () => {
     const { data } = await useApi('stock/card', { params })
     logs.value = data
 }
+
+const { exportPDF, exportExcel } = useReportExporter()
+
+const handleExport = (format) => {
+    if (format === 'pdf') {
+        exportPDF(
+            logs.value,
+            [
+                { key: 'date', header: 'Date' },
+                { key: 'description', header: 'Description' },
+                { key: 'in', header: 'In' },
+                { key: 'out', header: 'Out' },
+                { key: 'balance', header: 'Balance' }
+            ],
+            `Stock Card`,
+            dateRange.value,
+            'p'
+        )
+    } else {
+        exportExcel(logs.value, `Stock_Card`, 'stockcard')
+    }
+}
+
+const exportButtons = [
+    {
+        label: 'Export PDF',
+        icon: 'i-lucide-file-text',
+        click: () => handleExport('pdf')
+    },
+    {
+        label: 'Export Excel',
+        icon: 'i-lucide-file-spreadsheet',
+        click: () => handleExport('excel')
+    }
+]
 </script>
 
 <template>
@@ -142,13 +177,20 @@ const fetchAudit = async () => {
                         class="font-bold shadow-sm w-full"
                     />
                 </UFormField>
-                <UButton
-                    block
-                    class="justify-center font-black uppercase italic"
-                    @click="fetchAudit"
-                >
-                    Filter
-                </UButton>
+                <UButtonGroup class="flex">
+                    <UButton
+                        block
+                        class="justify-center font-black uppercase italic"
+                        @click="fetchAudit"
+                    >
+                        Filter
+                    </UButton>
+                    <UDropdownMenu :items="exportButtons">
+                        <UButton
+                            icon="i-lucide-chevron-down"
+                        />
+                    </UDropdownMenu>
+                </UButtonGroup>
             </div>
         </div>
 

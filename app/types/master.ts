@@ -59,7 +59,7 @@ export interface Customer extends Timestamps {
     discount: number
     tax: number
     img_no: number
-    account_id?: number
+    user_id?: number
 }
 
 export interface Employee extends Timestamps {
@@ -76,7 +76,7 @@ export interface Employee extends Timestamps {
     mobile?: string
     email?: string
     img_no: number
-    account_id?: number
+    user_id?: number
     branch?: Branch
     user?: User
 }

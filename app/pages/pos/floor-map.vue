@@ -4,14 +4,11 @@ import TransferModal from '~/components/TransferModal.vue'
 
 const currentFloor = ref(1)
 const nuxtApp = useNuxtApp()
-const { $echo } = nuxtApp
 const api = useApi()
 const { user } = useAuth()
 const floorStore = useFloorMapStore()
-const isCalling = ref(false)
 const isMoveModalOpen = ref(false)
 const isReservationModalOpen = ref(false)
-const callingTable = ref<Table | null>(null)
 const selectedTable = ref<Table | null>(null)
 const isDrawerOpen = ref(false)
 const isShiftingMode = ref(false)
@@ -49,28 +46,11 @@ const fetchTodaysReservations = async () => {
     }
 }
 
-const bindEcho = () => {
-    if (!$echo) return
-
-    if (branch.value?.id) {
-        $echo.leave(`branch.*`)
-        $echo.channel(`branch.${branch.value.id}`)
-            .listen('WaiterCalled', (e: { table: number }) => {
-                const spottedTable = floorStore.tables.find(t => t.id === e.table)
-                if (spottedTable) {
-                    callingTable.value = spottedTable
-                    isCalling.value = true
-                }
-            })
-    }
-}
-
 watch(branch, (newVal) => {
     if (newVal) {
         currentFloor.value = 1
         refreshData()
         fetchTodaysReservations()
-        bindEcho()
     }
 }, { deep: true })
 
@@ -263,7 +243,6 @@ onMounted(async () => {
 
     refreshData()
     fetchTodaysReservations()
-    bindEcho()
 })
 </script>
 
@@ -392,10 +371,11 @@ onMounted(async () => {
                         </button>
                     </div>
                     <button
+                        v-if="selectedTable.size > 1"
                         class="w-full py-4 rounded-2xl text-white font-black uppercase italic text-[10px] shadow-md transition-all active:scale-95 bg-zinc-500 hover:bg-zinc-600"
                         @click="splitTable(selectedTable!)"
                     >
-                        Pisah Jalur Meja
+                        Pisah Meja
                     </button>
                 </div>
 
@@ -421,7 +401,7 @@ onMounted(async () => {
                         class="w-full py-4 rounded-2xl text-white font-black uppercase italic text-[10px] shadow-md transition-all active:scale-95 bg-slate-500 hover:bg-slate-600"
                         @click="goToSplit(selectedTable.sales?.[0]?.id)"
                     >
-                        Pisah Meja / Kwitansi
+                        Pisah Kwitansi
                     </button>
 
                     <div class="h-px bg-slate-100 my-4" />

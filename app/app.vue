@@ -25,14 +25,6 @@ useSeoMeta({
     twitterImage: 'https://ui.nuxt.com/assets/templates/nuxt/starter-light.png',
     twitterCard: 'summary_large_image'
 })
-
-onMounted(() => {
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('Service Worker registered!', reg))
-            .catch(err => console.error('Service Worker failed:', err))
-    }
-})
 </script>
 
 <template>

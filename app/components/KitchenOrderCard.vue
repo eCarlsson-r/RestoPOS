@@ -14,7 +14,7 @@ const calculateElapsed = () => {
     elapsed.value = `${diff}m`
 }
 
-let timer: number
+let timer: ReturnType<typeof setInterval>
 onMounted(() => {
     calculateElapsed()
     timer = setInterval(calculateElapsed, 60000)

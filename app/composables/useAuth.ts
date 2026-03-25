@@ -1,4 +1,4 @@
-import type { User, AuthData } from '~/types/master'
+import type { User } from '~/types/master'
 
 export const useAuth = () => {
     const nuxtApp = useNuxtApp()
@@ -39,16 +39,33 @@ export const useAuth = () => {
     }
 
     const checkAuth = async () => {
+        const config = useRuntimeConfig()
         if (token.value && !user.value) {
-            try {
-                return nuxtApp.runWithContext(async () => {
-                    const api = useApi()
-                    const response = await api<{ data: AuthData }>('user-profile')
-                    user.value = response.data.user
-                })
-            } catch (e) {
-                if (e) logout()
-            }
+            return nuxtApp.runWithContext(async () => {
+                try {
+                    await $fetch('user-profile', {
+                        baseURL: (config.public.apiBase as string) || 'http://localhost:8000/api/',
+                        headers: {
+                            Authorization: token.value ? `Bearer ${token.value}` : '',
+                            Accept: 'application/json'
+                        },
+                        onResponse({ response }) {
+                            const data = response._data
+                            console.info(data)
+                            if (data.user) {
+                                user.value = data.user
+                            } else {
+                                token.value = null
+                                user.value = null
+                            }
+                        }
+                    })
+                } catch (e) {
+                    console.error(e)
+                    token.value = null
+                    user.value = null
+                }
+            })
         }
     }
 

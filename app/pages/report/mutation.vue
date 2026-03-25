@@ -67,6 +67,22 @@ const fetchMutation = async () => {
     mutationData.value = [...result]
 }
 
+const { exportPDF, exportExcel } = useReportExporter()
+
+const handleExport = (format: string) => {
+    if (format === 'pdf') {
+        exportPDF(
+            mutationData.value,
+            mutationColumns,
+            `Mutation Report`,
+            mutationFilter.value,
+            'p'
+        )
+    } else {
+        exportExcel(mutationData.value, `Mutation_Report`, 'mutation')
+    }
+}
+
 onMounted(async () => {
     const data = await useApi<Branch[] | ApiResponse<Branch[]>>('branches')
     if (Array.isArray(data)) {
@@ -142,6 +158,22 @@ fetchMutation()
                     @click="fetchMutation"
                 >
                     Refresh Audit
+                </UButton>
+                <UButton
+                    icon="i-lucide-download"
+                    color="success"
+                    variant="soft"
+                    @click="handleExport('pdf')"
+                >
+                    Export PDF
+                </UButton>
+                <UButton
+                    icon="i-lucide-download"
+                    color="success"
+                    variant="soft"
+                    @click="handleExport('excel')"
+                >
+                    Export Excel
                 </UButton>
             </div>
         </div>

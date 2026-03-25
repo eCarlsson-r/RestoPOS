@@ -14,14 +14,11 @@ export default defineNuxtConfig({
 
     runtimeConfig: {
         public: {
-            apiBase: 'http://restosystem-api.test/api/',
-            echo: {
-                key: 'h041wsoaf2e5u5irq4hd', // Your Laravel Echo app key
-                authentication: {
-                    mode: 'cookie',
-                    baseUrl: 'http://restosystem-api.test' // Your Laravel app URL
-                }
-            }
+            apiBase: process.env.APP_URL + '/api',
+            serverURL: process.env.APP_URL || 'http://localhost:8000',
+            reverbHost: process.env.REVERB_HOST || 'localhost',
+            reverbKey: process.env.REVERB_KEY,
+            vapidPublicKey: process.env.VAPID_PUBLIC_KEY || ''
         }
     },
 

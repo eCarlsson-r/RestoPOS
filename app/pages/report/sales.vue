@@ -1,5 +1,5 @@
 <script setup>
-import * as XLSX from 'xlsx'
+import 'jspdf-autotable'
 
 const filters = ref({
     branch: 'ALL',
@@ -100,50 +100,23 @@ const generateReport = async (reportType) => {
     }
 }
 
-const isExporting = ref(false)
+const { exportPDF, exportExcel } = useReportExporter()
 
-const exportToExcel = () => {
-    isExporting.value = true
+const handleExport = (format) => {
+    const type = filters.value.type
+    const isWide = ['invoice', 'mutation', 'cancel'].includes(type)
+    const orientation = isWide ? 'l' : 'p' // Landscape for wide reports
 
-    try {
-    // 1. Prepare the data (Flattening nested objects like branch.name)
-        const data = reportData.value.map((row) => {
-            // Map based on activeReport type to make headers look nice
-            return {
-                'Date': new Date(row.created_at).toLocaleString('id-ID'),
-                'Branch': row.branch?.name || '-',
-                'Table': row.table_number || '-',
-                'Customer': row.customer_name || 'Guest',
-                'Total Amount': row.total || 0,
-                'Status': row.status || '-',
-                'Void Reason': row.void_reason || 'No Reason Provided',
-                'Authorized By': row.void_by?.name || 'Unknown',
-                // Add Buffet specific columns if applicable
-                ...(row.buffet
-                    ? {
-                            Package: row.buffet.name,
-                            Adults: row.adult_count,
-                            Children: row.child_count
-                        }
-                    : {})
-            }
-        })
-
-        // 2. Create worksheet
-        const worksheet = XLSX.utils.json_to_sheet(data)
-        const workbook = XLSX.utils.book_new()
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Report')
-
-        // 3. Generate filename based on date and type
-        const dateStr = new Date().toISOString().split('T')[0]
-        const fileName = `${activeReport.value}_report_${dateStr}.xlsx`
-
-        // 4. Download
-        XLSX.writeFile(workbook, fileName)
-    } catch (error) {
-        console.error('Export failed:', error)
-    } finally {
-        isExporting.value = false
+    if (format === 'pdf') {
+        exportPDF(
+            reportData.value.items,
+            getColumnsFor(type),
+            `${type} Report`,
+            filters.value,
+            orientation
+        )
+    } else {
+        exportExcel(reportData.value.items, `${type}_Report`, type)
     }
 }
 </script>
@@ -246,10 +219,17 @@ const exportToExcel = () => {
                         </h3>
                         <UButton
                             icon="i-lucide-download"
-                            color="emerald"
+                            color="success"
                             variant="soft"
-                            :loading="isExporting"
-                            @click="exportToExcel"
+                            @click="handleExport('pdf')"
+                        >
+                            Export PDF
+                        </UButton>
+                        <UButton
+                            icon="i-lucide-download"
+                            color="success"
+                            variant="soft"
+                            @click="handleExport('excel')"
                         >
                             Export Excel
                         </UButton>

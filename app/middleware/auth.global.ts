@@ -1,6 +1,5 @@
 export default defineNuxtRouteMiddleware(async (to) => {
     const { user, checkAuth } = useAuth()
-
     await checkAuth()
 
     // 1. If no user session and not on login page, redirect to login

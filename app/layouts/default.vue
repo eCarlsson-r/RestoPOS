@@ -1,42 +1,3 @@
-<script setup>
-const { user } = useAuth()
-const toast = useToast()
-
-onMounted(() => {
-    const { $echo } = useNuxtApp()
-    if (!$echo) return
-
-    // Listen for the specific user's notifications (Private Channel)
-    $echo.private(`App.Models.User.${user.value.id}`)
-        .notification((notification) => {
-            const config = {
-                pendingorder: { color: 'primary', icon: 'i-lucide-utensils' },
-                cancelorder: { color: 'rose', icon: 'i-lucide-x-circle' },
-                movestock: { color: 'amber', icon: 'i-lucide-truck' },
-                krequest: { color: 'cyan', icon: 'i-lucide-clipboard-list' },
-                sales: { color: 'emerald', icon: 'i-lucide-banknote' }
-            }[notification.type] || { color: 'gray', icon: 'i-lucide-bell' }
-
-            toast.add({
-                title: notification.title,
-                description: notification.body,
-                color: config.color,
-                icon: config.icon,
-                // Action: Click notification to go to relevant page
-                onClick: () => handleNotificationClick(notification)
-            })
-
-            playNotificationSound(notification.type)
-        })
-
-    const handleNotificationClick = (n) => {
-        if (n.type === 'pendingorder') navigateTo('/kitchen')
-        if (n.type === 'movestock') navigateTo('/inventory/transfer/' + n.move_id)
-    // etc...
-    }
-})
-</script>
-
 <template>
     <div>
         <UHeader title="">
@@ -48,6 +9,7 @@ onMounted(() => {
 
             <ClientOnly>
                 <TemplateMenu />
+                <NotificationProvider />
             </ClientOnly>
 
             <template #right>

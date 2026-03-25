@@ -50,6 +50,24 @@ const generateReport = async (reportType) => {
         loading.value = false
     }
 }
+
+const { exportPDF, exportExcel } = useReportExporter()
+
+const handleExport = (format) => {
+    const type = filters.value.type
+
+    if (format === 'pdf') {
+        exportPDF(
+            reportData.value.items,
+            getColumnsFor(type),
+            `${type} Report`,
+            filters.value,
+            'p'
+        )
+    } else {
+        exportExcel(reportData.value.items, `${type}_Report`, type)
+    }
+}
 </script>
 
 <template>
@@ -127,9 +145,18 @@ const generateReport = async (reportType) => {
                             Preview: {{ filters.type }} Report
                         </h3>
                         <UButton
-                            color="error"
-                            variant="ghost"
                             icon="i-lucide-download"
+                            color="success"
+                            variant="soft"
+                            @click="handleExport('pdf')"
+                        >
+                            Export PDF
+                        </UButton>
+                        <UButton
+                            icon="i-lucide-download"
+                            color="success"
+                            variant="soft"
+                            @click="handleExport('excel')"
                         >
                             Export Excel
                         </UButton>
