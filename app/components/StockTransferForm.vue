@@ -73,7 +73,7 @@ onMounted(async () => {
                 <div class="grid grid-cols-2 gap-2">
                     <USelectMenu
                         v-model="form.from_branch_id"
-                        :records="branches"
+                        :items="branches"
                         label-key="name"
                         value-key="id"
                         value-attribute="id"
@@ -81,7 +81,7 @@ onMounted(async () => {
                     />
                     <USelect
                         v-model="form.from_storage"
-                        :records="storageList"
+                        :items="storageList"
                     />
                 </div>
             </div>
@@ -92,7 +92,7 @@ onMounted(async () => {
                 <div class="grid grid-cols-2 gap-2">
                     <USelectMenu
                         v-model="form.to_branch_id"
-                        :records="branches"
+                        :items="branches"
                         label-key="name"
                         value-key="id"
                         placeholder="Branch"
@@ -100,7 +100,7 @@ onMounted(async () => {
                     />
                     <USelect
                         v-model="form.to_storage"
-                        :records="storageList"
+                        :items="storageList"
                     />
                 </div>
             </div>
@@ -119,14 +119,14 @@ onMounted(async () => {
                     <URadioGroup
                         v-model="record.item_type"
                         orientation="horizontal"
-                        :records="[{ label: 'Ingredient', value: 'INGR' }, { label: 'Utility', value: 'UTLT' }]"
+                        :items="[{ label: 'Ingredient', value: 'INGR' }, { label: 'Utility', value: 'UTLT' }]"
                     />
                 </UFormField>
 
                 <UFormField label="Item">
                     <USelect
                         v-model="record.item_code"
-                        :records="record.item_type === 'INGR' ? ingredients : utilities"
+                        :items="record.item_type === 'INGR' ? ingredients : utilities"
                         label-key="name"
                         value-key="id"
                         class="w-full font-bold shadow-sm"

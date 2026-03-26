@@ -120,16 +120,6 @@ const navigation = computed<NavigationMenuItem[]>(() => {
                             to: '/admin/stock/transfer'
                         },
                         {
-                            label: 'Cek Voucher',
-                            icon: 'i-lucide-ticket',
-                            to: '/admin/stock/voucher'
-                        },
-                        {
-                            label: 'Buat Voucher',
-                            icon: 'i-lucide-tickets',
-                            to: '/admin/stock/register-voucher'
-                        },
-                        {
                             label: 'Request Dapur',
                             icon: 'i-lucide-chef-hat',
                             to: '/admin/stock/request'

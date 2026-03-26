@@ -14,6 +14,7 @@ const printStore = usePrintStore()
 
 const fetchProducts = async () => {
     let productURL = `products?category=${activeCategory.value}`
+    if (salesId.value) productURL += `&sales_id=${salesId.value}`
     if (search.value) productURL += `&q=${search.value}`
     const { data } = await useApi<{ data: Product[] }>(productURL)
     products.value = data || []
