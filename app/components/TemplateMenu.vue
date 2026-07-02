@@ -132,11 +132,6 @@ const navigation = computed<NavigationMenuItem[]>(() => {
                     icon: 'i-lucide-file-text',
                     children: [
                         {
-                            label: t('nav.aiAnalytics'),
-                            icon: 'i-lucide-sparkles',
-                            to: '/admin/dashboard'
-                        },
-                        {
                             label: t('nav.salesReport'),
                             icon: 'i-lucide-chart-bar-stacked',
                             to: '/report/sales'

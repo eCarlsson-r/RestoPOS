@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import ChartComponent from '~/components/ChartComponent.vue'
 import BarChartComponent from '~/components/BarChartComponent.vue'
 import ForecastChartComponent from '~/components/ForecastChartComponent.vue'
 
@@ -224,47 +223,6 @@ const rupiah = (value: number) => 'Rp ' + value.toLocaleString()
                     {{ summary.top_employee }}
                 </p>
             </div>
-        </div>
-
-        <div class="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm">
-                <h3 class="text-xs font-black uppercase italic mb-6">
-                    Top 5 Best Sellers
-                </h3>
-                <div
-                    v-for="(item, idx) in summary.top_items"
-                    :key="idx"
-                    class="flex items-center gap-4 mb-4"
-                >
-                    <span class="text-2xl font-black italic text-slate-200">#{{ idx + 1 }}</span>
-                    <div class="flex-1">
-                        <p class="text-sm font-black uppercase italic">
-                            {{ item.name }}
-                        </p>
-                        <div class="w-full bg-slate-100 h-2 rounded-full mt-1">
-                            <div
-                                class="bg-indigo-600 h-2 rounded-full"
-                                :style="{ width: item.percent + '%' }"
-                            />
-                        </div>
-                    </div>
-                    <span class="font-black text-xs italic">{{ item.qty_sold }}x</span>
-                </div>
-            </div>
-
-            <div class="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col justify-center items-center">
-                <ChartComponent :chart-data="chartData" />
-            </div>
-        </div>
-
-        <!-- AI Analytics -->
-        <div class="mt-14 mb-8">
-            <h2 class="text-2xl font-black uppercase italic tracking-tighter">
-                {{ t('analytics.title') }}
-            </h2>
-            <p class="text-xs text-slate-400 font-bold uppercase">
-                {{ t('analytics.subtitle') }}
-            </p>
         </div>
 
         <div

@@ -97,7 +97,7 @@ const reset = () => {
                 style="height: min(34rem, 75vh)"
             >
                 <!-- Header -->
-                <div class="bg-indigo-600 text-white p-6 flex items-start justify-between">
+                <div class="bg-rose-600 text-white p-6 flex items-start justify-between">
                     <div>
                         <h3 class="text-lg font-black uppercase italic tracking-tighter leading-none">
                             {{ t('chat.title') }}
