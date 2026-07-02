@@ -1,3 +1,16 @@
+<script setup lang="ts">
+const { locale, locales, setLocale } = useI18n()
+
+const languageItems = computed(() =>
+    locales.value.map(l => ({
+        label: l.name ?? l.code,
+        checked: l.code === locale.value,
+        type: 'checkbox' as const,
+        onSelect: () => setLocale(l.code)
+    }))
+)
+</script>
+
 <template>
     <div>
         <UHeader title="">
@@ -13,6 +26,15 @@
             </ClientOnly>
 
             <template #right>
+                <UDropdownMenu :items="languageItems">
+                    <UButton
+                        icon="i-lucide-languages"
+                        color="neutral"
+                        variant="ghost"
+                        :label="locale.toUpperCase()"
+                    />
+                </UDropdownMenu>
+
                 <UColorModeButton />
 
                 <UButton

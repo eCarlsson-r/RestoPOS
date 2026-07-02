@@ -2,151 +2,157 @@
 import type { NavigationMenuItem } from '@nuxt/ui'
 
 const { user } = useAuth()
+const { t } = useI18n()
 
 const navigation = computed<NavigationMenuItem[]>(() => {
     switch (user.value?.type) {
         case 'ADMIN':
             return [
                 {
-                    label: 'Sales',
+                    label: t('nav.sales'),
                     icon: 'i-lucide-shopping-cart',
                     children: [
                         {
-                            label: 'Floor Map',
+                            label: t('nav.floorMap'),
                             icon: 'i-lucide-map',
                             to: '/pos/floor-map'
                         },
                         {
-                            label: 'Alacarte Sales List',
+                            label: t('nav.alacarteList'),
                             icon: 'i-lucide-list',
                             to: '/admin/sales/alacarte'
                         },
                         {
-                            label: 'Buffet Sales List',
+                            label: t('nav.buffetList'),
                             icon: 'i-lucide-list',
                             to: '/admin/sales/buffet'
                         }
                     ]
                 },
                 {
-                    label: 'Purchasing',
+                    label: t('nav.purchasing'),
                     icon: 'i-lucide-shopping-cart',
                     children: [
                         {
-                            label: 'Purchase Order',
+                            label: t('nav.purchaseOrder'),
                             icon: 'i-lucide-receipt-text',
                             to: '/admin/purchase/order'
                         },
                         {
-                            label: 'Purchase Return',
+                            label: t('nav.purchaseReturn'),
                             icon: 'i-lucide-undo',
                             to: '/admin/purchase/return'
                         }
                     ]
                 },
                 {
-                    label: 'Master',
+                    label: t('nav.master'),
                     icon: 'i-lucide-database',
                     children: [
                         {
-                            label: 'Cabang',
+                            label: t('nav.branch'),
                             icon: 'i-lucide-store',
                             to: '/admin/master/branch'
                         },
                         {
-                            label: 'Kategori',
+                            label: t('nav.category'),
                             icon: 'i-lucide-folder',
                             to: '/admin/master/category'
                         },
                         {
-                            label: 'Produk',
+                            label: t('nav.product'),
                             icon: 'i-lucide-salad',
                             to: '/admin/master/product'
                         },
                         {
-                            label: 'Pegawai',
+                            label: t('nav.employee'),
                             icon: 'i-lucide-user',
                             to: '/admin/master/employee'
                         },
                         {
-                            label: 'Pelanggan',
+                            label: t('nav.customer'),
                             icon: 'i-lucide-users',
                             to: '/admin/master/customer'
                         },
                         {
-                            label: 'Pemasok',
+                            label: t('nav.supplier'),
                             icon: 'i-lucide-truck',
                             to: '/admin/master/supplier'
                         },
                         {
-                            label: 'Peralatan',
+                            label: t('nav.utility'),
                             icon: 'i-lucide-utensils',
                             to: '/admin/master/utility'
                         },
                         {
-                            label: 'Paket Alacarte',
+                            label: t('nav.packageAlacarte'),
                             icon: 'i-lucide-package',
                             to: '/admin/master/package'
                         },
                         {
-                            label: 'Paket Buffet',
+                            label: t('nav.packageBuffet'),
                             icon: 'i-lucide-package',
                             to: '/admin/master/buffet'
                         },
                         {
-                            label: 'Bahan Mentah',
+                            label: t('nav.ingredient'),
                             icon: 'i-lucide-beef',
                             to: '/admin/master/ingredient'
                         },
                         {
-                            label: 'Bahan Jadi',
+                            label: t('nav.prepare'),
                             icon: 'i-lucide-soup',
                             to: '/admin/master/prepare'
                         }
                     ]
                 },
                 {
-                    label: 'Stock',
+                    label: t('nav.stock'),
                     icon: 'i-lucide-package',
                     children: [
                         {
-                            label: 'Rincian Stok',
+                            label: t('nav.stockDetail'),
                             icon: 'i-lucide-list',
                             to: '/admin/stock/detail'
                         },
                         {
-                            label: 'Pindah Stok',
+                            label: t('nav.stockTransfer'),
                             icon: 'i-lucide-truck',
                             to: '/admin/stock/transfer'
                         },
                         {
-                            label: 'Request Dapur',
+                            label: t('nav.kitchenRequest'),
                             icon: 'i-lucide-chef-hat',
                             to: '/admin/stock/request'
                         }
                     ]
                 },
                 {
-                    label: 'Laporan',
+                    label: t('nav.reports'),
                     icon: 'i-lucide-file-text',
                     children: [
                         {
-                            label: 'Penjualan',
+                            label: t('nav.aiAnalytics'),
+                            icon: 'i-lucide-sparkles',
+                            to: '/admin/analytics'
+                        },
+                        {
+                            label: t('nav.salesReport'),
                             icon: 'i-lucide-chart-bar-stacked',
                             to: '/report/sales'
                         },
                         {
-                            label: 'Pembelian',
+                            label: t('nav.purchaseReport'),
                             icon: 'i-lucide-chart-line',
                             to: '/report/purchase'
                         },
                         {
-                            label: 'Kartu Stok',
+                            label: t('nav.stockCard'),
                             icon: 'i-lucide-wallet-cards',
                             to: '/report/stockcard'
                         },
                         {
-                            label: 'Mutasi Stok',
+                            label: t('nav.stockMutation'),
                             icon: 'i-lucide-logs',
                             to: '/report/mutation'
                         }
@@ -156,31 +162,31 @@ const navigation = computed<NavigationMenuItem[]>(() => {
         case 'KITCHEN':
             return [
                 {
-                    label: 'Produksi Bahan',
+                    label: t('nav.prepareProduction'),
                     icon: 'i-lucide-cooking-pot',
                     to: '/kitchen/prepare'
                 },
                 {
-                    label: 'Request Stok',
+                    label: t('nav.stockRequest'),
                     icon: 'i-lucide-receipt-text',
                     to: '/kitchen/request'
                 },
                 {
-                    label: 'Laporan',
+                    label: t('nav.reports'),
                     icon: 'i-lucide-file-text',
                     children: [
                         {
-                            label: 'Penjualan',
+                            label: t('nav.salesReport'),
                             icon: 'i-lucide-chart-bar-stacked',
                             to: '/report/sales'
                         },
                         {
-                            label: 'Kartu Stok',
+                            label: t('nav.stockCard'),
                             icon: 'i-lucide-wallet-cards',
                             to: '/report/stockcard'
                         },
                         {
-                            label: 'Mutasi Stok',
+                            label: t('nav.stockMutation'),
                             icon: 'i-lucide-logs',
                             to: '/report/mutation'
                         }
@@ -191,17 +197,17 @@ const navigation = computed<NavigationMenuItem[]>(() => {
         case 'WAITER':
             return [
                 {
-                    label: 'POS Dashboard',
+                    label: t('nav.posDashboard'),
                     icon: 'i-lucide-layout-dashboard',
                     to: '/pos/floor-map'
                 },
                 {
-                    label: 'Active Sales',
+                    label: t('nav.activeSales'),
                     icon: 'i-lucide-list',
                     to: '/admin/sales/alacarte'
                 },
                 {
-                    label: 'Reports',
+                    label: t('nav.reports'),
                     icon: 'i-lucide-file-text',
                     to: '/report/sales'
                 }
