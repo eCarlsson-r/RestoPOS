@@ -134,7 +134,7 @@ const navigation = computed<NavigationMenuItem[]>(() => {
                         {
                             label: t('nav.aiAnalytics'),
                             icon: 'i-lucide-sparkles',
-                            to: '/admin/analytics'
+                            to: '/admin/dashboard'
                         },
                         {
                             label: t('nav.salesReport'),

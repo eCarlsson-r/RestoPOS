@@ -61,6 +61,15 @@
             "Beverage Star": "Bintang Minuman"
         }
     },
+    "chat": {
+        "title": "Asisten RestoSystem",
+        "subtitle": "Reservasi, meja & buffet",
+        "placeholder": "Tanya apa saja…",
+        "greeting": "Halo! Saya bisa cek reservasi hari ini, ketersediaan meja, dan paket buffet untuk cabang Anda. Ada yang bisa dibantu?",
+        "error": "Maaf, terjadi kesalahan. Silakan coba lagi.",
+        "open": "Asisten AI",
+        "newChat": "Chat baru"
+    },
     "common": {
         "language": "Bahasa"
     }

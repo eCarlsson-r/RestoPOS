@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { locale, locales, setLocale } = useI18n()
+const { user } = useAuth()
 
 const languageItems = computed(() =>
     locales.value.map(l => ({
@@ -49,6 +50,10 @@ const languageItems = computed(() =>
         <UMain>
             <slot />
         </UMain>
+
+        <ClientOnly>
+            <ChatWidget v-if="user" />
+        </ClientOnly>
 
         <UFooter>
             <template #default>

@@ -61,6 +61,15 @@
             "Beverage Star": "Beverage Star"
         }
     },
+    "chat": {
+        "title": "RestoSystem Assistant",
+        "subtitle": "Reservations, tables & buffets",
+        "placeholder": "Ask me anything…",
+        "greeting": "Hi! I can check today's reservations, table availability and buffet packages for your branch. How can I help?",
+        "error": "Sorry, something went wrong. Please try again.",
+        "open": "AI Assistant",
+        "newChat": "New chat"
+    },
     "common": {
         "language": "Language"
     }
