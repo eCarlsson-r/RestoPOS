@@ -75,7 +75,7 @@ const reset = () => {
         <!-- Floating launcher -->
         <button
             v-if="!open"
-            class="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-indigo-600 text-white pl-5 pr-2 py-2 rounded-full shadow-2xl shadow-indigo-200 active:scale-95 transition-all"
+            class="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-rose-600 text-white pl-5 pr-2 py-2 rounded-full shadow-2xl shadow-rose-200 active:scale-95 transition-all"
             @click="open = true"
         >
             <span class="text-[10px] font-black uppercase tracking-widest italic">{{ t('chat.open') }}</span>
@@ -122,7 +122,7 @@ const reset = () => {
                             variant="ghost"
                             size="sm"
                             class="text-white/70"
-                            @click="open = false"
+                            @click="open = false;"
                         />
                     </div>
                 </div>
@@ -147,7 +147,7 @@ const reset = () => {
                         <div
                             class="max-w-[85%] px-5 py-3 text-sm shadow-sm whitespace-pre-line"
                             :class="message.role === 'user'
-                                ? 'bg-indigo-600 text-white rounded-3xl rounded-tr-lg'
+                                ? 'bg-rose-600 text-white rounded-3xl rounded-tr-lg'
                                 : 'bg-white border border-slate-100 rounded-3xl rounded-tl-lg'"
                         >
                             {{ message.text }}
@@ -185,13 +185,13 @@ const reset = () => {
                         name="message"
                         :placeholder="t('chat.placeholder')"
                         autocomplete="off"
-                        class="flex-1 px-5 py-3 rounded-full bg-slate-50 border border-slate-100 text-sm focus:outline-none focus:border-indigo-300"
+                        class="flex-1 px-5 py-3 rounded-full bg-slate-50 border border-slate-100 text-sm focus:outline-none focus:border-rose-300"
                     >
                     <UButton
                         type="submit"
                         icon="i-lucide-send"
                         color="primary"
-                        class="rounded-full w-12 h-12 justify-center bg-indigo-600"
+                        class="rounded-full w-12 h-12 justify-center bg-rose-600"
                         :disabled="sending || !draft.trim()"
                     />
                 </form>

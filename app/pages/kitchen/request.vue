@@ -78,7 +78,7 @@ onMounted(async () => {
             Kitchen Request
         </h2>
 
-        <div class="grid grid-cols-2 gap-6 mb-10 p-6 bg-slate-50 rounded-4xl border border-slate-200">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 p-6 bg-slate-50 rounded-4xl border border-slate-200">
             <UFormField label="Request From (Branch)">
                 <USelectMenu
                     v-model="form.from_branch"
@@ -99,7 +99,7 @@ onMounted(async () => {
             </UFormField>
         </div>
 
-        <div class="grid grid-cols-4 items-end gap-3 mb-6 bg-slate-50 p-6 rounded-3xl border border-slate-200">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 items-end gap-3 mb-6 bg-slate-50 p-6 rounded-3xl border border-slate-200">
             <UFormField
                 label="Item Type"
             >

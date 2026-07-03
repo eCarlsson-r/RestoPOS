@@ -1,4 +1,8 @@
 {
+    "header": {
+        "title": "Menu",
+        "description": "Navigasi utama"
+    },
     "nav": {
         "sales": "Penjualan",
         "floorMap": "Denah Meja",

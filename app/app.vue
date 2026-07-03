@@ -1,5 +1,8 @@
 <script setup>
+import * as uiLocales from '@nuxt/ui/locale'
 import PrintProvider from './components/PrintProvider.vue'
+
+const { locale } = useI18n()
 
 useHead({
     meta: [
@@ -9,7 +12,7 @@ useHead({
         { rel: 'icon', href: '/favicon.ico' }
     ],
     htmlAttrs: {
-        lang: 'en'
+        lang: () => locale.value
     }
 })
 
@@ -28,7 +31,7 @@ useSeoMeta({
 </script>
 
 <template>
-    <UApp>
+    <UApp :locale="uiLocales[locale]">
         <NuxtLayout>
             <NuxtPage />
         </NuxtLayout>

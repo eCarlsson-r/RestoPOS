@@ -187,7 +187,7 @@ const rupiah = (value: number) => 'Rp ' + value.toLocaleString()
 
 <template>
     <UContainer class="p-6">
-        <div class="grid grid-cols-4 gap-6 mb-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
             <div class="bg-amber-600 p-8 rounded-[2.5rem] text-white shadow-xl shadow-amber-100">
                 <p class="text-[10px] font-black uppercase opacity-60">
                     Active Orders
@@ -268,7 +268,7 @@ const rupiah = (value: number) => 'Rp ' + value.toLocaleString()
                     </p>
                 </div>
 
-                <div class="bg-indigo-600 p-8 rounded-[2.5rem] text-white shadow-xl shadow-indigo-100">
+                <div class="bg-rose-600 p-8 rounded-[2.5rem] text-white shadow-xl shadow-rose-100">
                     <p class="text-[10px] font-black uppercase opacity-60">
                         {{ t('analytics.forecastNext14d') }}
                     </p>

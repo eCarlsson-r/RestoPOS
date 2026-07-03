@@ -95,7 +95,7 @@ const exportButtons = [
             <h1 class="text-3xl font-black uppercase italic tracking-tighter">
                 Kartu Stok (Audit)
             </h1>
-            <div class="grid grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <UFormField
                     label="Tipe"
                     class="w-full"
@@ -165,10 +165,10 @@ const exportButtons = [
                     />
                 </UFormField>
             </div>
-            <div class="grid grid-cols-4 gap-4 items-end">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                 <UFormField
                     label="Periode"
-                    class="col-span-3"
+                    class="sm:col-span-2 lg:col-span-3"
                     :ui="{ label: 'block text-[10px] font-black uppercase tracking-widest' }"
                 >
                     <UInputDate

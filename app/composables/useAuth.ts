@@ -51,9 +51,10 @@ export const useAuth = () => {
                         },
                         onResponse({ response }) {
                             const data = response._data
-                            console.info(data)
-                            if (data.user) {
-                                user.value = data.user
+                            // API wraps the payload: { err, msg, data: { user, employee } }
+                            const profile = data?.data?.user ?? data?.user
+                            if (profile) {
+                                user.value = { ...profile, employee: data?.data?.employee ?? profile.employee }
                             } else {
                                 token.value = null
                                 user.value = null

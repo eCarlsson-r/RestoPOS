@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
 
+const props = withDefaults(defineProps<{
+    orientation?: 'horizontal' | 'vertical'
+}>(), {
+    orientation: 'horizontal'
+})
+
 const { user } = useAuth()
 const { t } = useI18n()
 
@@ -31,7 +37,7 @@ const navigation = computed<NavigationMenuItem[]>(() => {
                 },
                 {
                     label: t('nav.purchasing'),
-                    icon: 'i-lucide-shopping-cart',
+                    icon: 'i-lucide-shopping-basket',
                     children: [
                         {
                             label: t('nav.purchaseOrder'),
@@ -214,5 +220,9 @@ const navigation = computed<NavigationMenuItem[]>(() => {
 </script>
 
 <template>
-    <UNavigationMenu :items="navigation" />
+    <UNavigationMenu
+        :items="navigation"
+        :orientation="props.orientation"
+        :class="props.orientation === 'vertical' ? 'w-full' : ''"
+    />
 </template>

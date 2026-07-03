@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { locale, locales, setLocale } = useI18n()
+const { t, locale, locales, setLocale } = useI18n()
 const { user } = useAuth()
 
 const languageItems = computed(() =>
@@ -14,7 +14,10 @@ const languageItems = computed(() =>
 
 <template>
     <div>
-        <UHeader title="">
+        <UHeader
+            title=""
+            :menu="{ title: t('header.title'), description: t('header.description') }"
+        >
             <template #title>
                 <NuxtLink to="/">
                     <AppLogo class="w-auto h-12 shrink-0" />
@@ -23,8 +26,14 @@ const languageItems = computed(() =>
 
             <ClientOnly>
                 <TemplateMenu />
-                <NotificationProvider />
             </ClientOnly>
+
+            <!-- Mobile slideover menu — its presence makes UHeader render the hamburger toggle -->
+            <template #body>
+                <ClientOnly>
+                    <TemplateMenu orientation="vertical" />
+                </ClientOnly>
+            </template>
 
             <template #right>
                 <UDropdownMenu :items="languageItems">
@@ -52,6 +61,7 @@ const languageItems = computed(() =>
         </UMain>
 
         <ClientOnly>
+            <NotificationProvider />
             <ChatWidget v-if="user" />
         </ClientOnly>
 

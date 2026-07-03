@@ -1,4 +1,8 @@
 {
+    "header": {
+        "title": "Menu",
+        "description": "Main navigation"
+    },
     "nav": {
         "sales": "Sales",
         "floorMap": "Floor Map",

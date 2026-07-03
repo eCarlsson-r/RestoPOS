@@ -85,8 +85,8 @@ watch(soldOutProducts, async (newVal, oldVal) => {
             </div>
         </header>
 
-        <div class="grid grid-cols-4 gap-6">
-            <div class="col-span-4 lg:col-span-3 space-y-4">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="lg:col-span-3 space-y-4">
                 <div
                     v-if="!activeOrders?.length"
                     class="grid grid-cols-2 gap-4"
@@ -111,7 +111,7 @@ watch(soldOutProducts, async (newVal, oldVal) => {
                 </div>
             </div>
 
-            <div class="col-span-4 lg:col-span-1 space-y-6">
+            <div class="lg:col-span-1 space-y-6">
                 <section class="p-6 lg:p-3 rounded-2xl border border-primary-500/20">
                     <h3 class="text-xs font-black uppercase mb-4 tracking-widest">
                         Sold Out Items
