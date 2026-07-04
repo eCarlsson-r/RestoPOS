@@ -42,7 +42,7 @@ const send = async () => {
     sending.value = true
 
     try {
-        const res = await api<{ reply: string, conversation_id: string }>('reservation-agent/chat', {
+        const res = await api<{ reply: string, conversation_id: string }>('staff-assistant/chat', {
             method: 'POST',
             body: {
                 message,
